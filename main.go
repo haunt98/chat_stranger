@@ -38,7 +38,8 @@ func main() {
 	router.GET("/api/users", userHandler.FetchAll)
 	router.GET("/api/users/:id", userHandler.FindByID)
 	router.POST("/api/users", userHandler.Create)
-	router.PUT("/api/users/:id", userHandler.UpdateByID)
+	router.PUT("/api/users/:id/info", userHandler.UpdateInfoByID)
+	router.PUT("/api/users/:id/password", userHandler.UpdatePasswordByID)
 	router.DELETE("/api/users/:id", userHandler.DeleteByID)
 
 	router.POST("/api/users/authenticate", userHandler.Authenticate)

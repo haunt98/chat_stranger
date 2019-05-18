@@ -16,48 +16,58 @@ func NewUserRepoGorm(db *gorm.DB) IUserRepo {
 	return &UserRepoGorm{db: db}
 }
 
-func (g *UserRepoGorm) FetchAll() ([]*models.User, error) {
+func (g *UserRepoGorm) FetchAll() ([]*models.User, []error) {
 	var users []*models.User
-	err := g.db.Find(&users).Error
-	if err != nil {
-		return nil, err
+	errs := g.db.Find(&users).GetErrors()
+	if len(errs) != 0 {
+		return nil, errs
 	} else {
 		for _, user := range users {
-			err := g.db.Model(user).Related(&user.Credential).Error
-			if err != nil {
-				return nil, err
+			errs := g.db.Model(user).Related(&user.Credential).GetErrors()
+			if len(errs) != 0 {
+				return nil, errs
 			}
 		}
 		return users, nil
 	}
 }
 
-func (g *UserRepoGorm) FindByID(id uint) (*models.User, error) {
+func (g *UserRepoGorm) FindByID(id uint) (*models.User, []error) {
 	var user models.User
-	err := g.db.Where("id = ?", id).First(&user).Error
-	if err != nil {
-		return nil, err
+	errs := g.db.Where("id = ?", id).First(&user).GetErrors()
+	if len(errs) != 0 {
+		return nil, errs
 	} else {
-		err := g.db.Model(&user).Related(&user.Credential).Error
-		if err != nil {
-			return nil, err
+		errs := g.db.Model(&user).Related(&user.Credential).GetErrors()
+		if len(errs) != 0 {
+			return nil, errs
 		}
 		return &user, nil
 	}
 }
 
-func (g *UserRepoGorm) Create(u *models.User) error {
-	err := g.db.Create(u).Error
-	return err
+func (g *UserRepoGorm) Create(user *models.User) (bool, []error) {
+	errs := g.db.Create(user).GetErrors()
+	if len(errs) != 0 {
+		return false, errs
+	}
+	return true, nil
 }
 
-func (g *UserRepoGorm) Update(uOld *models.User, uNew *models.User) error {
-	uOld.Credential = uNew.Credential
-	err := g.db.Save(uOld).Error
-	return err
+func (g *UserRepoGorm) UpdateInfo(userOld *models.User, userNew *models.User) (bool, []error) {
+	userOld.FullName = userNew.FullName
+
+	errs := g.db.Save(userOld).GetErrors()
+	if len(errs) != 0 {
+		return false, errs
+	}
+	return true, nil
 }
 
-func (g *UserRepoGorm) Delete(u *models.User) error {
-	err := g.db.Delete(u).Error
-	return err
+func (g *UserRepoGorm) Delete(user *models.User) (bool, []error) {
+	errs := g.db.Delete(user).GetErrors()
+	if len(errs) != 0 {
+		return false, errs
+	}
+	return true, nil
 }

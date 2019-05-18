@@ -4,8 +4,9 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-// Admin save admin information
+// Admin belongs to Credential
 type Admin struct {
 	gorm.Model
-	Credential Credential
+	Credential   Credential
+	CredentialID uint
 }

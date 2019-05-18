@@ -11,7 +11,7 @@ func ServerLog(err error) {
 
 func ServerLogs(errs []error) {
 	log.SetPrefix("[Server] ")
-	for err := range errs {
+	for _, err := range errs {
 		log.Println(err)
 	}
 }

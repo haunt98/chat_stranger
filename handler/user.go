@@ -21,9 +21,9 @@ func NewUserHandler(service *service.UserService) *UserHandler {
 }
 
 func (userHandler *UserHandler) FetchAll(c *gin.Context) {
-	users, err := userHandler.service.FetchAll()
-	if err != nil {
-		log.ServerLog(err)
+	users, errs := userHandler.service.FetchAll()
+	if len(errs) != 0 {
+		log.ServerLogs(errs)
 		c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 	} else {
 		c.JSON(http.StatusOK, users)
@@ -36,9 +36,9 @@ func (userHandler *UserHandler) FindByID(c *gin.Context) {
 		log.ServerLog(err)
 		c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 	} else {
-		user, err := userHandler.service.FindByID(uint(id))
-		if err != nil {
-			log.ServerLog(err)
+		user, errs := userHandler.service.FindByID(uint(id))
+		if len(errs) != 0 {
+			log.ServerLogs(errs)
 			c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 		} else {
 			c.JSON(http.StatusOK, models.WrapSucceed{Succeed: true, Value: user})
@@ -53,9 +53,9 @@ func (userHandler *UserHandler) Create(c *gin.Context) {
 		log.ServerLog(err)
 		c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 	} else {
-		err := userHandler.service.Create(&userUpload)
-		if err != nil {
-			log.ServerLog(err)
+		status, errs := userHandler.service.Create(&userUpload)
+		if status == false {
+			log.ServerLogs(errs)
 			c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 		} else {
 			c.JSON(http.StatusOK, models.WrapSucceed{Succeed: true})
@@ -63,7 +63,7 @@ func (userHandler *UserHandler) Create(c *gin.Context) {
 	}
 }
 
-func (userHandler *UserHandler) UpdateByID(c *gin.Context) {
+func (userHandler *UserHandler) UpdateInfoByID(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
@@ -75,9 +75,32 @@ func (userHandler *UserHandler) UpdateByID(c *gin.Context) {
 			log.ServerLog(err)
 			c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 		} else {
-			err := userHandler.service.UpdateByID(uint(id), &userUpload)
-			if err != nil {
-				log.ServerLog(err)
+			status, errs := userHandler.service.UpdateInfoByID(uint(id), &userUpload)
+			if status == false {
+				log.ServerLogs(errs)
+				c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
+			} else {
+				c.JSON(http.StatusOK, models.WrapSucceed{Succeed: true})
+			}
+		}
+	}
+}
+
+func (userHandler *UserHandler) UpdatePasswordByID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	if err != nil {
+		log.ServerLog(err)
+		c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
+	} else {
+		var userUpload models.UserUpload
+		err := c.ShouldBindJSON(&userUpload)
+		if err != nil {
+			log.ServerLog(err)
+			c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
+		} else {
+			status, errs := userHandler.service.UpdatePasswordByID(uint(id), &userUpload)
+			if status == false {
+				log.ServerLogs(errs)
 				c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 			} else {
 				c.JSON(http.StatusOK, models.WrapSucceed{Succeed: true})
@@ -92,9 +115,9 @@ func (userHandler *UserHandler) DeleteByID(c *gin.Context) {
 		log.ServerLog(err)
 		c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 	} else {
-		err := userHandler.service.DeleteByID(uint(id))
-		if err != nil {
-			log.ServerLog(err)
+		status, errs := userHandler.service.DeleteByID(uint(id))
+		if status == false {
+			log.ServerLogs(errs)
 			c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 		} else {
 			c.JSON(http.StatusOK, models.WrapSucceed{Succeed: true})

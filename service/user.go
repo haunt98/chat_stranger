@@ -19,46 +19,92 @@ func NewUserService(credentialRepo repository.ICredentialRepo, userRepo reposito
 	}
 }
 
-func (userService *UserService) FetchAll() ([]*models.User, error) {
+func (userService *UserService) FetchAll() ([]*models.User, []error) {
 	return userService.userRepo.FetchAll()
 }
 
-func (userService *UserService) FindByID(id uint) (*models.User, error) {
+func (userService *UserService) FindByID(id uint) (*models.User, []error) {
 	return userService.userRepo.FindByID(id)
 }
 
-func (userService *UserService) Create(userUpload *models.UserUpload) error {
-	_, err := userService.credentialRepo.FindByName(userUpload.Authentication.Name)
-	if err == nil {
-		return fmt.Errorf("Username already exists")
+func (userService *UserService) Create(userUpload *models.UserUpload) (bool, []error) {
+	_, errs := userService.credentialRepo.FindByName(userUpload.Authentication.Name)
+	if len(errs) == 0 {
+		var errs []error
+		errs = append(errs, fmt.Errorf("Username already exists"))
+		return false, errs
 	}
 
-	u, err := userUpload.NewUser()
+	credential, err := userUpload.Authentication.NewCredential()
 	if err != nil {
-		return err
+		var errs []error
+		errs = append(errs, err)
+		return false, errs
 	}
-	return userService.userRepo.Create(u)
+	user := userUpload.NewUser()
+	user.Credential = *credential
+
+	return userService.userRepo.Create(user)
 }
 
-func (userService *UserService) UpdateByID(id uint, userUpload *models.UserUpload) error {
-	uOld, err := userService.FindByID(id)
-	if err != nil {
-		return fmt.Errorf("ID not exists")
+func (userService *UserService) UpdateInfoByID(id uint, userUpload *models.UserUpload) (bool, []error) {
+	userOld, errs := userService.FindByID(id)
+	if len(errs) != 0 {
+		var errs []error
+		errs = append(errs, fmt.Errorf("ID not exists"))
+		return false, errs
 	}
 
-	uNew, err := userUpload.NewUser()
-	if err != nil {
-		return err
-	}
+	userNew := userUpload.NewUser()
 
-	return userService.userRepo.Update(uOld, uNew)
+	return userService.userRepo.UpdateInfo(userOld, userNew)
 }
 
-func (userService *UserService) DeleteByID(id uint) error {
-	u, err := userService.FindByID(id)
-	if err != nil {
-		return fmt.Errorf("ID not exists")
+func (userService *UserService) UpdatePasswordByID(id uint, userUpload *models.UserUpload) (bool, []error) {
+	userOld, errs := userService.FindByID(id)
+	if len(errs) != 0 {
+		var errs []error
+		errs = append(errs, fmt.Errorf("ID not exists"))
+		return false, errs
 	}
 
-	return userService.userRepo.Delete(u)
+	credentialOld, errs := userService.credentialRepo.FindByUser(userOld)
+	if len(errs) != 0 {
+		return false, errs
+	}
+
+	credentialNew, err := userUpload.Authentication.NewCredential()
+	if err != nil {
+		var errs []error
+		errs = append(errs, err)
+		return false, errs
+	}
+
+	return userService.credentialRepo.UpdatePassword(credentialOld, credentialNew)
+}
+
+func (userService *UserService) DeleteByID(id uint) (bool, []error) {
+	user, errs := userService.FindByID(id)
+	if len(errs) != 0 {
+		var errs []error
+		errs = append(errs, fmt.Errorf("ID not exists"))
+		return false, errs
+	}
+
+	status, errs := userService.userRepo.Delete(user)
+	if status == false {
+		return false, errs
+	}
+
+	credential, errs := userService.credentialRepo.FindByUser(user)
+	if len(errs) != 0 {
+		return false, errs
+	}
+
+	status, errs = userService.credentialRepo.Delete(credential)
+	if status == false {
+		return false, errs
+	}
+
+	return true, nil
 }
