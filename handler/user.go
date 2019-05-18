@@ -24,14 +24,13 @@ func (userHandler *UserHandler) FetchAll(c *gin.Context) {
 	users, err := userHandler.service.FetchAll()
 	if err != nil {
 		log.ServerLog(err)
-		c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
+		c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 	} else {
 		c.JSON(http.StatusOK, users)
 	}
 }
 
 func (userHandler *UserHandler) FindByID(c *gin.Context) {
-	// Get id param
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
@@ -40,7 +39,7 @@ func (userHandler *UserHandler) FindByID(c *gin.Context) {
 		user, err := userHandler.service.FindByID(uint(id))
 		if err != nil {
 			log.ServerLog(err)
-			c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
+			c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 		} else {
 			c.JSON(http.StatusOK, models.WrapSucceed{Succeed: true, Value: user})
 		}
@@ -48,17 +47,16 @@ func (userHandler *UserHandler) FindByID(c *gin.Context) {
 }
 
 func (userHandler *UserHandler) Create(c *gin.Context) {
-	// Bind JSON
-	var userPOST models.UserPOST
-	err := c.ShouldBindJSON(&userPOST)
+	var userUpload models.UserUpload
+	err := c.ShouldBindJSON(&userUpload)
 	if err != nil {
 		log.ServerLog(err)
 		c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 	} else {
-		err := userHandler.service.Create(&userPOST)
+		err := userHandler.service.Create(&userUpload)
 		if err != nil {
 			log.ServerLog(err)
-			c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
+			c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 		} else {
 			c.JSON(http.StatusOK, models.WrapSucceed{Succeed: true})
 		}
@@ -66,23 +64,21 @@ func (userHandler *UserHandler) Create(c *gin.Context) {
 }
 
 func (userHandler *UserHandler) UpdateByID(c *gin.Context) {
-	// Get id param
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
 		c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 	} else {
-		// Bind JSON
-		var userPOST models.UserPOST
-		err := c.ShouldBindJSON(&userPOST)
+		var userUpload models.UserUpload
+		err := c.ShouldBindJSON(&userUpload)
 		if err != nil {
 			log.ServerLog(err)
 			c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 		} else {
-			err := userHandler.service.UpdateByID(uint(id), &userPOST)
+			err := userHandler.service.UpdateByID(uint(id), &userUpload)
 			if err != nil {
 				log.ServerLog(err)
-				c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
+				c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 			} else {
 				c.JSON(http.StatusOK, models.WrapSucceed{Succeed: true})
 			}
@@ -91,7 +87,6 @@ func (userHandler *UserHandler) UpdateByID(c *gin.Context) {
 }
 
 func (userHandler *UserHandler) DeleteByID(c *gin.Context) {
-	// Get id param
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
@@ -100,9 +95,13 @@ func (userHandler *UserHandler) DeleteByID(c *gin.Context) {
 		err := userHandler.service.DeleteByID(uint(id))
 		if err != nil {
 			log.ServerLog(err)
-			c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
+			c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 		} else {
 			c.JSON(http.StatusOK, models.WrapSucceed{Succeed: true})
 		}
 	}
+}
+
+func (userHandler *UserHandler) Authenticate(c *gin.Context) {
+
 }

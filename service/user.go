@@ -8,62 +8,57 @@ import (
 )
 
 type UserService struct {
-	repo repository.IUserRepo
+	credentialRepo repository.ICredentialRepo
+	userRepo       repository.IUserRepo
 }
 
-func NewUserService(repo repository.IUserRepo) *UserService {
+func NewUserService(credentialRepo repository.ICredentialRepo, userRepo repository.IUserRepo) *UserService {
 	return &UserService{
-		repo: repo,
+		credentialRepo: credentialRepo,
+		userRepo:       userRepo,
 	}
 }
 
 func (userService *UserService) FetchAll() ([]*models.User, error) {
-	return userService.repo.FetchAll()
+	return userService.userRepo.FetchAll()
 }
 
 func (userService *UserService) FindByID(id uint) (*models.User, error) {
-	return userService.repo.FindByID(id)
+	return userService.userRepo.FindByID(id)
 }
 
-func (userService *UserService) FindByUsername(username string) (*models.User, error) {
-	return userService.repo.FindByUsername(username)
-}
-
-func (userService *UserService) Create(up *models.UserPOST) error {
-	// Username already exist
-	_, err := userService.FindByUsername(up.Username)
+func (userService *UserService) Create(userUpload *models.UserUpload) error {
+	_, err := userService.credentialRepo.FindByName(userUpload.Authentication.Name)
 	if err == nil {
 		return fmt.Errorf("Username already exists")
 	}
 
-	u, err := up.NewUser()
+	u, err := userUpload.NewUser()
 	if err != nil {
 		return err
 	}
-	return userService.repo.Create(u)
+	return userService.userRepo.Create(u)
 }
 
-func (userService *UserService) UpdateByID(id uint, up *models.UserPOST) error {
-	// ID not exist
+func (userService *UserService) UpdateByID(id uint, userUpload *models.UserUpload) error {
 	uOld, err := userService.FindByID(id)
 	if err != nil {
 		return fmt.Errorf("ID not exists")
 	}
 
-	uNew, err := up.NewUser()
+	uNew, err := userUpload.NewUser()
 	if err != nil {
 		return err
 	}
 
-	return userService.repo.Update(uOld, uNew)
+	return userService.userRepo.Update(uOld, uNew)
 }
 
 func (userService *UserService) DeleteByID(id uint) error {
-	// ID not exist
 	u, err := userService.FindByID(id)
 	if err != nil {
 		return fmt.Errorf("ID not exists")
 	}
 
-	return userService.repo.Delete(u)
+	return userService.userRepo.Delete(u)
 }

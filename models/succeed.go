@@ -1,6 +1,6 @@
 package models
 
-// Wrap anything return with JSON
+// WrapSucceed is struct for wrap object with succeed status
 type WrapSucceed struct {
 	Succeed bool
 	Value   interface{}

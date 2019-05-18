@@ -5,25 +5,30 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// User belongs to Credential
 type User struct {
 	gorm.Model
-	Username     string
-	PasswordHash string
+	Credential   Credential
+	CredentialID uint
 }
 
-// Struct for POST /users
-type UserPOST struct {
-	Username string
-	Password string
+type UserUpload struct {
+	Authentication Authentication
 }
 
-func (up *UserPOST) NewUser() (*User, error) {
-	// Use bcrypt to hash password
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte(up.Password), bcrypt.DefaultCost)
+func (userUpload *UserUpload) NewUser() (*User, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(userUpload.Authentication.Password),
+		bcrypt.DefaultCost,
+	)
 	if err != nil {
 		return nil, err
-	} else {
-		m := User{Username: up.Username, PasswordHash: string(passwordHash)}
-		return &m, nil
 	}
+
+	user := User{Credential: Credential{
+		Name:           userUpload.Authentication.Name,
+		HashedPassword: string(hashedPassword)},
+	}
+
+	return &user, nil
 }

@@ -13,16 +13,13 @@ import (
 )
 
 func main() {
-	// Load env
 	err := godotenv.Load()
 	if err != nil {
 		log.ServerLog(err)
 	}
 
-	// Load database config
 	databaseConfig := config.NewDatabaseConfig()
 
-	// Open database connect
 	db, err := gorm.Open("postgres", databaseConfig.NewPostgresSource())
 	if err != nil {
 		log.ServerLog(err)
@@ -30,13 +27,12 @@ func main() {
 	}
 	defer db.Close()
 
-	// Disable gin color
 	gin.DisableConsoleColor()
-	
 	router := gin.Default()
 
-	userRepo := repository.NewGormUserRepo(db)
-	userService := service.NewUserService(userRepo)
+	credentialRepo := repository.NewCredentialRepoGorm(db)
+	userRepo := repository.NewUserRepoGorm(db)
+	userService := service.NewUserService(credentialRepo, userRepo)
 	userHandler := handler.NewUserHandler(userService)
 
 	router.GET("/api/users", userHandler.FetchAll)
@@ -44,6 +40,8 @@ func main() {
 	router.POST("/api/users", userHandler.Create)
 	router.PUT("/api/users/:id", userHandler.UpdateByID)
 	router.DELETE("/api/users/:id", userHandler.DeleteByID)
+
+	router.POST("/api/users/authenticate", userHandler.Authenticate)
 
 	router.Run()
 }
