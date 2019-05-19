@@ -48,7 +48,7 @@ func main() {
 	test := router.Group("/test")
 	test.Use(userHandler.RequireAuthenticate())
 	{
-		test.GET("/bla", func(c *gin.Context) {
+		test.GET("/", func(c *gin.Context) {
 			c.JSON(200, "OK")
 		})
 	}
