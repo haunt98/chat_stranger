@@ -45,5 +45,13 @@ func main() {
 
 	router.POST("/api/users/authenticate", userHandler.Authenticate)
 
+	test := router.Group("/test")
+	test.Use(userHandler.RequireAuthenticate())
+	{
+		test.GET("/bla", func(c *gin.Context) {
+			c.JSON(200, "OK")
+		})
+	}
+
 	router.Run()
 }
