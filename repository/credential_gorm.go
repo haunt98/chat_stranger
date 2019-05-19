@@ -43,23 +43,23 @@ func (g *CredentialRepoGorm) FindByUser(user *models.User) (*models.Credential, 
 	return &credential, nil
 }
 
-func (g *CredentialRepoGorm) Create(*models.Credential) (bool, []error) {
-	return false, nil
+func (g *CredentialRepoGorm) Create(*models.Credential) []error {
+	return nil
 }
 
-func (g *CredentialRepoGorm) UpdatePassword(credentialOld *models.Credential, credentialNew *models.Credential) (bool, []error) {
+func (g *CredentialRepoGorm) UpdatePassword(credentialOld *models.Credential, credentialNew *models.Credential) []error {
 	credentialOld.HashedPassword = credentialNew.HashedPassword
 	errs := g.db.Save(credentialOld).GetErrors()
 	if len(errs) != 0 {
-		return false, errs
+		return errs
 	}
-	return true, nil
+	return nil
 }
 
-func (g *CredentialRepoGorm) Delete(credential *models.Credential) (bool, []error) {
+func (g *CredentialRepoGorm) Delete(credential *models.Credential) []error {
 	errs := g.db.Delete(credential).GetErrors()
 	if len(errs) != 0 {
-		return false, errs
+		return errs
 	}
-	return true, nil
+	return nil
 }

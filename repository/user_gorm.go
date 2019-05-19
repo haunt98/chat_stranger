@@ -46,28 +46,28 @@ func (g *UserRepoGorm) FindByID(id uint) (*models.User, []error) {
 	}
 }
 
-func (g *UserRepoGorm) Create(user *models.User) (bool, []error) {
+func (g *UserRepoGorm) Create(user *models.User) []error {
 	errs := g.db.Create(user).GetErrors()
 	if len(errs) != 0 {
-		return false, errs
+		return errs
 	}
-	return true, nil
+	return nil
 }
 
-func (g *UserRepoGorm) UpdateInfo(userOld *models.User, userNew *models.User) (bool, []error) {
+func (g *UserRepoGorm) UpdateInfo(userOld *models.User, userNew *models.User) []error {
 	userOld.FullName = userNew.FullName
 
 	errs := g.db.Save(userOld).GetErrors()
 	if len(errs) != 0 {
-		return false, errs
+		return errs
 	}
-	return true, nil
+	return nil
 }
 
-func (g *UserRepoGorm) Delete(user *models.User) (bool, []error) {
+func (g *UserRepoGorm) Delete(user *models.User) []error {
 	errs := g.db.Delete(user).GetErrors()
 	if len(errs) != 0 {
-		return false, errs
+		return errs
 	}
-	return true, nil
+	return nil
 }

@@ -8,14 +8,18 @@ import (
 )
 
 type UserService struct {
-	credentialRepo repository.ICredentialRepo
-	userRepo       repository.IUserRepo
+	credentialRepo  repository.ICredentialRepo
+	userRepo        repository.IUserRepo
+	transactionRepo repository.ITransactionRepo
 }
 
-func NewUserService(credentialRepo repository.ICredentialRepo, userRepo repository.IUserRepo) *UserService {
+func NewUserService(credentialRepo repository.ICredentialRepo,
+	userRepo repository.IUserRepo,
+	transactionRepo repository.ITransactionRepo) *UserService {
 	return &UserService{
-		credentialRepo: credentialRepo,
-		userRepo:       userRepo,
+		credentialRepo:  credentialRepo,
+		userRepo:        userRepo,
+		transactionRepo: transactionRepo,
 	}
 }
 
@@ -27,19 +31,19 @@ func (userService *UserService) FindByID(id uint) (*models.User, []error) {
 	return userService.userRepo.FindByID(id)
 }
 
-func (userService *UserService) Create(userUpload *models.UserUpload) (bool, []error) {
+func (userService *UserService) Create(userUpload *models.UserUpload) []error {
 	_, errs := userService.credentialRepo.FindByName(userUpload.Authentication.Name)
 	if len(errs) == 0 {
 		var errs []error
 		errs = append(errs, fmt.Errorf("Username already exists"))
-		return false, errs
+		return errs
 	}
 
 	credential, err := userUpload.Authentication.NewCredential()
 	if err != nil {
 		var errs []error
 		errs = append(errs, err)
-		return false, errs
+		return errs
 	}
 	user := userUpload.NewUser()
 	user.Credential = *credential
@@ -47,12 +51,10 @@ func (userService *UserService) Create(userUpload *models.UserUpload) (bool, []e
 	return userService.userRepo.Create(user)
 }
 
-func (userService *UserService) UpdateInfoByID(id uint, userUpload *models.UserUpload) (bool, []error) {
+func (userService *UserService) UpdateInfoByID(id uint, userUpload *models.UserUpload) []error {
 	userOld, errs := userService.FindByID(id)
 	if len(errs) != 0 {
-		var errs []error
-		errs = append(errs, fmt.Errorf("ID not exists"))
-		return false, errs
+		return errs
 	}
 
 	userNew := userUpload.NewUser()
@@ -60,51 +62,45 @@ func (userService *UserService) UpdateInfoByID(id uint, userUpload *models.UserU
 	return userService.userRepo.UpdateInfo(userOld, userNew)
 }
 
-func (userService *UserService) UpdatePasswordByID(id uint, userUpload *models.UserUpload) (bool, []error) {
+func (userService *UserService) UpdatePasswordByID(id uint, userUpload *models.UserUpload) []error {
 	userOld, errs := userService.FindByID(id)
 	if len(errs) != 0 {
-		var errs []error
-		errs = append(errs, fmt.Errorf("ID not exists"))
-		return false, errs
+		return errs
 	}
 
 	credentialOld, errs := userService.credentialRepo.FindByUser(userOld)
 	if len(errs) != 0 {
-		return false, errs
+		return errs
 	}
 
 	credentialNew, err := userUpload.Authentication.NewCredential()
 	if err != nil {
 		var errs []error
 		errs = append(errs, err)
-		return false, errs
+		return errs
 	}
 
 	return userService.credentialRepo.UpdatePassword(credentialOld, credentialNew)
 }
 
-func (userService *UserService) DeleteByID(id uint) (bool, []error) {
-	user, errs := userService.FindByID(id)
+func (userService *UserService) DeleteByID(id uint) []error {
+	return userService.transactionRepo.DeleteUserWithCredentialByUserID(id)
+}
+
+func (userService *UserService) Authenticate(authentication *models.Authentication) []error {
+	credential, errs := userService.credentialRepo.FindByName(authentication.Name)
 	if len(errs) != 0 {
 		var errs []error
-		errs = append(errs, fmt.Errorf("ID not exists"))
-		return false, errs
+		errs = append(errs, fmt.Errorf("Name or password is incorrect"))
+		return errs
 	}
 
-	status, errs := userService.userRepo.Delete(user)
-	if status == false {
-		return false, errs
+	err := authentication.Authenticate(credential)
+	if err != nil {
+		var errs []error
+		errs = append(errs, err)
+		return errs
 	}
 
-	credential, errs := userService.credentialRepo.FindByUser(user)
-	if len(errs) != 0 {
-		return false, errs
-	}
-
-	status, errs = userService.credentialRepo.Delete(credential)
-	if status == false {
-		return false, errs
-	}
-
-	return true, nil
+	return nil
 }

@@ -53,8 +53,8 @@ func (userHandler *UserHandler) Create(c *gin.Context) {
 		log.ServerLog(err)
 		c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 	} else {
-		status, errs := userHandler.service.Create(&userUpload)
-		if status == false {
+		errs := userHandler.service.Create(&userUpload)
+		if len(errs) != 0 {
 			log.ServerLogs(errs)
 			c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 		} else {
@@ -75,8 +75,8 @@ func (userHandler *UserHandler) UpdateInfoByID(c *gin.Context) {
 			log.ServerLog(err)
 			c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 		} else {
-			status, errs := userHandler.service.UpdateInfoByID(uint(id), &userUpload)
-			if status == false {
+			errs := userHandler.service.UpdateInfoByID(uint(id), &userUpload)
+			if len(errs) != 0 {
 				log.ServerLogs(errs)
 				c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 			} else {
@@ -98,8 +98,8 @@ func (userHandler *UserHandler) UpdatePasswordByID(c *gin.Context) {
 			log.ServerLog(err)
 			c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 		} else {
-			status, errs := userHandler.service.UpdatePasswordByID(uint(id), &userUpload)
-			if status == false {
+			errs := userHandler.service.UpdatePasswordByID(uint(id), &userUpload)
+			if len(errs) != 0 {
 				log.ServerLogs(errs)
 				c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 			} else {
@@ -115,8 +115,8 @@ func (userHandler *UserHandler) DeleteByID(c *gin.Context) {
 		log.ServerLog(err)
 		c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
 	} else {
-		status, errs := userHandler.service.DeleteByID(uint(id))
-		if status == false {
+		errs := userHandler.service.DeleteByID(uint(id))
+		if len(errs) != 0 {
 			log.ServerLogs(errs)
 			c.JSON(http.StatusInternalServerError, models.WrapSucceed{Succeed: false})
 		} else {
@@ -126,5 +126,18 @@ func (userHandler *UserHandler) DeleteByID(c *gin.Context) {
 }
 
 func (userHandler *UserHandler) Authenticate(c *gin.Context) {
-
+	var authentication models.Authentication
+	err := c.ShouldBindJSON(&authentication)
+	if err != nil {
+		log.ServerLog(err)
+		c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
+	} else {
+		errs := userHandler.service.Authenticate(&authentication)
+		if len(errs) != 0 {
+			log.ServerLogs(errs)
+			c.JSON(http.StatusBadRequest, models.WrapSucceed{Succeed: false})
+		} else {
+			c.JSON(http.StatusOK, models.WrapSucceed{Succeed: true})
+		}
+	}
 }

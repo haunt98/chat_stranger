@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -31,4 +33,17 @@ func (authentication *Authentication) NewCredential() (*Credential, error) {
 	}
 
 	return &credential, nil
+}
+
+func (authentication *Authentication) Authenticate(credential *Credential) error {
+	if authentication.Name != credential.Name {
+		return fmt.Errorf("Name or password is incorrect")
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(credential.HashedPassword), []byte(authentication.Password))
+	if err != nil {
+		return fmt.Errorf("Name or password is incorrect")
+	}
+
+	return nil
 }

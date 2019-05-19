@@ -7,9 +7,9 @@ import (
 type IUserRepo interface {
 	FetchAll() ([]*models.User, []error)
 	FindByID(uint) (*models.User, []error)
-	Create(*models.User) (bool, []error)
-	UpdateInfo(*models.User, *models.User) (bool, []error)
-	Delete(*models.User) (bool, []error)
+	Create(*models.User) []error
+	UpdateInfo(*models.User, *models.User) []error
+	Delete(*models.User) []error
 }
 
 type ICredentialRepo interface {
@@ -17,7 +17,11 @@ type ICredentialRepo interface {
 	FindByID(id uint) (*models.Credential, []error)
 	FindByName(string) (*models.Credential, []error)
 	FindByUser(*models.User) (*models.Credential, []error)
-	Create(*models.Credential) (bool, []error)
-	UpdatePassword(*models.Credential, *models.Credential) (bool, []error)
-	Delete(*models.Credential) (bool, []error)
+	Create(*models.Credential) []error
+	UpdatePassword(*models.Credential, *models.Credential) []error
+	Delete(*models.Credential) []error
+}
+
+type ITransactionRepo interface {
+	DeleteUserWithCredentialByUserID(id uint) []error
 }

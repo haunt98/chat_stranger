@@ -32,7 +32,8 @@ func main() {
 
 	credentialRepo := repository.NewCredentialRepoGorm(db)
 	userRepo := repository.NewUserRepoGorm(db)
-	userService := service.NewUserService(credentialRepo, userRepo)
+	transactionRepo := repository.NewTransactionRepoGorm(db)
+	userService := service.NewUserService(credentialRepo, userRepo, transactionRepo)
 	userHandler := handler.NewUserHandler(userService)
 
 	router.GET("/api/users", userHandler.FetchAll)
