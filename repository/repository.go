@@ -6,22 +6,24 @@ import (
 
 type IUserRepo interface {
 	FetchAll() ([]*models.User, []error)
-	FindByID(uint) (*models.User, []error)
-	Create(*models.User) []error
-	UpdateInfo(*models.User, *models.User) []error
-	Delete(*models.User) []error
+	Find(uint) (*models.User, []error)
+	Create(*models.UserUpload) (uint, []error)
+	UpdateInfo(uint, *models.UserUpload) []error
+	UpdatePassword(uint, *models.Authentication) []error
+	Delete(uint) []error
+}
+
+type IAdminRepo interface {
+	FetchAll() ([]*models.Admin, []error)
+	Find(uint) (*models.Admin, []error)
+	Create(*models.AdminUpload) (uint, []error)
+	UpdateInfo(uint, *models.AdminUpload) []error
+	UpdatePassword(uint, *models.Authentication) []error
+	Delete(uint) []error
 }
 
 type ICredentialRepo interface {
-	FetchAll() ([]*models.Credential, []error)
-	FindByID(id uint) (*models.Credential, []error)
-	FindByName(string) (*models.Credential, []error)
-	FindByUser(*models.User) (*models.Credential, []error)
-	Create(*models.Credential) []error
-	UpdatePassword(*models.Credential, *models.Credential) []error
-	Delete(*models.Credential) []error
-}
-
-type ITransactionRepo interface {
-	DeleteUserWithCredentialByUserID(id uint) []error
+	Find(string) (*models.Credential, []error)
+	TryAdmin(*models.Credential) (*models.Admin, []error)
+	TryUser(*models.Credential) (*models.User, []error)
 }

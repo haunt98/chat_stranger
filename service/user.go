@@ -1,102 +1,58 @@
 package service
 
 import (
-	"fmt"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/1612180/chat_stranger/models"
 	"github.com/1612180/chat_stranger/repository"
 )
 
 type UserService struct {
-	credentialRepo  repository.ICredentialRepo
-	userRepo        repository.IUserRepo
-	transactionRepo repository.ITransactionRepo
+	credentialRepo repository.ICredentialRepo
+	userRepo       repository.IUserRepo
 }
 
-func NewUserService(credentialRepo repository.ICredentialRepo,
-	userRepo repository.IUserRepo,
-	transactionRepo repository.ITransactionRepo) *UserService {
+func NewUserService(credentialRepo repository.ICredentialRepo, userRepo repository.IUserRepo) *UserService {
 	return &UserService{
-		credentialRepo:  credentialRepo,
-		userRepo:        userRepo,
-		transactionRepo: transactionRepo,
+		credentialRepo: credentialRepo,
+		userRepo:       userRepo,
 	}
 }
-
 func (userService *UserService) FetchAll() ([]*models.User, []error) {
 	return userService.userRepo.FetchAll()
 }
 
-func (userService *UserService) FindByID(id uint) (*models.User, []error) {
-	return userService.userRepo.FindByID(id)
+func (userService *UserService) Find(id uint) (*models.User, []error) {
+	return userService.userRepo.Find(id)
 }
 
-func (userService *UserService) Create(userUpload *models.UserUpload) []error {
-	_, errs := userService.credentialRepo.FindByName(userUpload.Authentication.Name)
-	if len(errs) == 0 {
-		var errs []error
-		errs = append(errs, fmt.Errorf("Username already exists"))
-		return errs
-	}
-
-	credential, err := userUpload.Authentication.NewCredential()
-	if err != nil {
-		var errs []error
-		errs = append(errs, err)
-		return errs
-	}
-	user := userUpload.NewUser()
-	user.Credential = *credential
-
-	return userService.userRepo.Create(user)
+func (userService *UserService) Create(userUpload *models.UserUpload) (uint, []error) {
+	return userService.userRepo.Create(userUpload)
 }
 
-func (userService *UserService) UpdateInfoByID(id uint, userUpload *models.UserUpload) []error {
-	userOld, errs := userService.FindByID(id)
-	if len(errs) != 0 {
-		return errs
-	}
-
-	userNew := userUpload.NewUser()
-
-	return userService.userRepo.UpdateInfo(userOld, userNew)
+func (userService *UserService) UpdateInfo(id uint, userUpload *models.UserUpload) []error {
+	return userService.userRepo.UpdateInfo(id, userUpload)
 }
 
-func (userService *UserService) UpdatePasswordByID(id uint, userUpload *models.UserUpload) []error {
-	userOld, errs := userService.FindByID(id)
-	if len(errs) != 0 {
-		return errs
-	}
-
-	credentialOld, errs := userService.credentialRepo.FindByUser(userOld)
-	if len(errs) != 0 {
-		return errs
-	}
-
-	credentialNew, err := userUpload.Authentication.NewCredential()
-	if err != nil {
-		var errs []error
-		errs = append(errs, err)
-		return errs
-	}
-
-	return userService.credentialRepo.UpdatePassword(credentialOld, credentialNew)
+func (userService *UserService) UpdatePassword(id uint, authentication *models.Authentication) []error {
+	return userService.userRepo.UpdatePassword(id, authentication)
 }
 
-func (userService *UserService) DeleteByID(id uint) []error {
-	return userService.transactionRepo.DeleteUserWithCredentialByUserID(id)
+func (userService *UserService) Delete(id uint) []error {
+	return userService.userRepo.Delete(id)
 }
 
 func (userService *UserService) Authenticate(authentication *models.Authentication) []error {
-	credential, errs := userService.credentialRepo.FindByName(authentication.Name)
+	credential, errs := userService.credentialRepo.Find(authentication.Name)
 	if len(errs) != 0 {
-		var errs []error
-		errs = append(errs, fmt.Errorf("Name or password is incorrect"))
 		return errs
 	}
 
-	err := authentication.Authenticate(credential)
-	if err != nil {
+	if _, errs = userService.credentialRepo.TryUser(credential); len(errs) != 0 {
+		return errs
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(credential.HashedPassword), []byte(authentication.Password)); err != nil {
 		var errs []error
 		errs = append(errs, err)
 		return errs

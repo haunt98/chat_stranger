@@ -12,18 +12,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserHandler struct {
-	service *service.UserService
+type AdminHandler struct {
+	service *service.AdminService
 }
 
-func NewUserHandler(service *service.UserService) *UserHandler {
-	return &UserHandler{
+func NewAdminHandler(service *service.AdminService) *AdminHandler {
+	return &AdminHandler{
 		service: service,
 	}
 }
 
-func (userHandler *UserHandler) FetchAll(c *gin.Context) {
-	users, errs := userHandler.service.FetchAll()
+func (adminHandler *AdminHandler) FetchAll(c *gin.Context) {
+	admins, errs := adminHandler.service.FetchAll()
 	if len(errs) != 0 {
 		log.ServerLogs(errs)
 		c.JSON(http.StatusInternalServerError, Response(false, ":("))
@@ -31,11 +31,11 @@ func (userHandler *UserHandler) FetchAll(c *gin.Context) {
 	}
 
 	res := Response(true, ":)")
-	res["Users"] = users
+	res["Admins"] = admins
 	c.JSON(http.StatusOK, res)
 }
 
-func (userHandler *UserHandler) Find(c *gin.Context) {
+func (adminHandler *AdminHandler) Find(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
@@ -43,7 +43,7 @@ func (userHandler *UserHandler) Find(c *gin.Context) {
 		return
 	}
 
-	user, errs := userHandler.service.Find(uint(id))
+	admin, errs := adminHandler.service.Find(uint(id))
 	if len(errs) != 0 {
 		log.ServerLogs(errs)
 		c.JSON(http.StatusInternalServerError, Response(false, ":("))
@@ -51,19 +51,19 @@ func (userHandler *UserHandler) Find(c *gin.Context) {
 	}
 
 	res := Response(true, ":)")
-	res["User"] = user
+	res["Admin"] = admin
 	c.JSON(http.StatusOK, res)
 }
 
-func (userHandler *UserHandler) Create(c *gin.Context) {
-	var userUpload models.UserUpload
-	if err := c.ShouldBindJSON(&userUpload); err != nil {
+func (adminHandler *AdminHandler) Create(c *gin.Context) {
+	var adminUpload models.AdminUpload
+	if err := c.ShouldBindJSON(&adminUpload); err != nil {
 		log.ServerLog(err)
 		c.JSON(http.StatusBadRequest, Response(false, ":("))
 		return
 	}
 
-	id, errs := userHandler.service.Create(&userUpload)
+	id, errs := adminHandler.service.Create(&adminUpload)
 	if len(errs) != 0 {
 		log.ServerLogs(errs)
 		c.JSON(http.StatusInternalServerError, Response(false, ":("))
@@ -71,11 +71,11 @@ func (userHandler *UserHandler) Create(c *gin.Context) {
 	}
 
 	res := Response(true, ":)")
-	res["UserID"] = id
+	res["AdminID"] = id
 	c.JSON(http.StatusOK, res)
 }
 
-func (userHandler *UserHandler) UpdateInfo(c *gin.Context) {
+func (adminHandler *AdminHandler) UpdateInfo(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
@@ -83,14 +83,14 @@ func (userHandler *UserHandler) UpdateInfo(c *gin.Context) {
 		return
 	}
 
-	var userUpload models.UserUpload
-	if err = c.ShouldBindJSON(&userUpload); err != nil {
+	var adminUpload models.AdminUpload
+	if err = c.ShouldBindJSON(&adminUpload); err != nil {
 		log.ServerLog(err)
 		c.JSON(http.StatusInternalServerError, Response(false, ":("))
 		return
 	}
 
-	if errs := userHandler.service.UpdateInfo(uint(id), &userUpload); len(errs) != 0 {
+	if errs := adminHandler.service.UpdateInfo(uint(id), &adminUpload); len(errs) != 0 {
 		log.ServerLogs(errs)
 		c.JSON(http.StatusInternalServerError, Response(false, ":("))
 		return
@@ -99,7 +99,7 @@ func (userHandler *UserHandler) UpdateInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, Response(true, ":)"))
 }
 
-func (userHandler *UserHandler) UpdatePassword(c *gin.Context) {
+func (adminHandler *AdminHandler) UpdatePassword(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
@@ -113,7 +113,7 @@ func (userHandler *UserHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	if errs := userHandler.service.UpdatePassword(uint(id), &authentication); len(errs) != 0 {
+	if errs := adminHandler.service.UpdatePassword(uint(id), &authentication); len(errs) != 0 {
 		log.ServerLogs(errs)
 		c.JSON(http.StatusInternalServerError, Response(false, ":("))
 		return
@@ -122,7 +122,7 @@ func (userHandler *UserHandler) UpdatePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, Response(true, ":)"))
 }
 
-func (userHandler *UserHandler) Delete(c *gin.Context) {
+func (adminHandler *AdminHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
@@ -130,7 +130,7 @@ func (userHandler *UserHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if errs := userHandler.service.Delete(uint(id)); len(errs) != 0 {
+	if errs := adminHandler.service.Delete(uint(id)); len(errs) != 0 {
 		log.ServerLogs(errs)
 		c.JSON(http.StatusInternalServerError, Response(false, ":("))
 		return
@@ -139,7 +139,7 @@ func (userHandler *UserHandler) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, Response(true, ":)"))
 }
 
-func (userHandler *UserHandler) Authenticate(c *gin.Context) {
+func (adminHandler *AdminHandler) Authenticate(c *gin.Context) {
 	var authentication models.Authentication
 	if err := c.ShouldBindJSON(&authentication); err != nil {
 		log.ServerLog(err)
@@ -148,7 +148,7 @@ func (userHandler *UserHandler) Authenticate(c *gin.Context) {
 		return
 	}
 
-	if errs := userHandler.service.Authenticate(&authentication); len(errs) != 0 {
+	if errs := adminHandler.service.Authenticate(&authentication); len(errs) != 0 {
 		log.ServerLogs(errs)
 		res := Response(false, "Username or password is incorrect")
 		c.JSON(http.StatusBadRequest, res)
@@ -157,7 +157,7 @@ func (userHandler *UserHandler) Authenticate(c *gin.Context) {
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, models.CredentialClaims{
 		authentication.Name,
-		"User",
+		"Admin",
 		jwt.StandardClaims{},
 	})
 

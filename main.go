@@ -32,26 +32,36 @@ func main() {
 
 	credentialRepo := repository.NewCredentialRepoGorm(db)
 	userRepo := repository.NewUserRepoGorm(db)
-	transactionRepo := repository.NewTransactionRepoGorm(db)
-	userService := service.NewUserService(credentialRepo, userRepo, transactionRepo)
-	userHandler := handler.NewUserHandler(userService)
+	adminRepo := repository.NewAdminRepoGorm(db)
 
-	router.GET("/api/users", userHandler.FetchAll)
-	router.GET("/api/users/:id", userHandler.FindByID)
-	router.POST("/api/users", userHandler.Create)
-	router.PUT("/api/users/:id/info", userHandler.UpdateInfoByID)
-	router.PUT("/api/users/:id/password", userHandler.UpdatePasswordByID)
-	router.DELETE("/api/users/:id", userHandler.DeleteByID)
+	userService := service.NewUserService(credentialRepo, userRepo)
+	adminService := service.NewAdminService(credentialRepo, adminRepo)
+
+	userHandler := handler.NewUserHandler(userService)
+	adminHandler := handler.NewAdminHandler(adminService)
+
+	RESTUser := router.Group("/api/users")
+	//RESTUser.Use(handler.VerifyRole("Admin"))
+	{
+		RESTUser.GET("", userHandler.FetchAll)
+		RESTUser.GET("/:id", userHandler.Find)
+		RESTUser.POST("", userHandler.Create)
+		RESTUser.PUT("/:id/info", userHandler.UpdateInfo)
+		RESTUser.PUT("/:id/password", userHandler.UpdatePassword)
+		RESTUser.DELETE("/:id", userHandler.Delete)
+	}
+
+	RESTAdmin := router.Group("/api/admins")
+	{
+		RESTAdmin.GET("", adminHandler.FetchAll)
+		RESTAdmin.GET("/:id", adminHandler.Find)
+		RESTAdmin.POST("", adminHandler.Create)
+		RESTAdmin.PUT("/:id/info", adminHandler.UpdateInfo)
+		RESTAdmin.PUT("/:id/password", adminHandler.UpdatePassword)
+		RESTAdmin.DELETE("/:id", adminHandler.Delete)
+	}
 
 	router.POST("/api/users/authenticate", userHandler.Authenticate)
-
-	test := router.Group("/test")
-	test.Use(userHandler.RequireAuthenticate())
-	{
-		test.GET("/", func(c *gin.Context) {
-			c.JSON(200, "OK")
-		})
-	}
 
 	router.Run()
 }

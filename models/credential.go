@@ -1,10 +1,8 @@
 package models
 
 import (
-	"fmt"
-
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type Credential struct {
@@ -18,32 +16,8 @@ type Authentication struct {
 	Password string
 }
 
-func (authentication *Authentication) NewCredential() (*Credential, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword(
-		[]byte(authentication.Password),
-		bcrypt.DefaultCost,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	credential := Credential{
-		Name:           authentication.Name,
-		HashedPassword: string(hashedPassword),
-	}
-
-	return &credential, nil
-}
-
-func (authentication *Authentication) Authenticate(credential *Credential) error {
-	if authentication.Name != credential.Name {
-		return fmt.Errorf("Name or password is incorrect")
-	}
-
-	err := bcrypt.CompareHashAndPassword([]byte(credential.HashedPassword), []byte(authentication.Password))
-	if err != nil {
-		return fmt.Errorf("Name or password is incorrect")
-	}
-
-	return nil
+type CredentialClaims struct {
+	Name string `gorm:"unique"`
+	Role string
+	jwt.StandardClaims
 }

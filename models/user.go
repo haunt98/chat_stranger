@@ -16,11 +16,3 @@ type UserUpload struct {
 	Authentication Authentication
 	FullName       string
 }
-
-func (userUpload *UserUpload) NewUser() *User {
-	user := User{
-		FullName: userUpload.FullName,
-	}
-
-	return &user
-}
