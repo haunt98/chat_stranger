@@ -41,7 +41,7 @@ func main() {
 	adminHandler := handler.NewAdminHandler(adminService)
 
 	RESTUser := router.Group("/api/users")
-	//RESTUser.Use(handler.VerifyRole("Admin"))
+	RESTUser.Use(handler.VerifyRole("Admin"))
 	{
 		RESTUser.GET("", userHandler.FetchAll)
 		RESTUser.GET("/:id", userHandler.Find)
@@ -52,6 +52,7 @@ func main() {
 	}
 
 	RESTAdmin := router.Group("/api/admins")
+	RESTUser.Use(handler.VerifyRole("Admin"))
 	{
 		RESTAdmin.GET("", adminHandler.FetchAll)
 		RESTAdmin.GET("/:id", adminHandler.Find)
@@ -62,6 +63,7 @@ func main() {
 	}
 
 	router.POST("/api/users/authenticate", userHandler.Authenticate)
+	router.POST("/api/admins/authenticate", adminHandler.Authenticate)
 
 	router.Run()
 }
