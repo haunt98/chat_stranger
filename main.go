@@ -62,6 +62,8 @@ func main() {
 	privateForUser.Use(handler.VerifyRole("User"))
 	{
 		privateForUser.DELETE("", userHandler.VerifyDelete)
+		privateForUser.PUT("/info", userHandler.VerifyUpdateInfo)
+		privateForUser.PUT("/password", userHandler.VerifyUpdatePassword)
 	}
 
 	privateForAdmin := router.Group("/api/privateForAdmin")

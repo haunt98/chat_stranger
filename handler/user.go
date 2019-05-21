@@ -190,3 +190,49 @@ func (userHandler *UserHandler) VerifyDelete(c *gin.Context) {
 
 	c.JSON(http.StatusOK, Response(true, "Delete OK"))
 }
+
+func (userHandler *UserHandler) VerifyUpdateInfo(c *gin.Context) {
+	id, ok := c.Get("ID")
+	if !ok {
+		c.JSON(http.StatusBadRequest, Response(false, ":("))
+		return
+	}
+
+	var userUpload models.UserUpload
+	if err := c.ShouldBindJSON(&userUpload); err != nil {
+		log.ServerLog(err)
+		c.JSON(http.StatusInternalServerError, Response(false, ":("))
+		return
+	}
+
+	if errs := userHandler.service.UpdateInfo(id.(uint), &userUpload); len(errs) != 0 {
+		log.ServerLogs(errs)
+		c.JSON(http.StatusInternalServerError, Response(false, ":("))
+		return
+	}
+
+	c.JSON(http.StatusOK, Response(true, "Update Info OK"))
+}
+
+func (userHandler *UserHandler) VerifyUpdatePassword(c *gin.Context) {
+	id, ok := c.Get("ID")
+	if !ok {
+		c.JSON(http.StatusBadRequest, Response(false, ":("))
+		return
+	}
+
+	var authentication models.Authentication
+	if err := c.ShouldBindJSON(&authentication); err != nil {
+		log.ServerLog(err)
+		c.JSON(http.StatusBadRequest, Response(false, ":("))
+		return
+	}
+
+	if errs := userHandler.service.UpdatePassword(id.(uint), &authentication); len(errs) != 0 {
+		log.ServerLogs(errs)
+		c.JSON(http.StatusInternalServerError, Response(false, ":("))
+		return
+	}
+
+	c.JSON(http.StatusOK, Response(true, "Update Password OK"))
+}

@@ -88,7 +88,11 @@ func (g *UserRepoGorm) UpdateInfo(id uint, userUpload *models.UserUpload) []erro
 func (g *UserRepoGorm) UpdatePassword(id uint, authentication *models.Authentication) []error {
 	var user models.User
 	var credential models.Credential
-	if errs := g.db.Where("id = ?", id).First(&user).Related(&credential).GetErrors(); len(errs) != 0 {
+	if errs := g.db.Where("id = ?", id).First(&user).GetErrors(); len(errs) != 0 {
+		return errs
+	}
+
+	if errs := g.db.Model(&user).Related(&credential).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 

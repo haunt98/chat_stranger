@@ -86,8 +86,11 @@ func (g *AdminRepoGorm) UpdateInfo(id uint, adminUpload *models.AdminUpload) []e
 func (g *AdminRepoGorm) UpdatePassword(id uint, authentication *models.Authentication) []error {
 	var admin models.Admin
 	var credential models.Credential
-	errs := g.db.Where("id = ?", id).First(&admin).Related(&credential).GetErrors()
-	if len(errs) != 0 {
+	if errs := g.db.Where("id = ?", id).First(&admin).GetErrors(); len(errs) != 0 {
+		return errs
+	}
+
+	if errs := g.db.Model(&admin).Related(&credential).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 
@@ -98,7 +101,7 @@ func (g *AdminRepoGorm) UpdatePassword(id uint, authentication *models.Authentic
 		return errs
 	}
 
-	if errs = g.db.Model(&credential).Update("hashed_password", hashedPassword).GetErrors(); len(errs) != 0 {
+	if errs := g.db.Model(&credential).Update("hashed_password", hashedPassword).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 
