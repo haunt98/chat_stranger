@@ -42,21 +42,22 @@ func (adminService *AdminService) Delete(id uint) []error {
 	return adminService.adminRepo.Delete(id)
 }
 
-func (adminService *AdminService) Authenticate(authentication *models.Authentication) []error {
+func (adminService *AdminService) Authenticate(authentication *models.Authentication) (*models.Admin, []error) {
 	credential, errs := adminService.credentialRepo.Find(authentication.Name)
 	if len(errs) != 0 {
-		return errs
+		return nil, errs
 	}
 
-	if _, errs = adminService.credentialRepo.TryAdmin(credential); len(errs) != 0 {
-		return errs
+	admin, errs := adminService.credentialRepo.TryAdmin(credential)
+	if len(errs) != 0 {
+		return nil, errs
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(credential.HashedPassword), []byte(authentication.Password)); err != nil {
 		var errs []error
 		errs = append(errs, err)
-		return errs
+		return nil, errs
 	}
 
-	return nil
+	return admin, nil
 }

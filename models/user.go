@@ -10,9 +10,15 @@ type User struct {
 	Credential   Credential
 	CredentialID uint
 	FullName     string
+	Gender       string
+	BirthYear    int
+	Introduce    string
 }
 
 type UserUpload struct {
 	Authentication Authentication
 	FullName       string
+	Gender         string
+	BirthYear      int
+	Introduce      string
 }

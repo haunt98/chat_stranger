@@ -16,8 +16,8 @@ type Authentication struct {
 	Password string
 }
 
-type CredentialClaims struct {
-	Name string
+type JWTClaims struct {
+	ID   uint
 	Role string
 	jwt.StandardClaims
 }

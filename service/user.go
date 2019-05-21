@@ -42,21 +42,22 @@ func (userService *UserService) Delete(id uint) []error {
 	return userService.userRepo.Delete(id)
 }
 
-func (userService *UserService) Authenticate(authentication *models.Authentication) []error {
+func (userService *UserService) Authenticate(authentication *models.Authentication) (*models.User, []error) {
 	credential, errs := userService.credentialRepo.Find(authentication.Name)
 	if len(errs) != 0 {
-		return errs
+		return nil, errs
 	}
 
-	if _, errs = userService.credentialRepo.TryUser(credential); len(errs) != 0 {
-		return errs
+	user, errs := userService.credentialRepo.TryUser(credential)
+	if len(errs) != 0 {
+		return nil, errs
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(credential.HashedPassword), []byte(authentication.Password)); err != nil {
 		var errs []error
 		errs = append(errs, err)
-		return errs
+		return nil, errs
 	}
 
-	return nil
+	return user, nil
 }

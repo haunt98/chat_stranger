@@ -59,18 +59,18 @@ func (adminHandler *AdminHandler) Create(c *gin.Context) {
 	var adminUpload models.AdminUpload
 	if err := c.ShouldBindJSON(&adminUpload); err != nil {
 		log.ServerLog(err)
-		c.JSON(http.StatusBadRequest, Response(false, ":("))
+		c.JSON(http.StatusBadRequest, Response(false, "Username is already used"))
 		return
 	}
 
 	id, errs := adminHandler.service.Create(&adminUpload)
 	if len(errs) != 0 {
 		log.ServerLogs(errs)
-		c.JSON(http.StatusInternalServerError, Response(false, ":("))
+		c.JSON(http.StatusBadRequest, Response(false, "Username is already used"))
 		return
 	}
 
-	res := Response(true, ":)")
+	res := Response(true, "Register OK")
 	res["AdminID"] = id
 	c.JSON(http.StatusOK, res)
 }
@@ -96,7 +96,7 @@ func (adminHandler *AdminHandler) UpdateInfo(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, Response(true, ":)"))
+	c.JSON(http.StatusOK, Response(true, "Update Info OK"))
 }
 
 func (adminHandler *AdminHandler) UpdatePassword(c *gin.Context) {
@@ -119,7 +119,7 @@ func (adminHandler *AdminHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, Response(true, ":)"))
+	c.JSON(http.StatusOK, Response(true, "Update Password OK"))
 }
 
 func (adminHandler *AdminHandler) Delete(c *gin.Context) {
@@ -136,34 +136,36 @@ func (adminHandler *AdminHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, Response(true, ":)"))
+	c.JSON(http.StatusOK, Response(true, "Delete OK"))
 }
 
 func (adminHandler *AdminHandler) Authenticate(c *gin.Context) {
 	var authentication models.Authentication
 	if err := c.ShouldBindJSON(&authentication); err != nil {
 		log.ServerLog(err)
-		res := Response(false, ":(")
+		res := Response(false, "Username or password is incorrect")
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	if errs := adminHandler.service.Authenticate(&authentication); len(errs) != 0 {
+	admin, errs := adminHandler.service.Authenticate(&authentication)
+	if len(errs) != 0 {
 		log.ServerLogs(errs)
 		res := Response(false, "Username or password is incorrect")
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
 
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, models.CredentialClaims{
-		authentication.Name,
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, models.JWTClaims{
+		admin.ID,
 		"Admin",
 		jwt.StandardClaims{},
 	})
 
 	tokenStr, err := jwtToken.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
-		res := Response(false, ":(")
+		log.ServerLog(err)
+		res := Response(false, "Username or password is incorrect")
 		c.JSON(http.StatusInternalServerError, res)
 		return
 	}

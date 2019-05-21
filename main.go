@@ -1,9 +1,12 @@
 package main
 
 import (
+	"os"
+
 	"github.com/1612180/chat_stranger/config"
 	"github.com/1612180/chat_stranger/handler"
 	"github.com/1612180/chat_stranger/log"
+	"github.com/1612180/chat_stranger/models"
 	"github.com/1612180/chat_stranger/repository"
 	"github.com/1612180/chat_stranger/service"
 	"github.com/gin-gonic/gin"
@@ -34,6 +37,14 @@ func main() {
 	userRepo := repository.NewUserRepoGorm(db)
 	adminRepo := repository.NewAdminRepoGorm(db)
 
+	adminRepo.Create(&models.AdminUpload{
+		FullName: os.Getenv("ADMIN_NAME"),
+		Authentication: models.Authentication{
+			Name:     os.Getenv("ADMIN_NAME"),
+			Password: os.Getenv("ADMIN_PASSWORD"),
+		},
+	})
+
 	userService := service.NewUserService(credentialRepo, userRepo)
 	adminService := service.NewAdminService(credentialRepo, adminRepo)
 
@@ -47,7 +58,13 @@ func main() {
 		public.POST("/admins/authenticate", adminHandler.Authenticate)
 	}
 
-	privateForAdmin := router.Group("/api/private")
+	privateForUser := router.Group("/api/privateForUser")
+	privateForUser.Use(handler.VerifyRole("User"))
+	{
+		privateForUser.DELETE("", userHandler.VerifyDelete)
+	}
+
+	privateForAdmin := router.Group("/api/privateForAdmin")
 	privateForAdmin.Use(handler.VerifyRole("Admin"))
 	{
 		privateForAdmin.GET("/users", userHandler.FetchAll)
