@@ -7,7 +7,7 @@ import (
 
 type Credential struct {
 	gorm.Model
-	Name           string
+	Name           string `gorm:"unique"`
 	HashedPassword string `json:"-"`
 }
 
@@ -17,7 +17,7 @@ type Authentication struct {
 }
 
 type CredentialClaims struct {
-	Name string `gorm:"unique"`
+	Name string
 	Role string
 	jwt.StandardClaims
 }

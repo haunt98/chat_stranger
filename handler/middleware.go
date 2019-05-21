@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/1612180/chat_stranger/log"
 	"github.com/1612180/chat_stranger/models"
@@ -13,7 +14,14 @@ import (
 
 func VerifyRole(Role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.GetHeader("Token")
+		authHeader := c.GetHeader("Authorization")
+		splitAuthHeader := strings.Split(authHeader, "Bearer")
+		tokenString := strings.TrimSpace(splitAuthHeader[1])
+
+		fmt.Println(authHeader)
+		fmt.Println(splitAuthHeader)
+		fmt.Println(tokenString)
+
 		if tokenString == "" {
 			log.ServerLog(fmt.Errorf("Token not found"))
 			c.JSON(http.StatusForbidden, Response(false, "Login require"))
@@ -27,7 +35,7 @@ func VerifyRole(Role string) gin.HandlerFunc {
 
 		if !token.Valid {
 			log.ServerLog(err)
-			c.JSON(http.StatusForbidden, Response(false, "Token bad"))
+			c.JSON(http.StatusForbidden, Response(false, "Login require"))
 			c.Abort()
 			return
 		}
@@ -35,7 +43,7 @@ func VerifyRole(Role string) gin.HandlerFunc {
 		if claims, ok := token.Claims.(*models.CredentialClaims); ok {
 			if claims.Role != Role {
 				log.ServerLog(fmt.Errorf("Role bad"))
-				c.JSON(http.StatusForbidden, Response(false, "Role bad"))
+				c.JSON(http.StatusForbidden, Response(false, "Login require"))
 				c.Abort()
 				return
 			}

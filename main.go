@@ -40,30 +40,29 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 	adminHandler := handler.NewAdminHandler(adminService)
 
-	RESTUser := router.Group("/api/users")
-	RESTUser.Use(handler.VerifyRole("Admin"))
+	public := router.Group("/api/public")
 	{
-		RESTUser.GET("", userHandler.FetchAll)
-		RESTUser.GET("/:id", userHandler.Find)
-		RESTUser.POST("", userHandler.Create)
-		RESTUser.PUT("/:id/info", userHandler.UpdateInfo)
-		RESTUser.PUT("/:id/password", userHandler.UpdatePassword)
-		RESTUser.DELETE("/:id", userHandler.Delete)
+		public.POST("/users/register", userHandler.Create)
+		public.POST("/users/authenticate", userHandler.Authenticate)
+		public.POST("/admins/authenticate", adminHandler.Authenticate)
 	}
 
-	RESTAdmin := router.Group("/api/admins")
-	RESTUser.Use(handler.VerifyRole("Admin"))
+	privateForAdmin := router.Group("/api/private")
+	privateForAdmin.Use(handler.VerifyRole("Admin"))
 	{
-		RESTAdmin.GET("", adminHandler.FetchAll)
-		RESTAdmin.GET("/:id", adminHandler.Find)
-		RESTAdmin.POST("", adminHandler.Create)
-		RESTAdmin.PUT("/:id/info", adminHandler.UpdateInfo)
-		RESTAdmin.PUT("/:id/password", adminHandler.UpdatePassword)
-		RESTAdmin.DELETE("/:id", adminHandler.Delete)
+		privateForAdmin.GET("/users", userHandler.FetchAll)
+		privateForAdmin.GET("/users/:id", userHandler.Find)
+		privateForAdmin.POST("/users", userHandler.Create)
+		privateForAdmin.PUT("/users/:id/info", userHandler.UpdateInfo)
+		privateForAdmin.PUT("/users/:id/password", userHandler.UpdatePassword)
+		privateForAdmin.DELETE("/users/:id", userHandler.Delete)
+		privateForAdmin.GET("/admins", adminHandler.FetchAll)
+		privateForAdmin.GET("/admins/:id", adminHandler.Find)
+		privateForAdmin.POST("/admins", adminHandler.Create)
+		privateForAdmin.PUT("/admins/:id/info", adminHandler.UpdateInfo)
+		privateForAdmin.PUT("/admins/:id/password", adminHandler.UpdatePassword)
+		privateForAdmin.DELETE("/admins/:id", adminHandler.Delete)
 	}
-
-	router.POST("/api/users/authenticate", userHandler.Authenticate)
-	router.POST("/api/admins/authenticate", adminHandler.Authenticate)
 
 	router.Run()
 }
