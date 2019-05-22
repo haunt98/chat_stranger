@@ -48,7 +48,7 @@ func (g *AdminRepoGorm) Find(id uint) (*models.Admin, []error) {
 }
 
 func (g *AdminRepoGorm) Create(adminUpload *models.AdminUpload) (uint, []error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminUpload.Authentication.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminUpload.Password), bcrypt.DefaultCost)
 	if err != nil {
 		var errs []error
 		errs = append(errs, err)
@@ -57,7 +57,7 @@ func (g *AdminRepoGorm) Create(adminUpload *models.AdminUpload) (uint, []error) 
 
 	admin := models.Admin{
 		Credential: models.Credential{
-			Name:           adminUpload.Authentication.Name,
+			Name:           adminUpload.Name,
 			HashedPassword: string(hashedPassword),
 		},
 		FullName: adminUpload.FullName,

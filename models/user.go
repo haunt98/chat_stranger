@@ -6,19 +6,20 @@ import (
 
 // User belongs to Credential
 type User struct {
-	gorm.Model
-	Credential   Credential
-	CredentialID uint
-	FullName     string
-	Gender       string
-	BirthYear    int
-	Introduce    string
+	gorm.Model   `json:"-"`
+	Credential   Credential `json:"-"`
+	CredentialID uint       `json:"-"`
+	FullName     string     `json:"fullname"`
+	Gender       string     `json:"gender"`
+	BirthYear    int        `json:"birthyear"`
+	Introduce    string     `json:"introduce"`
 }
 
 type UserUpload struct {
-	Authentication Authentication
-	FullName       string
-	Gender         string
-	BirthYear      int
-	Introduce      string
+	Name      string `json:"name"`
+	Password  string `json:"password"`
+	FullName  string `json:"fullname"`
+	Gender    string `json:"gender"`
+	BirthYear int    `json:"birthyear"`
+	Introduce string `json:"introduce"`
 }

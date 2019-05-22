@@ -6,13 +6,14 @@ import (
 
 // Admin belongs to Credential
 type Admin struct {
-	gorm.Model
-	Credential   Credential
-	CredentialID uint
-	FullName     string
+	gorm.Model   `json:"-"`
+	Credential   Credential `json:"-"`
+	CredentialID uint       `json:"-"`
+	FullName     string     `json:"fullname"`
 }
 
 type AdminUpload struct {
-	Authentication Authentication
-	FullName       string
+	Name     string `json:"name"`
+	Password string `json:"password"`
+	FullName string `json:"fullname"`
 }

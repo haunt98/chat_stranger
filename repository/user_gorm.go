@@ -48,7 +48,7 @@ func (g *UserRepoGorm) Find(id uint) (*models.User, []error) {
 }
 
 func (g *UserRepoGorm) Create(userUpload *models.UserUpload) (uint, []error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userUpload.Authentication.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userUpload.Password), bcrypt.DefaultCost)
 	if err != nil {
 		var errs []error
 		errs = append(errs, err)
@@ -57,7 +57,7 @@ func (g *UserRepoGorm) Create(userUpload *models.UserUpload) (uint, []error) {
 
 	user := models.User{
 		Credential: models.Credential{
-			Name:           userUpload.Authentication.Name,
+			Name:           userUpload.Name,
 			HashedPassword: string(hashedPassword),
 		},
 		FullName:  userUpload.FullName,

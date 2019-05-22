@@ -38,11 +38,9 @@ func main() {
 	adminRepo := repository.NewAdminRepoGorm(db)
 
 	adminRepo.Create(&models.AdminUpload{
+		Name:     os.Getenv("ADMIN_NAME"),
+		Password: os.Getenv("ADMIN_PASSWORD"),
 		FullName: os.Getenv("ADMIN_NAME"),
-		Authentication: models.Authentication{
-			Name:     os.Getenv("ADMIN_NAME"),
-			Password: os.Getenv("ADMIN_PASSWORD"),
-		},
 	})
 
 	userService := service.NewUserService(credentialRepo, userRepo)

@@ -6,14 +6,14 @@ import (
 )
 
 type Credential struct {
-	gorm.Model
-	Name           string `gorm:"unique"`
+	gorm.Model     `json:"-"`
+	Name           string `gorm:"unique" json:"name"`
 	HashedPassword string `json:"-"`
 }
 
 type Authentication struct {
-	Name     string
-	Password string
+	Name     string `json:"name"`
+	Password string `json:"password"`
 }
 
 type JWTClaims struct {

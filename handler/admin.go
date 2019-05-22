@@ -31,7 +31,7 @@ func (adminHandler *AdminHandler) FetchAll(c *gin.Context) {
 	}
 
 	res := Response(true, ":)")
-	res["Admins"] = admins
+	res["admins"] = admins
 	c.JSON(http.StatusOK, res)
 }
 
@@ -51,7 +51,7 @@ func (adminHandler *AdminHandler) Find(c *gin.Context) {
 	}
 
 	res := Response(true, ":)")
-	res["Admin"] = admin
+	res["admin"] = admin
 	c.JSON(http.StatusOK, res)
 }
 
@@ -71,7 +71,7 @@ func (adminHandler *AdminHandler) Create(c *gin.Context) {
 	}
 
 	res := Response(true, "Register OK")
-	res["AdminID"] = id
+	res["adminid"] = id
 	c.JSON(http.StatusOK, res)
 }
 
@@ -171,6 +171,6 @@ func (adminHandler *AdminHandler) Authenticate(c *gin.Context) {
 	}
 
 	res := Response(true, "Login OK")
-	res["Token"] = tokenStr
+	res["token"] = tokenStr
 	c.JSON(http.StatusOK, res)
 }

@@ -31,7 +31,7 @@ func (userHandler *UserHandler) FetchAll(c *gin.Context) {
 	}
 
 	res := Response(true, ":)")
-	res["Users"] = users
+	res["users"] = users
 	c.JSON(http.StatusOK, res)
 }
 
@@ -51,7 +51,7 @@ func (userHandler *UserHandler) Find(c *gin.Context) {
 	}
 
 	res := Response(true, ":)")
-	res["User"] = user
+	res["user"] = user
 	c.JSON(http.StatusOK, res)
 }
 
@@ -71,7 +71,7 @@ func (userHandler *UserHandler) Create(c *gin.Context) {
 	}
 
 	res := Response(true, "Register OK")
-	res["UserID"] = id
+	res["userid"] = id
 	c.JSON(http.StatusOK, res)
 }
 
@@ -171,7 +171,7 @@ func (userHandler *UserHandler) Authenticate(c *gin.Context) {
 	}
 
 	res := Response(true, "Login OK")
-	res["Token"] = tokenStr
+	res["token"] = tokenStr
 	c.JSON(http.StatusOK, res)
 }
 
