@@ -26,11 +26,11 @@ func (adminHandler *AdminHandler) FetchAll(c *gin.Context) {
 	admins, errs := adminHandler.service.FetchAll()
 	if len(errs) != 0 {
 		log.ServerLogs(errs)
-		c.JSON(http.StatusInternalServerError, Response(false, ":("))
+		c.JSON(http.StatusOK, Response(402))
 		return
 	}
 
-	res := Response(true, ":)")
+	res := Response(200)
 	res["admins"] = admins
 	c.JSON(http.StatusOK, res)
 }
@@ -39,18 +39,18 @@ func (adminHandler *AdminHandler) Find(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
-		c.JSON(http.StatusBadRequest, Response(false, ":("))
+		c.JSON(http.StatusBadRequest, Response(401))
 		return
 	}
 
 	admin, errs := adminHandler.service.Find(uint(id))
 	if len(errs) != 0 {
 		log.ServerLogs(errs)
-		c.JSON(http.StatusInternalServerError, Response(false, ":("))
+		c.JSON(http.StatusOK, Response(403))
 		return
 	}
 
-	res := Response(true, ":)")
+	res := Response(201)
 	res["admin"] = admin
 	c.JSON(http.StatusOK, res)
 }
@@ -59,18 +59,18 @@ func (adminHandler *AdminHandler) Create(c *gin.Context) {
 	var adminUpload models.AdminUpload
 	if err := c.ShouldBindJSON(&adminUpload); err != nil {
 		log.ServerLog(err)
-		c.JSON(http.StatusBadRequest, Response(false, "Username is already used"))
+		c.JSON(http.StatusBadRequest, Response(400))
 		return
 	}
 
 	id, errs := adminHandler.service.Create(&adminUpload)
 	if len(errs) != 0 {
 		log.ServerLogs(errs)
-		c.JSON(http.StatusBadRequest, Response(false, "Username is already used"))
+		c.JSON(http.StatusOK, Response(401))
 		return
 	}
 
-	res := Response(true, "Register OK")
+	res := Response(205)
 	res["adminid"] = id
 	c.JSON(http.StatusOK, res)
 }
@@ -79,80 +79,78 @@ func (adminHandler *AdminHandler) UpdateInfo(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
-		c.JSON(http.StatusBadRequest, Response(false, ":("))
+		c.JSON(http.StatusBadRequest, Response(401))
 		return
 	}
 
 	var adminUpload models.AdminUpload
 	if err = c.ShouldBindJSON(&adminUpload); err != nil {
 		log.ServerLog(err)
-		c.JSON(http.StatusInternalServerError, Response(false, ":("))
+		c.JSON(http.StatusBadRequest, Response(400))
 		return
 	}
 
 	if errs := adminHandler.service.UpdateInfo(uint(id), &adminUpload); len(errs) != 0 {
 		log.ServerLogs(errs)
-		c.JSON(http.StatusInternalServerError, Response(false, ":("))
+		c.JSON(http.StatusOK, Response(403))
 		return
 	}
 
-	c.JSON(http.StatusOK, Response(true, "Update Info OK"))
+	c.JSON(http.StatusOK, Response(202))
 }
 
 func (adminHandler *AdminHandler) UpdatePassword(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
-		c.JSON(http.StatusBadRequest, Response(false, ":("))
+		c.JSON(http.StatusBadRequest, Response(401))
 	}
 
 	var authentication models.Authentication
 	if err = c.ShouldBindJSON(&authentication); err != nil {
 		log.ServerLog(err)
-		c.JSON(http.StatusBadRequest, Response(false, ":("))
+		c.JSON(http.StatusBadRequest, Response(400))
 		return
 	}
 
 	if errs := adminHandler.service.UpdatePassword(uint(id), &authentication); len(errs) != 0 {
 		log.ServerLogs(errs)
-		c.JSON(http.StatusInternalServerError, Response(false, ":("))
+		c.JSON(http.StatusOK, Response(403))
 		return
 	}
 
-	c.JSON(http.StatusOK, Response(true, "Update Password OK"))
+	c.JSON(http.StatusOK, Response(203))
 }
 
 func (adminHandler *AdminHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
 		log.ServerLog(err)
-		c.JSON(http.StatusBadRequest, Response(false, ":("))
+		c.JSON(http.StatusBadRequest, Response(401))
 		return
 	}
 
 	if errs := adminHandler.service.Delete(uint(id)); len(errs) != 0 {
 		log.ServerLogs(errs)
-		c.JSON(http.StatusInternalServerError, Response(false, ":("))
+		c.JSON(http.StatusOK, Response(403))
 		return
 	}
 
-	c.JSON(http.StatusOK, Response(true, "Delete OK"))
+	c.JSON(http.StatusOK, Response(204))
 }
 
 func (adminHandler *AdminHandler) Authenticate(c *gin.Context) {
 	var authentication models.Authentication
 	if err := c.ShouldBindJSON(&authentication); err != nil {
 		log.ServerLog(err)
-		res := Response(false, "Username or password is incorrect")
-		c.JSON(http.StatusBadRequest, res)
+		c.JSON(http.StatusBadRequest, Response(400))
 		return
 	}
 
 	admin, errs := adminHandler.service.Authenticate(&authentication)
 	if len(errs) != 0 {
 		log.ServerLogs(errs)
-		res := Response(false, "Username or password is incorrect")
-		c.JSON(http.StatusBadRequest, res)
+		c.JSON(http.StatusOK, Response(405))
 		return
 	}
 
@@ -165,12 +163,11 @@ func (adminHandler *AdminHandler) Authenticate(c *gin.Context) {
 	tokenStr, err := jwtToken.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		log.ServerLog(err)
-		res := Response(false, "Username or password is incorrect")
-		c.JSON(http.StatusInternalServerError, res)
+		c.JSON(http.StatusInternalServerError, Response(500))
 		return
 	}
 
-	res := Response(true, "Login OK")
+	res := Response(206)
 	res["token"] = tokenStr
 	c.JSON(http.StatusOK, res)
 }
