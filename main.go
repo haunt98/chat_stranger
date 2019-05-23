@@ -30,9 +30,6 @@ func main() {
 	}
 	defer db.Close()
 
-	gin.DisableConsoleColor()
-	router := gin.Default()
-
 	credentialRepo := repository.NewCredentialRepoGorm(db)
 	userRepo := repository.NewUserRepoGorm(db)
 	adminRepo := repository.NewAdminRepoGorm(db)
@@ -49,6 +46,19 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 	adminHandler := handler.NewAdminHandler(adminService)
 
+	gin.DisableConsoleColor()
+	router := gin.Default()
+	router.LoadHTMLGlob("./static/*.html")
+	router.Static("/static/script", "./static/script")
+
+	router.GET("/index", func(c *gin.Context) {
+		c.HTML(200, "index.html", gin.H{})
+	})
+
+	router.GET("/welcome_user", func(c *gin.Context) {
+		c.HTML(200, "welcome_user.html", gin.H{})
+	})
+
 	public := router.Group("/api/public")
 	{
 		public.POST("/users/register", userHandler.Create)
@@ -59,6 +69,7 @@ func main() {
 	privateForUser := router.Group("/api/privateForUser")
 	privateForUser.Use(handler.VerifyRole("User"))
 	{
+		privateForUser.GET("", userHandler.VerifyFind)
 		privateForUser.DELETE("", userHandler.VerifyDelete)
 		privateForUser.PUT("/info", userHandler.VerifyUpdateInfo)
 		privateForUser.PUT("/password", userHandler.VerifyUpdatePassword)

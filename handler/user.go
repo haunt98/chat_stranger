@@ -172,6 +172,25 @@ func (userHandler *UserHandler) Authenticate(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
+func (userHandler *UserHandler) VerifyFind(c *gin.Context) {
+	id, ok := c.Get("ID")
+	if !ok {
+		c.JSON(http.StatusBadRequest, Response(501))
+		return
+	}
+
+	user, errs := userHandler.service.Find(id.(uint))
+	if len(errs) != 0 {
+		log.ServerLogs(errs)
+		c.JSON(http.StatusOK, Response(403))
+		return
+	}
+
+	res := Response(201)
+	res["user"] = user
+	c.JSON(http.StatusOK, res)
+}
+
 func (userHandler *UserHandler) VerifyDelete(c *gin.Context) {
 	id, ok := c.Get("ID")
 	if !ok {
