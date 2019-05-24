@@ -60,9 +60,9 @@ func (g *UserRepoGorm) Create(userUpload *models.UserUpload) (uint, []error) {
 			Name:           userUpload.Name,
 			HashedPassword: string(hashedPassword),
 		},
-		FullName:  userUpload.FullName,
+		Fullname:  userUpload.FullName,
 		Gender:    userUpload.Gender,
-		BirthYear: userUpload.BirthYear,
+		Birthyear: userUpload.BirthYear,
 		Introduce: userUpload.Introduce,
 	}
 
@@ -116,22 +116,22 @@ func (g *UserRepoGorm) Delete(id uint) []error {
 	var user models.User
 	var credential models.Credential
 
-	if errs := g.db.Where("id = ?", id).First(&user).GetErrors(); len(errs) != 0 {
+	if errs := tx.Where("id = ?", id).First(&user).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}
 
-	if errs := g.db.Model(&user).Related(&credential).GetErrors(); len(errs) != 0 {
+	if errs := tx.Model(&user).Related(&credential).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}
 
-	if errs := g.db.Delete(&user).GetErrors(); len(errs) != 0 {
+	if errs := tx.Delete(&user).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}
 
-	if errs := g.db.Delete(&credential).GetErrors(); len(errs) != 0 {
+	if errs := tx.Delete(&credential).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}

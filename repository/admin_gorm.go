@@ -60,7 +60,7 @@ func (g *AdminRepoGorm) Create(adminUpload *models.AdminUpload) (uint, []error) 
 			Name:           adminUpload.Name,
 			HashedPassword: string(hashedPassword),
 		},
-		FullName: adminUpload.FullName,
+		Fullname: adminUpload.FullName,
 	}
 
 	if errs := g.db.Create(&admin).GetErrors(); len(errs) != 0 {
@@ -114,22 +114,22 @@ func (g *AdminRepoGorm) Delete(id uint) []error {
 	var admin models.Admin
 	var credential models.Credential
 
-	if errs := g.db.Where("id = ?", id).First(&admin).GetErrors(); len(errs) != 0 {
+	if errs := tx.Where("id = ?", id).First(&admin).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}
 
-	if errs := g.db.Model(&admin).Related(&credential).GetErrors(); len(errs) != 0 {
+	if errs := tx.Model(&admin).Related(&credential).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}
 
-	if errs := g.db.Delete(&admin).GetErrors(); len(errs) != 0 {
+	if errs := tx.Delete(&admin).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}
 
-	if errs := g.db.Delete(&credential).GetErrors(); len(errs) != 0 {
+	if errs := tx.Delete(&credential).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}

@@ -2,13 +2,15 @@ package models
 
 import (
 	"github.com/dgrijalva/jwt-go"
-	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type Credential struct {
-	gorm.Model     `json:"-"`
-	Name           string `gorm:"unique" json:"name"`
-	HashedPassword string `json:"-"`
+	ID             uint      `json:"-"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	Name           string    `gorm:"unique" json:"name"`
+	HashedPassword string    `json:"-"`
 }
 
 type Authentication struct {

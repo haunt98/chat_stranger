@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"os"
 
 	"github.com/1612180/chat_stranger/config"
@@ -16,8 +17,7 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
+	if err := godotenv.Load(); err != nil {
 		log.ServerLog(err)
 	}
 
@@ -51,12 +51,15 @@ func main() {
 	router.LoadHTMLGlob("./static/*.html")
 	router.Static("/static/script", "./static/script")
 
+	// Serve HTML
 	router.GET("/index", func(c *gin.Context) {
-		c.HTML(200, "index.html", gin.H{})
+		c.HTML(http.StatusOK, "index.html", gin.H{})
 	})
-
 	router.GET("/welcome_user", func(c *gin.Context) {
-		c.HTML(200, "welcome_user.html", gin.H{})
+		c.HTML(http.StatusOK, "welcome_user.html", gin.H{})
+	})
+	router.GET("/chat", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "chat.html", gin.H{})
 	})
 
 	public := router.Group("/api/public")
@@ -66,8 +69,7 @@ func main() {
 		public.POST("/admins/authenticate", adminHandler.Authenticate)
 	}
 
-	privateForUser := router.Group("/api/privateForUser")
-	privateForUser.Use(handler.VerifyRole("User"))
+	privateForUser := router.Group("/api/me", handler.VerifyRole("User"))
 	{
 		privateForUser.GET("", userHandler.VerifyFind)
 		privateForUser.DELETE("", userHandler.VerifyDelete)
@@ -75,8 +77,7 @@ func main() {
 		privateForUser.PUT("/password", userHandler.VerifyUpdatePassword)
 	}
 
-	privateForAdmin := router.Group("/api/privateForAdmin")
-	privateForAdmin.Use(handler.VerifyRole("Admin"))
+	privateForAdmin := router.Group("/api/me", handler.VerifyRole("Admin"))
 	{
 		privateForAdmin.GET("/users", userHandler.FetchAll)
 		privateForAdmin.GET("/users/:id", userHandler.Find)
@@ -96,5 +97,8 @@ func main() {
 	if PORT == "" {
 		PORT = "8080"
 	}
-	_ = router.Run(":" + PORT)
+
+	if err = router.Run(":" + PORT); err != nil {
+		log.ServerLog(err)
+	}
 }

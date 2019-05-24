@@ -1,17 +1,19 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
+	"time"
 )
 
 // User belongs to Credential
 type User struct {
-	gorm.Model   `json:"-"`
+	ID           uint       `json:"-"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 	Credential   Credential `json:"-"`
 	CredentialID uint       `json:"-"`
-	FullName     string     `json:"fullname"`
+	Fullname     string     `json:"fullname"`
 	Gender       string     `json:"gender"`
-	BirthYear    int        `json:"birthyear"`
+	Birthyear    int        `json:"birthyear"`
 	Introduce    string     `json:"introduce"`
 }
 

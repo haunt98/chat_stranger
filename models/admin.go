@@ -1,15 +1,17 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
+	"time"
 )
 
 // Admin belongs to Credential
 type Admin struct {
-	gorm.Model   `json:"-"`
+	ID           uint       `json:"-"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 	Credential   Credential `json:"-"`
 	CredentialID uint       `json:"-"`
-	FullName     string     `json:"fullname"`
+	Fullname     string     `json:"fullname"`
 }
 
 type AdminUpload struct {

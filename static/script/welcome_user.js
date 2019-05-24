@@ -2,16 +2,8 @@ window.addEventListener('load', function () {
     let baseurl = location.protocol + '//' + location.host;
     let token = localStorage.getItem('token');
 
-    // If not log in -> force homepage
-    // If log in -> welcome
     if (token === null) {
-        if (location.href !== baseurl + '/index') {
             location.href = baseurl + '/index'
-        }
-    } else {
-        if (location.href !== baseurl + '/welcome_user') {
-            location.href = baseurl + '/welcome_user'
-        }
     }
 
     // Get user info
@@ -31,6 +23,7 @@ window.addEventListener('load', function () {
             } else {
                 console.log(response.message);
 
+                localStorage.removeItem('token');
                 location.href = baseurl + '/index'
             }
         });
@@ -41,5 +34,10 @@ window.addEventListener('load', function () {
         localStorage.removeItem('token');
 
         location.href = baseurl + '/index'
+    });
+
+    let btnStartChat = document.getElementById('btnStartChat');
+    btnStartChat.addEventListener('click', function () {
+        location.href = baseurl + '/chat'
     })
 });
