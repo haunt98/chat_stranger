@@ -3,11 +3,11 @@ window.addEventListener('load', function () {
     let token = localStorage.getItem('token');
 
     if (token === null) {
-            location.href = baseurl + '/index'
+        location.href = baseurl
     }
 
     // Get user info
-    fetch(baseurl + '/api/privateForUser', {
+    fetch(baseurl + '/api/me', {
         method: 'GET',
         headers: {
             'Authorization': 'Bearer' + token
@@ -24,7 +24,7 @@ window.addEventListener('load', function () {
                 console.log(response.message);
 
                 localStorage.removeItem('token');
-                location.href = baseurl + '/index'
+                location.href = baseurl
             }
         });
 
@@ -33,7 +33,7 @@ window.addEventListener('load', function () {
     btnLogOut.addEventListener('click', function () {
         localStorage.removeItem('token');
 
-        location.href = baseurl + '/index'
+        location.href = baseurl
     });
 
     let btnStartChat = document.getElementById('btnStartChat');

@@ -52,8 +52,8 @@ func main() {
 	router.Static("/static/script", "./static/script")
 
 	// Serve HTML
-	router.GET("/index", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.html", gin.H{})
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "home.html", gin.H{})
 	})
 	router.GET("/welcome_user", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "welcome_user.html", gin.H{})
