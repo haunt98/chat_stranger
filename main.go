@@ -92,5 +92,9 @@ func main() {
 		privateForAdmin.DELETE("/admins/:id", adminHandler.Delete)
 	}
 
-	router.Run()
+	PORT := os.Getenv("PORT")
+	if PORT == "" {
+		PORT = "8080"
+	}
+	_ = router.Run(":" + PORT)
 }

@@ -155,9 +155,9 @@ func (userHandler *UserHandler) Authenticate(c *gin.Context) {
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, models.JWTClaims{
-		user.ID,
-		"User",
-		jwt.StandardClaims{},
+		ID:             user.ID,
+		Role:           "User",
+		StandardClaims: jwt.StandardClaims{},
 	})
 
 	tokenStr, err := jwtToken.SignedString([]byte(os.Getenv("SECRET_KEY")))

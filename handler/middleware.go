@@ -36,7 +36,7 @@ func VerifyRole(Role string) gin.HandlerFunc {
 			return []byte(os.Getenv("SECRET_KEY")), nil
 		})
 
-		if !token.Valid {
+		if token == nil || !token.Valid {
 			log.ServerLog(err)
 			c.JSON(http.StatusForbidden, Response(408))
 			c.Abort()

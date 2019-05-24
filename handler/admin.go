@@ -155,9 +155,9 @@ func (adminHandler *AdminHandler) Authenticate(c *gin.Context) {
 	}
 
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, models.JWTClaims{
-		admin.ID,
-		"Admin",
-		jwt.StandardClaims{},
+		ID:             admin.ID,
+		Role:           "Admin",
+		StandardClaims: jwt.StandardClaims{},
 	})
 
 	tokenStr, err := jwtToken.SignedString([]byte(os.Getenv("SECRET_KEY")))

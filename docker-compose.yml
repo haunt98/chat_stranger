@@ -5,14 +5,16 @@ services:
     restart: always
     ports:
       - "8080:8080"
-    depends_on:
-      - db
-    links:
-      - db
-    env_file:
-      - .env
+    environment:
+      - ADMIN_NAME=admin
+      - ADMIN_PASSWORD=1234
+      - SECRET_KEY=bla
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=54320
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
   db:
     image: "postgres:alpine"
     restart: always
     ports:
-      - "5432:5432"
+      - "5432:54320"
