@@ -69,28 +69,28 @@ func main() {
 		public.POST("/admins/authenticate", adminHandler.Authenticate)
 	}
 
-	privateForUser := router.Group("/api/me", handler.VerifyRole("User"))
+	roleUser := router.Group("/api/me", handler.VerifyRole("User"))
 	{
-		privateForUser.GET("", userHandler.VerifyFind)
-		privateForUser.DELETE("", userHandler.VerifyDelete)
-		privateForUser.PUT("/info", userHandler.VerifyUpdateInfo)
-		privateForUser.PUT("/password", userHandler.VerifyUpdatePassword)
+		roleUser.GET("", userHandler.VerifyFind)
+		roleUser.DELETE("", userHandler.VerifyDelete)
+		roleUser.PUT("/info", userHandler.VerifyUpdateInfo)
+		roleUser.PUT("/password", userHandler.VerifyUpdatePassword)
 	}
 
-	privateForAdmin := router.Group("/api/me", handler.VerifyRole("Admin"))
+	roleAdmin := router.Group("/api/me", handler.VerifyRole("Admin"))
 	{
-		privateForAdmin.GET("/users", userHandler.FetchAll)
-		privateForAdmin.GET("/users/:id", userHandler.Find)
-		privateForAdmin.POST("/users", userHandler.Create)
-		privateForAdmin.PUT("/users/:id/info", userHandler.UpdateInfo)
-		privateForAdmin.PUT("/users/:id/password", userHandler.UpdatePassword)
-		privateForAdmin.DELETE("/users/:id", userHandler.Delete)
-		privateForAdmin.GET("/admins", adminHandler.FetchAll)
-		privateForAdmin.GET("/admins/:id", adminHandler.Find)
-		privateForAdmin.POST("/admins", adminHandler.Create)
-		privateForAdmin.PUT("/admins/:id/info", adminHandler.UpdateInfo)
-		privateForAdmin.PUT("/admins/:id/password", adminHandler.UpdatePassword)
-		privateForAdmin.DELETE("/admins/:id", adminHandler.Delete)
+		roleAdmin.GET("/users", userHandler.FetchAll)
+		roleAdmin.GET("/users/:id", userHandler.Find)
+		roleAdmin.POST("/users", userHandler.Create)
+		roleAdmin.PUT("/users/:id/info", userHandler.UpdateInfo)
+		roleAdmin.PUT("/users/:id/password", userHandler.UpdatePassword)
+		roleAdmin.DELETE("/users/:id", userHandler.Delete)
+		roleAdmin.GET("/admins", adminHandler.FetchAll)
+		roleAdmin.GET("/admins/:id", adminHandler.Find)
+		roleAdmin.POST("/admins", adminHandler.Create)
+		roleAdmin.PUT("/admins/:id/info", adminHandler.UpdateInfo)
+		roleAdmin.PUT("/admins/:id/password", adminHandler.UpdatePassword)
+		roleAdmin.DELETE("/admins/:id", adminHandler.Delete)
 	}
 
 	PORT := os.Getenv("PORT")
