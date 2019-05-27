@@ -63,8 +63,6 @@ func main() {
 	})
 
 	hub := handler.NewHub()
-	go hub.Start()
-
 	router.GET("ws", hub.ChatHandler)
 
 	public := router.Group("/api/public")
@@ -75,7 +73,7 @@ func main() {
 
 		public.GET("/users/roomid", func(c *gin.Context) {
 			m := make(map[string]interface{})
-			m["roomid"] = 1
+			m["roomid"] = hub.NewRoom()
 			c.JSON(200, m)
 		})
 	}

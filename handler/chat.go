@@ -10,23 +10,13 @@ import (
 var upgrader = websocket.Upgrader{}
 
 type Client struct {
-	Conn   *websocket.Conn
-	Hub    *Hub
-	RoomID int
-}
-
-type Room struct {
-	Register   chan *Client
-	Unregister chan *Client
-	Clients    map[*Client]bool
-	Broadcast  chan Message
-	RoomID int
+	Conn *websocket.Conn
+	Room *Room
 }
 
 type Message struct {
-	Type   int    `json:"type"`
-	Body   string `json:"body"`
-	RoomID int    `json:"roomid"`
+	Type int    `json:"type"`
+	Body string `json:"body"`
 }
 
 func (client *Client) Read() {
@@ -34,7 +24,7 @@ func (client *Client) Read() {
 		if err := client.Conn.Close(); err != nil {
 			log.ServerLog(err)
 		}
-		client.Hub.Unregister <- client
+		client.Room.Unregister <- client
 	}()
 
 	for {
@@ -44,19 +34,19 @@ func (client *Client) Read() {
 			return
 		}
 		message := Message{Type: messageType, Body: string(p)}
-		client.Hub.Broadcast <- message
+		client.Room.Broadcast <- message
 	}
 }
 
-type Hub struct {
+type Room struct {
 	Register   chan *Client
 	Unregister chan *Client
 	Clients    map[*Client]bool
 	Broadcast  chan Message
 }
 
-func NewHub() *Hub {
-	return &Hub{
+func NewRoom() *Room {
+	return &Room{
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
 		Clients:    make(map[*Client]bool),
@@ -64,27 +54,44 @@ func NewHub() *Hub {
 	}
 }
 
-func (hub *Hub) Start() {
+type Hub struct {
+	Rooms map[int]*Room
+}
+
+func NewHub() *Hub {
+	return &Hub{
+		Rooms: make(map[int]*Room),
+	}
+}
+
+func (hub *Hub) NewRoom() int {
+	roomid := len(hub.Rooms) + 1
+	hub.Rooms[roomid] = NewRoom()
+	go hub.Rooms[roomid].Start()
+	return roomid
+}
+
+func (room *Room) Start() {
 	for {
 		select {
-		case client := <-hub.Register:
-			hub.Clients[client] = true
-			for client := range hub.Clients {
+		case client := <-room.Register:
+			room.Clients[client] = true
+			for client := range room.Clients {
 				if err := client.Conn.WriteJSON(Message{Type: 1, Body: "New User Joined..."}); err != nil {
 					log.ServerLog(err)
 				}
 			}
 			break
-		case client := <-hub.Unregister:
-			delete(hub.Clients, client)
-			for client := range hub.Clients {
+		case client := <-room.Unregister:
+			delete(room.Clients, client)
+			for client := range room.Clients {
 				if err := client.Conn.WriteJSON(Message{Type: 1, Body: "User Disconnected..."}); err != nil {
 					log.ServerLog(err)
 				}
 			}
 			break
-		case message := <-hub.Broadcast:
-			for client := range hub.Clients {
+		case message := <-room.Broadcast:
+			for client := range room.Clients {
 				if err := client.Conn.WriteJSON(message); err != nil {
 					log.ServerLog(err)
 					return
@@ -105,11 +112,10 @@ func (hub *Hub) ChatHandler(c *gin.Context) {
 	}
 
 	client := &Client{
-		Conn:   conn,
-		Hub:    hub,
-		RoomID: RoomID,
+		Conn: conn,
+		Room: hub.Rooms[RoomID],
 	}
 
-	hub.Register <- client
+	hub.Rooms[RoomID].Register <- client
 	client.Read()
 }
