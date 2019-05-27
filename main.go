@@ -62,6 +62,11 @@ func main() {
 		c.HTML(http.StatusOK, "chat.html", gin.H{})
 	})
 
+	hub := handler.NewHub()
+	go hub.Start()
+
+	router.GET("/ws", hub.ChatHandler)
+
 	public := router.Group("/api/public")
 	{
 		public.POST("/users/register", userHandler.Create)
