@@ -58,20 +58,26 @@ func main() {
 	router.GET("/welcome_user", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "welcome_user.html", gin.H{})
 	})
-	router.GET("/chat", func(c *gin.Context) {
+	router.GET("/chat/:roomid", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "chat.html", gin.H{})
 	})
 
 	hub := handler.NewHub()
 	go hub.Start()
 
-	router.GET("/ws", hub.ChatHandler)
+	router.GET("ws", hub.ChatHandler)
 
 	public := router.Group("/api/public")
 	{
 		public.POST("/users/register", userHandler.Create)
 		public.POST("/users/authenticate", userHandler.Authenticate)
 		public.POST("/admins/authenticate", adminHandler.Authenticate)
+
+		public.GET("/users/roomid", func(c *gin.Context) {
+			m := make(map[string]interface{})
+			m["roomid"] = 1
+			c.JSON(200, m)
+		})
 	}
 
 	roleUser := router.Group("/api/me", handler.VerifyRole("User"))

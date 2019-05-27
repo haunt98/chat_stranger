@@ -4,18 +4,29 @@ import (
 	"github.com/1612180/chat_stranger/log"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"strconv"
 )
 
 var upgrader = websocket.Upgrader{}
 
 type Client struct {
-	Conn *websocket.Conn
-	Hub  *Hub
+	Conn   *websocket.Conn
+	Hub    *Hub
+	RoomID int
+}
+
+type Room struct {
+	Register   chan *Client
+	Unregister chan *Client
+	Clients    map[*Client]bool
+	Broadcast  chan Message
+	RoomID int
 }
 
 type Message struct {
-	Type int    `json:"type"`
-	Body string `json:"body"`
+	Type   int    `json:"type"`
+	Body   string `json:"body"`
+	RoomID int    `json:"roomid"`
 }
 
 func (client *Client) Read() {
@@ -84,6 +95,9 @@ func (hub *Hub) Start() {
 }
 
 func (hub *Hub) ChatHandler(c *gin.Context) {
+	queryRoomID := c.Query("roomid")
+	RoomID, _ := strconv.Atoi(queryRoomID)
+
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.ServerLog(err)
@@ -91,8 +105,9 @@ func (hub *Hub) ChatHandler(c *gin.Context) {
 	}
 
 	client := &Client{
-		Conn: conn,
-		Hub:  hub,
+		Conn:   conn,
+		Hub:    hub,
+		RoomID: RoomID,
 	}
 
 	hub.Register <- client

@@ -38,6 +38,16 @@ window.addEventListener('load', function () {
 
     let btnStartChat = document.getElementById('btnStartChat');
     btnStartChat.addEventListener('click', function () {
-        location.href = baseurl + '/chat'
+        console.log('Hello')
+
+        fetch(baseurl + '/api/public/users/roomid', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then(function (response) {
+                console.log(response)
+
+                location.href = baseurl + '/chat' + '/' + response.roomid
+            })
     })
 });

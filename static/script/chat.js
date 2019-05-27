@@ -6,7 +6,9 @@ window.addEventListener('load', function () {
         location.href = baseurl
     }
 
-    let wsurl = 'ws:' + '//' + location.host + '/ws'
+    let roomid = location.href.split('/')[4]
+
+    let wsurl = 'ws:' + '//' + location.host + '/ws' + '?roomid=' + roomid
     console.log(wsurl)
     conn = new WebSocket(wsurl)
 
