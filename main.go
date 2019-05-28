@@ -73,7 +73,14 @@ func main() {
 
 		public.GET("/users/roomid", func(c *gin.Context) {
 			m := make(map[string]interface{})
-			m["roomid"] = hub.NewRoom()
+
+			roomid, err := hub.GetAvailableRoom()
+			if err != nil {
+				log.ServerLog(err)
+				roomid = hub.NewRoom()
+			}
+
+			m["roomid"] = roomid
 			c.JSON(200, m)
 		})
 	}

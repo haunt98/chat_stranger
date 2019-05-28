@@ -2,10 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/1612180/chat_stranger/log"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -104,7 +106,7 @@ func (client *Client) writePump() {
 				log.ServerLog(err)
 				return
 			}
-			if err := json.NewEncoder(w).Encode(message); err != nil{
+			if err := json.NewEncoder(w).Encode(message); err != nil {
 				return
 			}
 
@@ -144,6 +146,7 @@ type Room struct {
 	Unregister chan *Client
 	Clients    map[*Client]bool
 	Broadcast  chan Message
+	mux        sync.Mutex
 }
 
 func NewRoom() *Room {
@@ -178,8 +181,16 @@ func (room *Room) Run() {
 	}
 }
 
+func (room *Room) IsFull() bool {
+	room.mux.Lock()
+	defer room.mux.Unlock()
+
+	return len(room.Clients) >= 2
+}
+
 type Hub struct {
 	Rooms map[int]*Room
+	mux   sync.Mutex
 }
 
 func NewHub() *Hub {
@@ -189,12 +200,40 @@ func NewHub() *Hub {
 }
 
 func (hub *Hub) NewRoom() int {
+	hub.mux.Lock()
+	defer hub.mux.Unlock()
+
 	roomid := len(hub.Rooms) + 1
 	hub.Rooms[roomid] = NewRoom()
 
 	go hub.Rooms[roomid].Run()
 
 	return roomid
+}
+
+func (hub *Hub) GetAvailableRoom() (int, error) {
+	hub.mux.Lock()
+	defer hub.mux.Unlock()
+
+	for roomid := range hub.Rooms {
+		if !hub.Rooms[roomid].IsFull() {
+			return roomid, nil
+		}
+	}
+
+	return -1, fmt.Errorf("no room available")
+}
+
+func (hub *Hub) IsAvailable(roomid int) bool {
+	hub.mux.Lock()
+	defer hub.mux.Unlock()
+
+	room, ok := hub.Rooms[roomid]
+	if !ok {
+		return false
+	}
+
+	return !room.IsFull()
 }
 
 var upgrader = websocket.Upgrader{
@@ -206,6 +245,10 @@ func (hub *Hub) ChatHandler(c *gin.Context) {
 	roomid, err := strconv.Atoi(c.Query("roomid"))
 	if err != nil {
 		log.ServerLog(err)
+		return
+	}
+
+	if !hub.IsAvailable(roomid) {
 		return
 	}
 
