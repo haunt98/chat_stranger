@@ -17,12 +17,8 @@ window.addEventListener('load', function () {
         .then(function (response) {
             console.log(response);
             if (response.code === 201) {
-                console.log(response.message);
-
                 document.getElementById('welcomeUsername').innerText = response.user.fullname
             } else {
-                console.log(response.message);
-
                 localStorage.removeItem('token');
                 location.href = baseurl
             }
@@ -38,15 +34,12 @@ window.addEventListener('load', function () {
 
     let btnStartChat = document.getElementById('btnStartChat');
     btnStartChat.addEventListener('click', function () {
-        console.log('Hello')
-
         fetch(baseurl + '/api/public/users/roomid', {
             method: 'GET'
         })
             .then(response => response.json())
             .then(function (response) {
-                console.log(response)
-
+                console.log(response);
                 location.href = baseurl + '/chat' + '/' + response.roomid
             })
     })

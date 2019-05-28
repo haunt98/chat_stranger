@@ -7,16 +7,14 @@ import (
 	"strconv"
 )
 
-var upgrader = websocket.Upgrader{}
+type Message struct {
+	Fullname string `json:"fullname"`
+	Body     string `json:"body"`
+}
 
 type Client struct {
 	Conn *websocket.Conn
 	Room *Room
-}
-
-type Message struct {
-	Type int    `json:"type"`
-	Body string `json:"body"`
 }
 
 func (client *Client) Read() {
@@ -28,12 +26,12 @@ func (client *Client) Read() {
 	}()
 
 	for {
-		messageType, p, err := client.Conn.ReadMessage()
+		var message Message
+		err := client.Conn.ReadJSON(&message)
 		if err != nil {
 			log.ServerLog(err)
 			return
 		}
-		message := Message{Type: messageType, Body: string(p)}
 		client.Room.Broadcast <- message
 	}
 }
@@ -54,6 +52,42 @@ func NewRoom() *Room {
 	}
 }
 
+func (room *Room) Start() {
+	for {
+		select {
+		case client := <-room.Register:
+			room.Clients[client] = true
+			for client := range room.Clients {
+				if err := client.Conn.WriteJSON(Message{
+					Fullname: "Server",
+					Body:     "New User Joined...",
+				}); err != nil {
+					log.ServerLog(err)
+				}
+			}
+			break
+		case client := <-room.Unregister:
+			delete(room.Clients, client)
+			for client := range room.Clients {
+				if err := client.Conn.WriteJSON(Message{
+					Fullname: "Server",
+					Body:     "User Disconnected...",
+				}); err != nil {
+					log.ServerLog(err)
+				}
+			}
+			break
+		case message := <-room.Broadcast:
+			for client := range room.Clients {
+				if err := client.Conn.WriteJSON(message); err != nil {
+					log.ServerLog(err)
+					return
+				}
+			}
+		}
+	}
+}
+
 type Hub struct {
 	Rooms map[int]*Room
 }
@@ -71,35 +105,7 @@ func (hub *Hub) NewRoom() int {
 	return roomid
 }
 
-func (room *Room) Start() {
-	for {
-		select {
-		case client := <-room.Register:
-			room.Clients[client] = true
-			for client := range room.Clients {
-				if err := client.Conn.WriteJSON(Message{Type: 1, Body: "New User Joined..."}); err != nil {
-					log.ServerLog(err)
-				}
-			}
-			break
-		case client := <-room.Unregister:
-			delete(room.Clients, client)
-			for client := range room.Clients {
-				if err := client.Conn.WriteJSON(Message{Type: 1, Body: "User Disconnected..."}); err != nil {
-					log.ServerLog(err)
-				}
-			}
-			break
-		case message := <-room.Broadcast:
-			for client := range room.Clients {
-				if err := client.Conn.WriteJSON(message); err != nil {
-					log.ServerLog(err)
-					return
-				}
-			}
-		}
-	}
-}
+var upgrader = websocket.Upgrader{}
 
 func (hub *Hub) ChatHandler(c *gin.Context) {
 	queryRoomID := c.Query("roomid")
