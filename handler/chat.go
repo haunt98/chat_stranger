@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/1612180/chat_stranger/log"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -98,18 +99,34 @@ func (client *Client) writePump() {
 				return
 			}
 
-			if err := client.Conn.WriteJSON(message); err != nil {
+			w, err := client.Conn.NextWriter(websocket.TextMessage)
+			if err != nil {
 				log.ServerLog(err)
 				return
 			}
+			if err := json.NewEncoder(w).Encode(message); err != nil{
+				return
+			}
+
+			//if err := client.Conn.WriteJSON(message); err != nil {
+			//	log.ServerLog(err)
+			//	return
+			//}
 
 			// Add queued chat messages to the current websocket message.
 			n := len(client.Send)
 			for i := 0; i < n; i++ {
-				if err := client.Conn.WriteJSON(<-client.Send); err != nil {
+				if err := json.NewEncoder(w).Encode(<-client.Send); err != nil {
 					log.ServerLog(err)
 					return
 				}
+				//if err := client.Conn.WriteJSON(<-client.Send); err != nil {
+				//	log.ServerLog(err)
+				//	return
+				//}
+			}
+			if err := w.Close(); err != nil {
+				return
 			}
 		case <-ticker.C:
 			if err := client.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {

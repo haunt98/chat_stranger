@@ -62,11 +62,13 @@ window.addEventListener('load', function () {
     formChat.addEventListener('submit', function (event) {
         event.preventDefault();
 
-        let inputMessage = document.getElementById('inputMessage').value;
+        let inputMessage = document.getElementById('inputMessage');
 
         conn.send(JSON.stringify({
             fullname: user.fullname,
-            body: inputMessage
+            body: inputMessage.value
         }))
+
+        inputMessage.value = ''
     })
 });
