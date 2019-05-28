@@ -6,7 +6,6 @@ window.addEventListener('load', function () {
         location.href = baseurl
     }
 
-    // Get user info
     fetch(baseurl + '/api/me', {
         method: 'GET',
         headers: {
@@ -28,7 +27,6 @@ window.addEventListener('load', function () {
     let btnLogOut = document.getElementById('btnLogOut');
     btnLogOut.addEventListener('click', function () {
         localStorage.removeItem('token');
-
         location.href = baseurl
     });
 

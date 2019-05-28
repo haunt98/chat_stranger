@@ -6,6 +6,7 @@ window.addEventListener('load', function () {
         location.href = baseurl
     }
 
+    // Get user info
     let user;
     fetch(baseurl + '/api/me', {
         method: 'GET',
@@ -15,37 +16,22 @@ window.addEventListener('load', function () {
     })
         .then(response => response.json())
         .then(function (response) {
-            console.log(response)
+            console.log(response);
             if (response.code === 201) {
                 user = response.user
-                console.log(user)
             } else {
                 localStorage.removeItem('token');
-                location.href = baseur;
+                location.href = baseurl;
             }
-        })
+        });
 
     let roomid = location.href.split('/')[4];
 
     let wsurl = 'ws:' + '//' + location.host + '/ws' + '?roomid=' + roomid;
     conn = new WebSocket(wsurl);
 
-    conn.onopen = function (event) {
-        console.log(event)
-    };
-
-    conn.onclose = function (event) {
-        console.log(event)
-    };
-
-    conn.onerror = function (event) {
-        console.log(event)
-    };
-
     conn.onmessage = function (event) {
-        console.log(event.data);
-
-        let message = JSON.parse(event.data)
+        let message = JSON.parse(event.data);
 
         let divRow = document.createElement('div');
         divRow.className = 'row';
@@ -62,11 +48,11 @@ window.addEventListener('load', function () {
         let pname = document.createElement('p');
         pname.className = 'font-weight-bold';
         divCol2.appendChild(pname);
-        pname.innerText = message.fullname
+        pname.innerText = message.fullname;
 
         let pmessage = document.createElement('p');
         divCol10.appendChild(pmessage);
-        pmessage.innerText = message.body
+        pmessage.innerText = message.body;
 
         let content = document.getElementById('content');
         content.appendChild(divRow);
@@ -77,8 +63,6 @@ window.addEventListener('load', function () {
         event.preventDefault();
 
         let inputMessage = document.getElementById('inputMessage').value;
-
-        console.log(user)
 
         conn.send(JSON.stringify({
             fullname: user.fullname,

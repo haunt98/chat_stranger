@@ -26,12 +26,8 @@ window.addEventListener('load', function () {
             .then(function (response) {
                 console.log(response);
                 if (response.code === 206) {
-                    console.log(response.message);
-
                     localStorage.setItem('token', response.token);
                     location.href = baseurl + '/welcome_user'
-                } else {
-                    console.log(response.message)
                 }
             })
     });
@@ -56,11 +52,9 @@ window.addEventListener('load', function () {
         })
             .then(response => response.json())
             .then(function (response) {
+                console.log(response);
                 if (response.code === 205) {
-                    console.log(response.message);
                     location.reload()
-                } else {
-                    console.log(response.message);
                 }
             })
     })
