@@ -21,9 +21,8 @@ func main() {
 		log.ServerLog(err)
 	}
 
-	databaseConfig := config.NewDatabaseConfig()
-
-	db, err := gorm.Open("postgres", databaseConfig.NewPostgresSource())
+	databaseReader := config.NewPostgres()
+	db, err := gorm.Open(databaseReader.GetDBMS(), databaseReader.GetSource())
 	if err != nil {
 		log.ServerLog(err)
 		return
