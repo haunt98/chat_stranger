@@ -4,16 +4,21 @@ import (
 	"github.com/1612180/chat_stranger/config"
 	"github.com/1612180/chat_stranger/handler"
 	"github.com/1612180/chat_stranger/log"
+	"github.com/1612180/chat_stranger/models"
 	"github.com/1612180/chat_stranger/repository"
 	"github.com/1612180/chat_stranger/service"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/spf13/viper"
 	"net/http"
 )
 
 func main() {
-	databaseReader := config.NewPostgres()
+	config.Init()
+
+	databaseReader := config.NewMySQL()
 	db, err := gorm.Open(databaseReader.GetDBMS(), databaseReader.GetSource())
 	if err != nil {
 		log.ServerLog(err)
@@ -28,7 +33,11 @@ func main() {
 	credentialRepo := repository.NewCredentialRepoGorm(db)
 	userRepo := repository.NewUserRepoGorm(db)
 	adminRepo := repository.NewAdminRepoGorm(db)
-	adminRepo.Create(config.CreateDefaultAdmin())
+	adminRepo.Create(&models.AdminUpload{
+		Name:     viper.GetString("default_admin.name"),
+		Password: viper.GetString("default_admin.password"),
+		FullName: viper.GetString("default_admin.fullname"),
+	})
 
 	userService := service.NewUserService(credentialRepo, userRepo)
 	adminService := service.NewAdminService(credentialRepo, adminRepo)
@@ -61,18 +70,7 @@ func main() {
 		public.POST("/users/authenticate", userHandler.Authenticate)
 		public.POST("/admins/authenticate", adminHandler.Authenticate)
 
-		public.GET("/users/roomid", func(c *gin.Context) {
-			m := make(map[string]interface{})
-
-			roomid, err := hub.GetAvailableRoom()
-			if err != nil {
-				log.ServerLog(err)
-				roomid = hub.NewRoom()
-			}
-
-			m["roomid"] = roomid
-			c.JSON(200, m)
-		})
+		public.GET("/users/roomid", hub.GetRoom)
 	}
 
 	roleUser := router.Group("/api/me", handler.VerifyRole("User"))
@@ -99,12 +97,7 @@ func main() {
 		roleAdmin.DELETE("/admins/:id", adminHandler.Delete)
 	}
 
-	PORT := config.GetPort()
-	if PORT == "" {
-		PORT = "8080"
-	}
-
-	if err = router.Run(":" + PORT); err != nil {
+	if err = router.Run(":" + viper.GetString("port")); err != nil {
 		log.ServerLog(err)
 	}
 }

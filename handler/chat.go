@@ -270,3 +270,16 @@ func (hub *Hub) ChatHandler(c *gin.Context) {
 	go client.writePump()
 	go client.readPump()
 }
+
+func (hub *Hub) GetRoom(c *gin.Context) {
+	m := make(map[string]interface{})
+
+	roomid, err := hub.GetAvailableRoom()
+	if err != nil {
+		log.ServerLog(err)
+		roomid = hub.NewRoom()
+	}
+
+	m["roomid"] = roomid
+	c.JSON(200, m)
+}

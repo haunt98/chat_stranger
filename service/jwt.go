@@ -2,15 +2,15 @@ package service
 
 import (
 	"fmt"
-	"github.com/1612180/chat_stranger/config"
 	"github.com/1612180/chat_stranger/models"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/spf13/viper"
 )
 
 func CreateTokenString(claims jwt.Claims) (string, error) {
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := jwtToken.SignedString([]byte(config.GetJWTSecretKey()))
+	tokenString, err := jwtToken.SignedString([]byte(viper.GetString("jwt.secret_key")))
 	if err != nil {
 		return "", err
 	}
@@ -20,7 +20,7 @@ func CreateTokenString(claims jwt.Claims) (string, error) {
 
 func VerifyTokenString(tokenString string) (*models.JWTClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &models.JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.GetJWTSecretKey()), nil
+		return []byte(viper.GetString("jwt.secret_key")), nil
 	})
 
 	if token == nil || !token.Valid {
