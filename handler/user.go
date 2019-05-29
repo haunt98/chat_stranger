@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"os"
 	"strconv"
 
 	"github.com/1612180/chat_stranger/log"
@@ -154,13 +153,11 @@ func (userHandler *UserHandler) Authenticate(c *gin.Context) {
 		return
 	}
 
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, models.JWTClaims{
+	tokenString, err := service.CreateTokenString(models.JWTClaims{
 		ID:             user.ID,
 		Role:           "User",
 		StandardClaims: jwt.StandardClaims{},
 	})
-
-	tokenStr, err := jwtToken.SignedString([]byte(os.Getenv("SECRET_KEY")))
 	if err != nil {
 		log.ServerLog(err)
 		c.JSON(http.StatusInternalServerError, Response(500))
@@ -168,7 +165,7 @@ func (userHandler *UserHandler) Authenticate(c *gin.Context) {
 	}
 
 	res := Response(206)
-	res["token"] = tokenStr
+	res["token"] = tokenString
 	c.JSON(http.StatusOK, res)
 }
 

@@ -1,43 +1,34 @@
 package main
 
 import (
-	"net/http"
-	"os"
-
 	"github.com/1612180/chat_stranger/config"
 	"github.com/1612180/chat_stranger/handler"
 	"github.com/1612180/chat_stranger/log"
-	"github.com/1612180/chat_stranger/models"
 	"github.com/1612180/chat_stranger/repository"
 	"github.com/1612180/chat_stranger/service"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/joho/godotenv"
+	"net/http"
 )
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.ServerLog(err)
-	}
-
 	databaseReader := config.NewPostgres()
 	db, err := gorm.Open(databaseReader.GetDBMS(), databaseReader.GetSource())
 	if err != nil {
 		log.ServerLog(err)
 		return
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.ServerLog(err)
+		}
+	}()
 
 	credentialRepo := repository.NewCredentialRepoGorm(db)
 	userRepo := repository.NewUserRepoGorm(db)
 	adminRepo := repository.NewAdminRepoGorm(db)
-
-	adminRepo.Create(&models.AdminUpload{
-		Name:     os.Getenv("ADMIN_NAME"),
-		Password: os.Getenv("ADMIN_PASSWORD"),
-		FullName: os.Getenv("ADMIN_NAME"),
-	})
+	adminRepo.Create(config.CreateDefaultAdmin())
 
 	userService := service.NewUserService(credentialRepo, userRepo)
 	adminService := service.NewAdminService(credentialRepo, adminRepo)
@@ -108,7 +99,7 @@ func main() {
 		roleAdmin.DELETE("/admins/:id", adminHandler.Delete)
 	}
 
-	PORT := os.Getenv("PORT")
+	PORT := config.GetPort()
 	if PORT == "" {
 		PORT = "8080"
 	}
