@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/1612180/chat_stranger/handler"
 	"github.com/1612180/chat_stranger/models"
-	"github.com/1612180/chat_stranger/pkg/config"
 	"github.com/1612180/chat_stranger/pkg/configutils"
 	"github.com/1612180/chat_stranger/pkg/log"
 	"github.com/1612180/chat_stranger/repository"
@@ -11,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/spf13/viper"
 	"net/http"
 )
@@ -19,8 +17,7 @@ import (
 func main() {
 	configutils.LoadConfiguration("chat_stranger", "config", "configs")
 
-	databaseReader := config.NewMySQL()
-	db, err := gorm.Open(databaseReader.GetDBMS(), databaseReader.GetSource())
+	db, err := gorm.Open(viper.GetString("db.dialect"), viper.GetString("db.url"))
 	if err != nil {
 		log.ServerLog(err)
 		return
