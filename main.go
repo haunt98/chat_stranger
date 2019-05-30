@@ -45,6 +45,7 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 	adminHandler := handler.NewAdminHandler(adminService)
 
+	gin.SetMode(viper.GetString("gin.mode"))
 	gin.DisableConsoleColor()
 	router := gin.Default()
 	router.LoadHTMLGlob("./static/*.html")

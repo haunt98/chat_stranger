@@ -24,4 +24,5 @@ func Init() {
 	})
 
 	viper.SetDefault("port", "8080")
+	viper.SetDefault("gin.mode", "debug")
 }
