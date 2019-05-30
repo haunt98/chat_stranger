@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/1612180/chat_stranger/log"
 	"github.com/1612180/chat_stranger/models"
+	"github.com/1612180/chat_stranger/pkg/log"
 	"github.com/1612180/chat_stranger/service"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"

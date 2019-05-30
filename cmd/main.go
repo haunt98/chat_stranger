@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/1612180/chat_stranger/config"
 	"github.com/1612180/chat_stranger/handler"
-	"github.com/1612180/chat_stranger/log"
 	"github.com/1612180/chat_stranger/models"
+	"github.com/1612180/chat_stranger/pkg/config"
+	"github.com/1612180/chat_stranger/pkg/configutils"
+	"github.com/1612180/chat_stranger/pkg/log"
 	"github.com/1612180/chat_stranger/repository"
 	"github.com/1612180/chat_stranger/service"
 	"github.com/gin-gonic/gin"
@@ -16,7 +17,7 @@ import (
 )
 
 func main() {
-	config.Init()
+	configutils.LoadConfiguration("chat_stranger", "config", "configs")
 
 	databaseReader := config.NewMySQL()
 	db, err := gorm.Open(databaseReader.GetDBMS(), databaseReader.GetSource())
