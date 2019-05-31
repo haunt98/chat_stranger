@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/1612180/chat_stranger/models"
+	"github.com/1612180/chat_stranger/internal/models"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -10,7 +10,7 @@ type UserRepoGorm struct {
 	db *gorm.DB
 }
 
-func NewUserRepoGorm(db *gorm.DB) IUserRepo {
+func NewUserRepoGorm(db *gorm.DB) UserRepo {
 	db.DropTableIfExists(&models.User{})
 	db.AutoMigrate(&models.User{})
 
@@ -47,8 +47,8 @@ func (g *UserRepoGorm) Find(id uint) (*models.User, []error) {
 	return &user, nil
 }
 
-func (g *UserRepoGorm) Create(userUpload *models.UserUpload) (uint, []error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userUpload.Password), bcrypt.DefaultCost)
+func (g *UserRepoGorm) Create(upload *models.UserUpload) (uint, []error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(upload.Password), bcrypt.DefaultCost)
 	if err != nil {
 		var errs []error
 		errs = append(errs, err)
@@ -57,13 +57,13 @@ func (g *UserRepoGorm) Create(userUpload *models.UserUpload) (uint, []error) {
 
 	user := models.User{
 		Credential: models.Credential{
-			Name:           userUpload.Name,
+			Name:           upload.Name,
 			HashedPassword: string(hashedPassword),
 		},
-		Fullname:  userUpload.FullName,
-		Gender:    userUpload.Gender,
-		Birthyear: userUpload.BirthYear,
-		Introduce: userUpload.Introduce,
+		Fullname:  upload.FullName,
+		Gender:    upload.Gender,
+		Birthyear: upload.BirthYear,
+		Introduce: upload.Introduce,
 	}
 
 	if errs := g.db.Create(&user).GetErrors(); len(errs) != 0 {
@@ -73,11 +73,11 @@ func (g *UserRepoGorm) Create(userUpload *models.UserUpload) (uint, []error) {
 	return user.ID, nil
 }
 
-func (g *UserRepoGorm) UpdateInfo(id uint, userUpload *models.UserUpload) []error {
+func (g *UserRepoGorm) UpdateInfo(id uint, upload *models.UserUpload) []error {
 	var user models.User
 	if errs := g.db.Where("id = ?", id).First(&user).Updates(
 		map[string]interface{}{
-			"full_name": userUpload.FullName,
+			"full_name": upload.FullName,
 		},
 	).GetErrors(); len(errs) != 0 {
 		return errs
@@ -85,25 +85,25 @@ func (g *UserRepoGorm) UpdateInfo(id uint, userUpload *models.UserUpload) []erro
 	return nil
 }
 
-func (g *UserRepoGorm) UpdatePassword(id uint, authentication *models.Authentication) []error {
+func (g *UserRepoGorm) UpdatePassword(id uint, auth *models.Authentication) []error {
 	var user models.User
-	var credential models.Credential
+	var cre models.Credential
 	if errs := g.db.Where("id = ?", id).First(&user).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 
-	if errs := g.db.Model(&user).Related(&credential).GetErrors(); len(errs) != 0 {
+	if errs := g.db.Model(&user).Related(&cre).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(authentication.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(auth.Password), bcrypt.DefaultCost)
 	if err != nil {
 		var errs []error
 		errs = append(errs, err)
 		return errs
 	}
 
-	if errs := g.db.Model(&credential).Update("hashed_password", hashedPassword).GetErrors(); len(errs) != 0 {
+	if errs := g.db.Model(&cre).Update("hashed_password", hashedPassword).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 
@@ -114,14 +114,14 @@ func (g *UserRepoGorm) Delete(id uint) []error {
 	tx := g.db.Begin()
 
 	var user models.User
-	var credential models.Credential
+	var cre models.Credential
 
 	if errs := tx.Where("id = ?", id).First(&user).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}
 
-	if errs := tx.Model(&user).Related(&credential).GetErrors(); len(errs) != 0 {
+	if errs := tx.Model(&user).Related(&cre).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}
@@ -131,7 +131,7 @@ func (g *UserRepoGorm) Delete(id uint) []error {
 		return errs
 	}
 
-	if errs := tx.Delete(&credential).GetErrors(); len(errs) != 0 {
+	if errs := tx.Delete(&cre).GetErrors(); len(errs) != 0 {
 		tx.Rollback()
 		return errs
 	}

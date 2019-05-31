@@ -5,9 +5,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/1612180/chat_stranger/pkg/network"
 	"log"
 	"strings"
+
+	"github.com/1612180/chat_stranger/pkg/network"
 
 	"github.com/spf13/viper"
 )

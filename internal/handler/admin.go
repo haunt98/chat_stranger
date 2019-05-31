@@ -1,12 +1,12 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/1612180/chat_stranger/models"
-	"github.com/1612180/chat_stranger/pkg/log"
-	"github.com/1612180/chat_stranger/service"
+	"github.com/1612180/chat_stranger/internal/models"
+	"github.com/1612180/chat_stranger/internal/service"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
@@ -15,16 +15,18 @@ type AdminHandler struct {
 	service *service.AdminService
 }
 
-func NewAdminHandler(service *service.AdminService) *AdminHandler {
+func NewAdminHandler(s *service.AdminService) *AdminHandler {
 	return &AdminHandler{
-		service: service,
+		service: s,
 	}
 }
 
-func (adminHandler *AdminHandler) FetchAll(c *gin.Context) {
-	admins, errs := adminHandler.service.FetchAll()
+func (h *AdminHandler) FetchAll(c *gin.Context) {
+	admins, errs := h.service.FetchAll()
 	if len(errs) != 0 {
-		log.ServerLogs(errs)
+		for _, err := range errs {
+			log.Println(err)
+		}
 		c.JSON(http.StatusOK, Response(402))
 		return
 	}
@@ -34,17 +36,19 @@ func (adminHandler *AdminHandler) FetchAll(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func (adminHandler *AdminHandler) Find(c *gin.Context) {
+func (h *AdminHandler) Find(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		log.ServerLog(err)
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
 		return
 	}
 
-	admin, errs := adminHandler.service.Find(uint(id))
+	admin, errs := h.service.Find(uint(id))
 	if len(errs) != 0 {
-		log.ServerLogs(errs)
+		for _, err := range errs {
+			log.Println(err)
+		}
 		c.JSON(http.StatusOK, Response(403))
 		return
 	}
@@ -54,17 +58,19 @@ func (adminHandler *AdminHandler) Find(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func (adminHandler *AdminHandler) Create(c *gin.Context) {
-	var adminUpload models.AdminUpload
-	if err := c.ShouldBindJSON(&adminUpload); err != nil {
-		log.ServerLog(err)
+func (h *AdminHandler) Create(c *gin.Context) {
+	var upload models.AdminUpload
+	if err := c.ShouldBindJSON(&upload); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(400))
 		return
 	}
 
-	id, errs := adminHandler.service.Create(&adminUpload)
+	id, errs := h.service.Create(&upload)
 	if len(errs) != 0 {
-		log.ServerLogs(errs)
+		for _, err := range errs {
+			log.Println(err)
+		}
 		c.JSON(http.StatusOK, Response(401))
 		return
 	}
@@ -74,23 +80,25 @@ func (adminHandler *AdminHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func (adminHandler *AdminHandler) UpdateInfo(c *gin.Context) {
+func (h *AdminHandler) UpdateInfo(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		log.ServerLog(err)
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
 		return
 	}
 
-	var adminUpload models.AdminUpload
-	if err = c.ShouldBindJSON(&adminUpload); err != nil {
-		log.ServerLog(err)
+	var upload models.AdminUpload
+	if err = c.ShouldBindJSON(&upload); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(400))
 		return
 	}
 
-	if errs := adminHandler.service.UpdateInfo(uint(id), &adminUpload); len(errs) != 0 {
-		log.ServerLogs(errs)
+	if errs := h.service.UpdateInfo(uint(id), &upload); len(errs) != 0 {
+		for _, err := range errs {
+			log.Println(err)
+		}
 		c.JSON(http.StatusOK, Response(403))
 		return
 	}
@@ -98,22 +106,24 @@ func (adminHandler *AdminHandler) UpdateInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, Response(202))
 }
 
-func (adminHandler *AdminHandler) UpdatePassword(c *gin.Context) {
+func (h *AdminHandler) UpdatePassword(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		log.ServerLog(err)
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
 	}
 
-	var authentication models.Authentication
-	if err = c.ShouldBindJSON(&authentication); err != nil {
-		log.ServerLog(err)
+	var auth models.Authentication
+	if err = c.ShouldBindJSON(&auth); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(400))
 		return
 	}
 
-	if errs := adminHandler.service.UpdatePassword(uint(id), &authentication); len(errs) != 0 {
-		log.ServerLogs(errs)
+	if errs := h.service.UpdatePassword(uint(id), &auth); len(errs) != 0 {
+		for _, err := range errs {
+			log.Println(err)
+		}
 		c.JSON(http.StatusOK, Response(403))
 		return
 	}
@@ -121,16 +131,18 @@ func (adminHandler *AdminHandler) UpdatePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, Response(203))
 }
 
-func (adminHandler *AdminHandler) Delete(c *gin.Context) {
+func (h *AdminHandler) Delete(c *gin.Context) {
 	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil {
-		log.ServerLog(err)
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
 		return
 	}
 
-	if errs := adminHandler.service.Delete(uint(id)); len(errs) != 0 {
-		log.ServerLogs(errs)
+	if errs := h.service.Delete(uint(id)); len(errs) != 0 {
+		for _, err := range errs {
+			log.Println(err)
+		}
 		c.JSON(http.StatusOK, Response(403))
 		return
 	}
@@ -138,33 +150,35 @@ func (adminHandler *AdminHandler) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, Response(204))
 }
 
-func (adminHandler *AdminHandler) Authenticate(c *gin.Context) {
-	var authentication models.Authentication
-	if err := c.ShouldBindJSON(&authentication); err != nil {
-		log.ServerLog(err)
+func (h *AdminHandler) Authenticate(c *gin.Context) {
+	var auth models.Authentication
+	if err := c.ShouldBindJSON(&auth); err != nil {
+		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(400))
 		return
 	}
 
-	admin, errs := adminHandler.service.Authenticate(&authentication)
+	admin, errs := h.service.Authenticate(&auth)
 	if len(errs) != 0 {
-		log.ServerLogs(errs)
+		for _, err := range errs {
+			log.Println(err)
+		}
 		c.JSON(http.StatusOK, Response(405))
 		return
 	}
 
-	tokenString, err := service.CreateTokenString(models.JWTClaims{
+	s, err := service.CreateTokenString(models.JWTClaims{
 		ID:             admin.ID,
 		Role:           "Admin",
 		StandardClaims: jwt.StandardClaims{},
 	})
 	if err != nil {
-		log.ServerLog(err)
+		log.Println(err)
 		c.JSON(http.StatusInternalServerError, Response(500))
 		return
 	}
 
 	res := Response(206)
-	res["token"] = tokenString
+	res["token"] = s
 	c.JSON(http.StatusOK, res)
 }

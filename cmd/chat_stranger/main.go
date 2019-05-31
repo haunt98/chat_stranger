@@ -1,30 +1,32 @@
 package main
 
 import (
-	"github.com/1612180/chat_stranger/handler"
-	"github.com/1612180/chat_stranger/models"
+	"log"
+	"net/http"
+
+	"github.com/1612180/chat_stranger/internal/handler"
+	"github.com/1612180/chat_stranger/internal/models"
+	"github.com/1612180/chat_stranger/internal/repository"
+	"github.com/1612180/chat_stranger/internal/service"
 	"github.com/1612180/chat_stranger/pkg/configutils"
-	"github.com/1612180/chat_stranger/pkg/log"
-	"github.com/1612180/chat_stranger/repository"
-	"github.com/1612180/chat_stranger/service"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/spf13/viper"
-	"net/http"
 )
 
 func main() {
+	log.SetPrefix("[Server] ")
 	configutils.LoadConfiguration("chat_stranger", "config", "configs")
 
 	db, err := gorm.Open(viper.GetString("db.dialect"), viper.GetString("db.url"))
 	if err != nil {
-		log.ServerLog(err)
+		log.Println(err)
 		return
 	}
 	defer func() {
 		if err := db.Close(); err != nil {
-			log.ServerLog(err)
+			log.Println(err)
 		}
 	}()
 
@@ -46,8 +48,8 @@ func main() {
 	gin.SetMode(viper.GetString("gin.mode"))
 	gin.DisableConsoleColor()
 	router := gin.Default()
-	router.LoadHTMLGlob("./static/*.html")
-	router.Static("/static/script", "./static/script")
+	router.LoadHTMLGlob("./web/*.html")
+	router.Static("/web/script", "./web/script")
 
 	// Serve HTML
 	router.GET("/", func(c *gin.Context) {
@@ -97,6 +99,6 @@ func main() {
 	}
 
 	if err = router.Run(":" + viper.GetString("port")); err != nil {
-		log.ServerLog(err)
+		log.Println(err)
 	}
 }

@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/1612180/chat_stranger/models"
+	"github.com/1612180/chat_stranger/internal/models"
 	"github.com/jinzhu/gorm"
 )
 
@@ -9,7 +9,7 @@ type CredentialRepoGorm struct {
 	db *gorm.DB
 }
 
-func NewCredentialRepoGorm(db *gorm.DB) ICredentialRepo {
+func NewCredentialRepoGorm(db *gorm.DB) CredentialRepo {
 	db.DropTableIfExists(&models.Credential{})
 	db.AutoMigrate(&models.Credential{})
 
@@ -26,9 +26,9 @@ func (g *CredentialRepoGorm) Find(name string) (*models.Credential, []error) {
 	return &credential, nil
 }
 
-func (g *CredentialRepoGorm) TryAdmin(credential *models.Credential) (*models.Admin, []error) {
+func (g *CredentialRepoGorm) TryAdmin(cre *models.Credential) (*models.Admin, []error) {
 	var admin models.Admin
-	errs := g.db.Model(credential).Related(&admin).GetErrors()
+	errs := g.db.Model(cre).Related(&admin).GetErrors()
 	if len(errs) != 0 {
 		return nil, errs
 	}
@@ -36,9 +36,9 @@ func (g *CredentialRepoGorm) TryAdmin(credential *models.Credential) (*models.Ad
 	return &admin, nil
 }
 
-func (g *CredentialRepoGorm) TryUser(credential *models.Credential) (*models.User, []error) {
+func (g *CredentialRepoGorm) TryUser(cre *models.Credential) (*models.User, []error) {
 	var user models.User
-	errs := g.db.Model(credential).Related(&user).GetErrors()
+	errs := g.db.Model(cre).Related(&user).GetErrors()
 	if len(errs) != 0 {
 		return nil, errs
 	}

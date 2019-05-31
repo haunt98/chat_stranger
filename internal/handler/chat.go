@@ -3,12 +3,13 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/1612180/chat_stranger/pkg/log"
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
+	"log"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 // https://github.com/gorilla/websocket/tree/master/examples/chat
@@ -44,33 +45,33 @@ type Client struct {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (client *Client) readPump() {
+func (c *Client) readPump() {
 	defer func() {
-		client.Room.Unregister <- client
-		if err := client.Conn.Close(); err != nil {
-			log.ServerLog(err)
+		c.Room.Unregister <- c
+		if err := c.Conn.Close(); err != nil {
+			log.Println(err)
 		}
 	}()
-	client.Conn.SetReadLimit(maxMessageSize)
-	if err := client.Conn.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
-		log.ServerLog(err)
+	c.Conn.SetReadLimit(maxMessageSize)
+	if err := c.Conn.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
+		log.Println(err)
 	}
-	client.Conn.SetPongHandler(func(string) error {
-		if err := client.Conn.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
-			log.ServerLog(err)
+	c.Conn.SetPongHandler(func(string) error {
+		if err := c.Conn.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
+			log.Println(err)
 		}
 		return nil
 	})
 	for {
 		var message Message
-		err := client.Conn.ReadJSON(&message)
+		err := c.Conn.ReadJSON(&message)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.ServerLog(err)
+				log.Println(err)
 			}
 			break
 		}
-		client.Room.Broadcast <- message
+		c.Room.Broadcast <- message
 	}
 }
 
@@ -79,62 +80,53 @@ func (client *Client) readPump() {
 // A goroutine running writePump is started for each connection. The
 // application ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
-func (client *Client) writePump() {
+func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		if err := client.Conn.Close(); err != nil {
-			log.ServerLog(err)
+		if err := c.Conn.Close(); err != nil {
+			log.Println(err)
 		}
 	}()
 	for {
 		select {
-		case message, ok := <-client.Send:
-			if err := client.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
-				log.ServerLog(err)
+		case message, ok := <-c.Send:
+			if err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+				log.Println(err)
 			}
 			if !ok {
 				// The hub closed the channel.
-				if err := client.Conn.WriteMessage(websocket.CloseMessage, nil); err != nil {
-					log.ServerLog(err)
+				if err := c.Conn.WriteMessage(websocket.CloseMessage, nil); err != nil {
+					log.Println(err)
 				}
 				return
 			}
 
-			w, err := client.Conn.NextWriter(websocket.TextMessage)
+			w, err := c.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
-				log.ServerLog(err)
+				log.Println(err)
 				return
 			}
 			if err := json.NewEncoder(w).Encode(message); err != nil {
 				return
 			}
 
-			//if err := client.Conn.WriteJSON(message); err != nil {
-			//	log.ServerLog(err)
-			//	return
-			//}
-
 			// Add queued chat messages to the current websocket message.
-			n := len(client.Send)
+			n := len(c.Send)
 			for i := 0; i < n; i++ {
-				if err := json.NewEncoder(w).Encode(<-client.Send); err != nil {
-					log.ServerLog(err)
+				if err := json.NewEncoder(w).Encode(<-c.Send); err != nil {
+					log.Println(err)
 					return
 				}
-				//if err := client.Conn.WriteJSON(<-client.Send); err != nil {
-				//	log.ServerLog(err)
-				//	return
-				//}
 			}
 			if err := w.Close(); err != nil {
 				return
 			}
 		case <-ticker.C:
-			if err := client.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
-				log.ServerLog(err)
+			if err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
+				log.Println(err)
 			}
-			if err := client.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
 		}
@@ -158,34 +150,34 @@ func NewRoom() *Room {
 	}
 }
 
-func (room *Room) Run() {
+func (r *Room) Run() {
 	for {
 		select {
-		case client := <-room.Register:
-			room.Clients[client] = true
-		case client := <-room.Unregister:
-			if _, ok := room.Clients[client]; ok {
-				delete(room.Clients, client)
+		case client := <-r.Register:
+			r.Clients[client] = true
+		case client := <-r.Unregister:
+			if _, ok := r.Clients[client]; ok {
+				delete(r.Clients, client)
 				close(client.Send)
 			}
-		case message := <-room.Broadcast:
-			for client := range room.Clients {
+		case message := <-r.Broadcast:
+			for client := range r.Clients {
 				select {
 				case client.Send <- message:
 				default:
 					close(client.Send)
-					delete(room.Clients, client)
+					delete(r.Clients, client)
 				}
 			}
 		}
 	}
 }
 
-func (room *Room) IsFull() bool {
-	room.mux.Lock()
-	defer room.mux.Unlock()
+func (r *Room) IsFull() bool {
+	r.mux.Lock()
+	defer r.mux.Unlock()
 
-	return len(room.Clients) >= 2
+	return len(r.Clients) >= 2
 }
 
 type Hub struct {
@@ -199,24 +191,24 @@ func NewHub() *Hub {
 	}
 }
 
-func (hub *Hub) NewRoom() int {
-	hub.mux.Lock()
-	defer hub.mux.Unlock()
+func (h *Hub) NewRoom() int {
+	h.mux.Lock()
+	defer h.mux.Unlock()
 
-	roomid := len(hub.Rooms) + 1
-	hub.Rooms[roomid] = NewRoom()
+	roomid := len(h.Rooms) + 1
+	h.Rooms[roomid] = NewRoom()
 
-	go hub.Rooms[roomid].Run()
+	go h.Rooms[roomid].Run()
 
 	return roomid
 }
 
-func (hub *Hub) GetAvailableRoom() (int, error) {
-	hub.mux.Lock()
-	defer hub.mux.Unlock()
+func (h *Hub) GetAvailableRoom() (int, error) {
+	h.mux.Lock()
+	defer h.mux.Unlock()
 
-	for roomid := range hub.Rooms {
-		if !hub.Rooms[roomid].IsFull() {
+	for roomid := range h.Rooms {
+		if !h.Rooms[roomid].IsFull() {
 			return roomid, nil
 		}
 	}
@@ -224,11 +216,11 @@ func (hub *Hub) GetAvailableRoom() (int, error) {
 	return -1, fmt.Errorf("no room available")
 }
 
-func (hub *Hub) IsAvailable(roomid int) bool {
-	hub.mux.Lock()
-	defer hub.mux.Unlock()
+func (h *Hub) IsAvailable(roomid int) bool {
+	h.mux.Lock()
+	defer h.mux.Unlock()
 
-	room, ok := hub.Rooms[roomid]
+	room, ok := h.Rooms[roomid]
 	if !ok {
 		return false
 	}
@@ -241,26 +233,26 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func (hub *Hub) ChatHandler(c *gin.Context) {
+func (h *Hub) ChatHandler(c *gin.Context) {
 	roomid, err := strconv.Atoi(c.Query("roomid"))
 	if err != nil {
-		log.ServerLog(err)
+		log.Println(err)
 		return
 	}
 
-	if !hub.IsAvailable(roomid) {
+	if !h.IsAvailable(roomid) {
 		return
 	}
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		log.ServerLog(err)
+		log.Println(err)
 		return
 	}
 
 	client := &Client{
 		Conn: conn,
-		Room: hub.Rooms[roomid],
+		Room: h.Rooms[roomid],
 		Send: make(chan Message),
 	}
 	client.Room.Register <- client
@@ -271,13 +263,13 @@ func (hub *Hub) ChatHandler(c *gin.Context) {
 	go client.readPump()
 }
 
-func (hub *Hub) GetRoom(c *gin.Context) {
+func (h *Hub) GetRoom(c *gin.Context) {
 	m := make(map[string]interface{})
 
-	roomid, err := hub.GetAvailableRoom()
+	roomid, err := h.GetAvailableRoom()
 	if err != nil {
-		log.ServerLog(err)
-		roomid = hub.NewRoom()
+		log.Println(err)
+		roomid = h.NewRoom()
 	}
 
 	m["roomid"] = roomid

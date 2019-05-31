@@ -2,20 +2,21 @@ package service
 
 import (
 	"fmt"
-	"github.com/1612180/chat_stranger/models"
+
+	"github.com/1612180/chat_stranger/internal/models"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
 )
 
 func CreateTokenString(claims jwt.Claims) (string, error) {
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := jwtToken.SignedString([]byte(viper.GetString("jwt.secret")))
+	s, err := token.SignedString([]byte(viper.GetString("jwt.secret")))
 	if err != nil {
 		return "", err
 	}
 
-	return tokenString, nil
+	return s, nil
 }
 
 func VerifyTokenString(tokenString string) (*models.JWTClaims, error) {

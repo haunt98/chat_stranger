@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"github.com/1612180/chat_stranger/models"
+	"github.com/1612180/chat_stranger/internal/models"
 )
 
-type IUserRepo interface {
+type UserRepo interface {
 	FetchAll() ([]*models.User, []error)
 	Find(uint) (*models.User, []error)
 	Create(*models.UserUpload) (uint, []error)
@@ -13,7 +13,7 @@ type IUserRepo interface {
 	Delete(uint) []error
 }
 
-type IAdminRepo interface {
+type AdminRepo interface {
 	FetchAll() ([]*models.Admin, []error)
 	Find(uint) (*models.Admin, []error)
 	Create(*models.AdminUpload) (uint, []error)
@@ -22,7 +22,7 @@ type IAdminRepo interface {
 	Delete(uint) []error
 }
 
-type ICredentialRepo interface {
+type CredentialRepo interface {
 	Find(string) (*models.Credential, []error)
 	TryAdmin(*models.Credential) (*models.Admin, []error)
 	TryUser(*models.Credential) (*models.User, []error)

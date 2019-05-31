@@ -10,4 +10,6 @@ RUN go mod download
 
 COPY . .
 
-CMD ["go", "run", "cmd/main.go"]
+RUN go install ./...
+
+CMD ["chat_stranger"]

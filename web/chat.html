@@ -15,13 +15,29 @@
 
 <body>
 <div class="container my-3">
-    <h1>Welcome <span id="welcomeUsername"></span></h1>
+    <h1>Chatting</h1>
+</div>
 
-    <button type="button" class="btn btn-primary" id="btnLogOut">Log out</button>
+<!-- Chat message -->
+<div class="container my-3" id="content">
+    <div class="row">
+        <div class="col-md-2">
+            <p class="font-weight-bold">User</p>
+        </div>
+        <div class="col-md-10">
+            <p>Message</p>
+        </div>
+    </div>
 </div>
 
 <div class="container my-3">
-    <button type="button" class="btn btn-primary" id="btnStartChat">Start chatting</button>
+    <form id="formChat" autocomplete="off">
+        <div class="form-group">
+            <label for="inputMessage">Write message</label>
+            <input type="text" class="form-control" id="inputMessage">
+        </div>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
 </div>
 
 <!-- Optional JavaScript -->
@@ -35,7 +51,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
-<script src="/static/script/welcome_user.js"></script>
+<script src="/web/script/chat.js"></script>
 </body>
 
 </html>
