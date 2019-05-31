@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 	"sync"
@@ -180,52 +179,51 @@ func (r *Room) IsFull() bool {
 	return len(r.Clients) >= 2
 }
 
-type Hub struct {
+type ChatHandler struct {
 	Rooms map[int]*Room
 	mux   sync.Mutex
 }
 
-func NewHub() *Hub {
-	return &Hub{
+func NewChatHandler() *ChatHandler {
+	return &ChatHandler{
 		Rooms: make(map[int]*Room),
 	}
 }
 
-func (h *Hub) NewRoom() int {
+func (h *ChatHandler) NextRoom(cur int) (int, error){
 	h.mux.Lock()
 	defer h.mux.Unlock()
 
-	roomid := len(h.Rooms) + 1
-	h.Rooms[roomid] = NewRoom()
-
-	go h.Rooms[roomid].Run()
-
-	return roomid
-}
-
-func (h *Hub) GetAvailableRoom() (int, error) {
-	h.mux.Lock()
-	defer h.mux.Unlock()
-
-	for roomid := range h.Rooms {
-		if !h.Rooms[roomid].IsFull() {
-			return roomid, nil
+	for id := range h.Rooms {
+		if !h.Rooms[id].IsFull() && id != cur {
+			return id, nil
 		}
 	}
 
-	return -1, fmt.Errorf("no room available")
+	id := len(h.Rooms) + 1
+	h.Rooms[id] = NewRoom()
+
+	go h.Rooms[id].Run()
+
+	return id, nil
 }
 
-func (h *Hub) IsAvailable(roomid int) bool {
+func (h *ChatHandler) JoinRoom() (int, error){
 	h.mux.Lock()
 	defer h.mux.Unlock()
 
-	room, ok := h.Rooms[roomid]
-	if !ok {
-		return false
+	for id := range h.Rooms {
+		if !h.Rooms[id].IsFull() {
+			return id, nil
+		}
 	}
 
-	return !room.IsFull()
+	id := len(h.Rooms) + 1
+	h.Rooms[id] = NewRoom()
+
+	go h.Rooms[id].Run()
+
+	return id, nil
 }
 
 var upgrader = websocket.Upgrader{
@@ -233,14 +231,14 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func (h *Hub) ChatHandler(c *gin.Context) {
-	roomid, err := strconv.Atoi(c.Query("roomid"))
+func (h *ChatHandler) WS(c *gin.Context) {
+	id, err := strconv.Atoi(c.Query("id"))
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	if !h.IsAvailable(roomid) {
+	if h.Rooms[id].IsFull() {
 		return
 	}
 
@@ -252,7 +250,7 @@ func (h *Hub) ChatHandler(c *gin.Context) {
 
 	client := &Client{
 		Conn: conn,
-		Room: h.Rooms[roomid],
+		Room: h.Rooms[id],
 		Send: make(chan Message),
 	}
 	client.Room.Register <- client
@@ -263,15 +261,8 @@ func (h *Hub) ChatHandler(c *gin.Context) {
 	go client.readPump()
 }
 
-func (h *Hub) GetRoom(c *gin.Context) {
+func (h *ChatHandler) FindRoom(c *gin.Context) {
 	m := make(map[string]interface{})
 
-	roomid, err := h.GetAvailableRoom()
-	if err != nil {
-		log.Println(err)
-		roomid = h.NewRoom()
-	}
-
-	m["roomid"] = roomid
 	c.JSON(200, m)
 }

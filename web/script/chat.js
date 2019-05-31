@@ -1,6 +1,6 @@
 window.addEventListener('load', function () {
     let baseurl = location.protocol + '//' + location.host;
-    let token = localStorage.getItem('token');
+    let token = sessionStorage.getItem('token');
 
     if (token === null) {
         location.href = baseurl
@@ -20,7 +20,7 @@ window.addEventListener('load', function () {
             if (response.code === 201) {
                 user = response.user
             } else {
-                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
                 location.href = baseurl;
             }
         });
@@ -28,7 +28,7 @@ window.addEventListener('load', function () {
     let roomid = location.href.split('/')[4];
 
     let wsurl = 'ws:' + '//' + location.host + '/ws' + '?roomid=' + roomid;
-    conn = new WebSocket(wsurl);
+    let conn = new WebSocket(wsurl);
 
     conn.onmessage = function (event) {
         let message = JSON.parse(event.data);
@@ -67,8 +67,24 @@ window.addEventListener('load', function () {
         conn.send(JSON.stringify({
             fullname: user.fullname,
             body: inputMessage.value
-        }))
+        }));
 
         inputMessage.value = ''
+    });
+
+    let btnLeave = document.getElementById('btnLeave');
+    btnLeave.addEventListener('click', function () {
+        conn.close();
+        location.href = baseurl + '/welcome_user'
+    });
+
+    let btnNext = document.getElementById('btnNext');
+    btnNext.addEventListener('click', function () {
+        fetch(baseurl + '/api/public/users/roomid' + '?id=' + roomid)
+            .then(response => response.json())
+            .then(function (response) {
+                console.log(response);
+                location.href = baseurl + '/chat' + '/' + response.roomid
+            })
     })
 });

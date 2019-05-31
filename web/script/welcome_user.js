@@ -1,6 +1,6 @@
 window.addEventListener('load', function () {
     let baseurl = location.protocol + '//' + location.host;
-    let token = localStorage.getItem('token');
+    let token = sessionStorage.getItem('token');
 
     if (token === null) {
         location.href = baseurl
@@ -18,7 +18,7 @@ window.addEventListener('load', function () {
             if (response.code === 201) {
                 document.getElementById('welcomeUsername').innerText = response.user.fullname
             } else {
-                localStorage.removeItem('token');
+                sessionStorage.removeItem('token');
                 location.href = baseurl
             }
         });
@@ -26,15 +26,13 @@ window.addEventListener('load', function () {
 
     let btnLogOut = document.getElementById('btnLogOut');
     btnLogOut.addEventListener('click', function () {
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
         location.href = baseurl
     });
 
     let btnStartChat = document.getElementById('btnStartChat');
     btnStartChat.addEventListener('click', function () {
-        fetch(baseurl + '/api/public/users/roomid', {
-            method: 'GET'
-        })
+        fetch(baseurl + '/api/public/users/roomid')
             .then(response => response.json())
             .then(function (response) {
                 console.log(response);

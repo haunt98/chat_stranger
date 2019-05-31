@@ -44,6 +44,7 @@ func main() {
 
 	userHandler := handler.NewUserHandler(userService)
 	adminHandler := handler.NewAdminHandler(adminService)
+	chatHandler := handler.NewChatHandler()
 
 	gin.SetMode(viper.GetString("gin.mode"))
 	gin.DisableConsoleColor()
@@ -62,16 +63,11 @@ func main() {
 		c.HTML(http.StatusOK, "chat.html", gin.H{})
 	})
 
-	hub := handler.NewHub()
-	router.GET("ws", hub.ChatHandler)
-
 	public := router.Group("/api/public")
 	{
 		public.POST("/users/register", userHandler.Create)
 		public.POST("/users/authenticate", userHandler.Authenticate)
 		public.POST("/admins/authenticate", adminHandler.Authenticate)
-
-		public.GET("/users/roomid", hub.GetRoom)
 	}
 
 	roleUser := router.Group("/api/me", handler.VerifyRole("User"))
@@ -80,6 +76,9 @@ func main() {
 		roleUser.DELETE("", userHandler.VerifyDelete)
 		roleUser.PUT("/info", userHandler.VerifyUpdateInfo)
 		roleUser.PUT("/password", userHandler.VerifyUpdatePassword)
+
+		roleUser.GET("/ws", chatHandler.WS)
+		roleUser.GET("/room", chatHandler.FindRoom)
 	}
 
 	roleAdmin := router.Group("/api/me", handler.VerifyRole("Admin"))

@@ -1,6 +1,6 @@
 window.addEventListener('load', function () {
     let baseurl = location.protocol + '//' + location.host;
-    let token = localStorage.getItem('token');
+    let token = sessionStorage.getItem('token');
 
     if (token !== null) {
         location.href = baseurl + '/welcome_user'
@@ -26,7 +26,7 @@ window.addEventListener('load', function () {
             .then(function (response) {
                 console.log(response);
                 if (response.code === 206) {
-                    localStorage.setItem('token', response.token);
+                    sessionStorage.setItem('token', response.token);
                     location.href = baseurl + '/welcome_user'
                 }
             })
