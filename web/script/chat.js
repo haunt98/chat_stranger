@@ -9,7 +9,6 @@ window.addEventListener('load', function () {
     // Get user info
     let user;
     fetch(baseurl + '/api/me', {
-        method: 'GET',
         headers: {
             'Authorization': 'Bearer' + token
         }
@@ -27,7 +26,7 @@ window.addEventListener('load', function () {
 
     let roomid = location.href.split('/')[4];
 
-    let wsurl = 'ws:' + '//' + location.host + '/ws' + '?roomid=' + roomid;
+    let wsurl = 'ws:' + '//' + location.host + '/api/public/ws' + '?id=' + roomid;
     let conn = new WebSocket(wsurl);
 
     conn.onmessage = function (event) {
@@ -80,11 +79,15 @@ window.addEventListener('load', function () {
 
     let btnNext = document.getElementById('btnNext');
     btnNext.addEventListener('click', function () {
-        fetch(baseurl + '/api/public/users/roomid' + '?id=' + roomid)
+        fetch(baseurl + '/api/me/room' + '?id=' + roomid, {
+            headers: {
+                'Authorization': 'Bearer' + token
+            }
+        })
             .then(response => response.json())
             .then(function (response) {
                 console.log(response);
-                location.href = baseurl + '/chat' + '/' + response.roomid
+                location.href = baseurl + '/chat' + '/' + response.room
             })
     })
 });

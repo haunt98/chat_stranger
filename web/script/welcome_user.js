@@ -7,7 +7,6 @@ window.addEventListener('load', function () {
     }
 
     fetch(baseurl + '/api/me', {
-        method: 'GET',
         headers: {
             'Authorization': 'Bearer' + token
         }
@@ -32,11 +31,15 @@ window.addEventListener('load', function () {
 
     let btnStartChat = document.getElementById('btnStartChat');
     btnStartChat.addEventListener('click', function () {
-        fetch(baseurl + '/api/public/users/roomid')
+        fetch(baseurl + '/api/me/room', {
+            headers: {
+                'Authorization': 'Bearer' + token
+            }
+        })
             .then(response => response.json())
             .then(function (response) {
                 console.log(response);
-                location.href = baseurl + '/chat' + '/' + response.roomid
+                location.href = baseurl + '/chat' + '/' + response.room
             })
     })
 });

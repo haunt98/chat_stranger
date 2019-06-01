@@ -2,7 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"sync"
 	"time"
@@ -190,13 +192,13 @@ func NewChatHandler() *ChatHandler {
 	}
 }
 
-func (h *ChatHandler) NextRoom(cur int) (int, error){
+func (h *ChatHandler) NextRoom(cur int) int {
 	h.mux.Lock()
 	defer h.mux.Unlock()
 
 	for id := range h.Rooms {
 		if !h.Rooms[id].IsFull() && id != cur {
-			return id, nil
+			return id
 		}
 	}
 
@@ -205,16 +207,16 @@ func (h *ChatHandler) NextRoom(cur int) (int, error){
 
 	go h.Rooms[id].Run()
 
-	return id, nil
+	return id
 }
 
-func (h *ChatHandler) JoinRoom() (int, error){
+func (h *ChatHandler) JoinRoom() int {
 	h.mux.Lock()
 	defer h.mux.Unlock()
 
 	for id := range h.Rooms {
 		if !h.Rooms[id].IsFull() {
-			return id, nil
+			return id
 		}
 	}
 
@@ -223,7 +225,7 @@ func (h *ChatHandler) JoinRoom() (int, error){
 
 	go h.Rooms[id].Run()
 
-	return id, nil
+	return id
 }
 
 var upgrader = websocket.Upgrader{
@@ -239,6 +241,7 @@ func (h *ChatHandler) WS(c *gin.Context) {
 	}
 
 	if h.Rooms[id].IsFull() {
+		log.Println(fmt.Errorf(ResponseCode[410]))
 		return
 	}
 
@@ -262,7 +265,21 @@ func (h *ChatHandler) WS(c *gin.Context) {
 }
 
 func (h *ChatHandler) FindRoom(c *gin.Context) {
-	m := make(map[string]interface{})
+	q := c.Query("id")
+	if q == "" {
+		res := Response(207)
+		res["room"] = h.JoinRoom()
+		c.JSON(http.StatusOK, res)
+	} else {
+		id, err := strconv.Atoi(c.Query("id"))
+		if err != nil {
+			log.Println(err)
+			c.JSON(http.StatusOK, Response(401))
+			return
+		}
 
-	c.JSON(200, m)
+		res := Response(208)
+		res["room"] = h.NextRoom(id)
+		c.JSON(http.StatusOK, res)
+	}
 }

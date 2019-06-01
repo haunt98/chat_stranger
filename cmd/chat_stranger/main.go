@@ -68,6 +68,7 @@ func main() {
 		public.POST("/users/register", userHandler.Create)
 		public.POST("/users/authenticate", userHandler.Authenticate)
 		public.POST("/admins/authenticate", adminHandler.Authenticate)
+		public.GET("/ws", chatHandler.WS)
 	}
 
 	roleUser := router.Group("/api/me", handler.VerifyRole("User"))
@@ -76,8 +77,6 @@ func main() {
 		roleUser.DELETE("", userHandler.VerifyDelete)
 		roleUser.PUT("/info", userHandler.VerifyUpdateInfo)
 		roleUser.PUT("/password", userHandler.VerifyUpdatePassword)
-
-		roleUser.GET("/ws", chatHandler.WS)
 		roleUser.GET("/room", chatHandler.FindRoom)
 	}
 

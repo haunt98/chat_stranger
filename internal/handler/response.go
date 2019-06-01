@@ -8,6 +8,8 @@ var ResponseCode = map[int]string{
 	204: "Delete OK",
 	205: "Register OK",
 	206: "Login OK",
+	207: "New room OK",
+	208: "Next room OK",
 	400: "JSON body is wrong",
 	401: "id param is wrong",
 	402: "Fetch all failed",
@@ -18,6 +20,7 @@ var ResponseCode = map[int]string{
 	407: "Auth token not found",
 	408: "Auth token not valid",
 	409: "Role wrong",
+	410: "Room is full",
 	500: "Create token failed",
 	501: "Get ID failed",
 }
