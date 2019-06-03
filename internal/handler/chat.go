@@ -60,14 +60,14 @@ func (r *Room) Run() {
 	for {
 		select {
 		case c := <-r.Register:
-			for old_c := range r.Clients {
-				if err := old_c.Conn.WriteJSON(Message{
+			for oldC := range r.Clients {
+				if err := oldC.Conn.WriteJSON(Message{
 					Fullname: "Server",
-					Body:     "User joined",
+					Body:     "User has joined",
 				}); err != nil {
 					log.Println(err)
-					delete(r.Clients, old_c)
-					if err := old_c.Conn.Close(); err != nil {
+					delete(r.Clients, oldC)
+					if err := oldC.Conn.Close(); err != nil {
 						log.Println(err)
 					}
 				}
@@ -78,14 +78,14 @@ func (r *Room) Run() {
 			if err := c.Conn.Close(); err != nil {
 				log.Println(err)
 			}
-			for old_c := range r.Clients {
-				if err := old_c.Conn.WriteJSON(Message{
+			for oldC := range r.Clients {
+				if err := oldC.Conn.WriteJSON(Message{
 					Fullname: "Server",
-					Body:     "User leaved",
+					Body:     "User has leaved",
 				}); err != nil {
 					log.Println(err)
-					delete(r.Clients, old_c)
-					if err := old_c.Conn.Close(); err != nil {
+					delete(r.Clients, oldC)
+					if err := oldC.Conn.Close(); err != nil {
 						log.Println(err)
 					}
 				}
