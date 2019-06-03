@@ -37,14 +37,14 @@ func (h *UserHandler) FetchAll(c *gin.Context) {
 }
 
 func (h *UserHandler) Find(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
 		return
 	}
 
-	user, errs := h.service.Find(uint(id))
+	user, errs := h.service.Find(id)
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -81,7 +81,7 @@ func (h *UserHandler) Create(c *gin.Context) {
 }
 
 func (h *UserHandler) UpdateInfo(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
@@ -95,7 +95,7 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 		return
 	}
 
-	if errs := h.service.UpdateInfo(uint(id), &upload); len(errs) != 0 {
+	if errs := h.service.UpdateInfo(id, &upload); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -107,7 +107,7 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 }
 
 func (h *UserHandler) UpdatePassword(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
@@ -120,7 +120,7 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	if errs := h.service.UpdatePassword(uint(id), &auth); len(errs) != 0 {
+	if errs := h.service.UpdatePassword(id, &auth); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -132,14 +132,14 @@ func (h *UserHandler) UpdatePassword(c *gin.Context) {
 }
 
 func (h *UserHandler) Delete(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
 		return
 	}
 
-	if errs := h.service.Delete(uint(id)); len(errs) != 0 {
+	if errs := h.service.Delete((id)); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -190,7 +190,7 @@ func (h *UserHandler) VerifyFind(c *gin.Context) {
 		return
 	}
 
-	user, errs := h.service.Find(id.(uint))
+	user, errs := h.service.Find(id.(int))
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -211,7 +211,7 @@ func (h *UserHandler) VerifyDelete(c *gin.Context) {
 		return
 	}
 
-	if errs := h.service.Delete(id.(uint)); len(errs) != 0 {
+	if errs := h.service.Delete(id.(int)); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -236,7 +236,7 @@ func (h *UserHandler) VerifyUpdateInfo(c *gin.Context) {
 		return
 	}
 
-	if errs := h.service.UpdateInfo(id.(uint), &upload); len(errs) != 0 {
+	if errs := h.service.UpdateInfo(id.(int), &upload); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -261,7 +261,7 @@ func (h *UserHandler) VerifyUpdatePassword(c *gin.Context) {
 		return
 	}
 
-	if errs := h.service.UpdatePassword(id.(uint), &auth); len(errs) != 0 {
+	if errs := h.service.UpdatePassword(id.(int), &auth); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}

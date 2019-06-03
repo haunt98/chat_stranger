@@ -6,90 +6,100 @@ window.addEventListener('load', function () {
         location.href = baseurl
     }
 
-    // Get user info
-    let user;
     fetch(baseurl + '/api/me', {
         headers: {
             'Authorization': 'Bearer' + token
         }
     })
         .then(response => response.json())
-        .then(function (response) {
+        .then((response) => {
             console.log(response);
-            if (response.code === 201) {
-                user = response.user
-            } else {
+            if (response.code !== 201) {
                 sessionStorage.removeItem('token');
                 location.href = baseurl;
+                return
             }
-        });
 
-    let roomid = location.href.split('/')[4];
+            let user = response.user;
+            let rid = location.href.split('/')[4];
+            let uid = user.id;
 
-    let wsurl = 'ws:' + '//' + location.host + '/api/public/ws' + '?id=' + roomid;
-    let conn = new WebSocket(wsurl);
+            let wsurl = 'ws:' + '//' + location.host + '/api/public/ws' + '?rid=' + rid + '&uid=' + uid;
+            let conn = new WebSocket(wsurl);
 
-    conn.onmessage = function (event) {
-        let message = JSON.parse(event.data);
+            conn.onmessage = (event) => {
+                let message = JSON.parse(event.data);
 
-        let divRow = document.createElement('div');
-        divRow.className = 'row';
+                let divRow = document.createElement('div');
+                divRow.className = 'row';
 
-        let divCol2 = document.createElement('div');
-        divCol2.className = 'col-md-2';
+                let divCol2 = document.createElement('div');
+                divCol2.className = 'col-md-2';
 
-        let divCol10 = document.createElement('div');
-        divCol10.className = 'col-md-10';
+                let divCol10 = document.createElement('div');
+                divCol10.className = 'col-md-10';
 
-        divRow.appendChild(divCol2);
-        divRow.appendChild(divCol10);
+                divRow.appendChild(divCol2);
+                divRow.appendChild(divCol10);
 
-        let pname = document.createElement('p');
-        pname.className = 'font-weight-bold';
-        divCol2.appendChild(pname);
-        pname.innerText = message.fullname;
+                let pname = document.createElement('p');
+                pname.className = 'font-weight-bold';
+                divCol2.appendChild(pname);
+                pname.innerText = message.fullname;
 
-        let pmessage = document.createElement('p');
-        divCol10.appendChild(pmessage);
-        pmessage.innerText = message.body;
+                let pmessage = document.createElement('p');
+                divCol10.appendChild(pmessage);
+                pmessage.innerText = message.body;
 
-        let content = document.getElementById('content');
-        content.appendChild(divRow);
-    };
+                let content = document.getElementById('content');
+                content.appendChild(divRow);
+            };
 
-    let formChat = document.getElementById('formChat');
-    formChat.addEventListener('submit', function (event) {
-        event.preventDefault();
+            let formChat = document.getElementById('formChat');
+            formChat.addEventListener('submit', (event) => {
+                event.preventDefault();
 
-        let inputMessage = document.getElementById('inputMessage');
+                let inputMessage = document.getElementById('inputMessage');
 
-        if (inputMessage.value !== '') {
-            conn.send(JSON.stringify({
-                fullname: user.fullname,
-                body: inputMessage.value
-            }));
+                if (inputMessage.value !== '') {
+                    conn.send(JSON.stringify({
+                        fullname: user.fullname,
+                        body: inputMessage.value
+                    }));
 
-            inputMessage.value = ''
-        }
-    });
+                    inputMessage.value = ''
+                }
+            });
 
-    let btnLeave = document.getElementById('btnLeave');
-    btnLeave.addEventListener('click', function () {
-        conn.close();
-        location.href = baseurl + '/welcome_user'
-    });
+            let btnLeave = document.getElementById('btnLeave');
+            btnLeave.addEventListener('click', function () {
+                conn.close();
+                location.href = baseurl + '/welcome_user'
+            });
 
-    let btnNext = document.getElementById('btnNext');
-    btnNext.addEventListener('click', function () {
-        fetch(baseurl + '/api/me/room' + '?id=' + roomid, {
-            headers: {
-                'Authorization': 'Bearer' + token
-            }
-        })
-            .then(response => response.json())
-            .then(function (response) {
-                console.log(response);
-                location.href = baseurl + '/chat' + '/' + response.room
+            let btnNext = document.getElementById('btnNext');
+            btnNext.addEventListener('click', () => {
+                fetch(baseurl + '/api/me/room' + '?rid=' + rid, {
+                    headers: {
+                        'Authorization': 'Bearer' + token
+                    }
+                })
+                    .then(res => res.json())
+                    .then((res) => {
+                        console.log(res);
+                        location.href = baseurl + '/chat' + '/' + res.room
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        sessionStorage.removeItem('token');
+                        location.href = baseurl;
+                    })
             })
-    })
+
+        })
+        .catch((err) => {
+            console.log(err);
+            sessionStorage.removeItem('token');
+            location.href = baseurl;
+        })
 });

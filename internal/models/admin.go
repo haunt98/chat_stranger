@@ -6,11 +6,11 @@ import (
 
 // Admin belongs to Credential
 type Admin struct {
-	ID           uint       `json:"-"`
+	ID           int        `json:"id"`
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`
 	Credential   Credential `json:"-"`
-	CredentialID uint       `json:"-"`
+	CredentialID int        `json:"-"`
 	Fullname     string     `json:"fullname"`
 }
 

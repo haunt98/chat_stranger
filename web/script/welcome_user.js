@@ -11,15 +11,14 @@ window.addEventListener('load', function () {
             'Authorization': 'Bearer' + token
         }
     })
-        .then(response => response.json())
-        .then(function (response) {
-            console.log(response);
-            if (response.code === 201) {
-                document.getElementById('welcomeUsername').innerText = response.user.fullname
-            } else {
+        .then(res => res.json())
+        .then((res) => {
+            console.log(res);
+            if (res.code !== 201) {
                 sessionStorage.removeItem('token');
                 location.href = baseurl
             }
+            document.getElementById('welcomeUsername').innerText = res.user.fullname
         });
 
 
@@ -36,10 +35,15 @@ window.addEventListener('load', function () {
                 'Authorization': 'Bearer' + token
             }
         })
-            .then(response => response.json())
-            .then(function (response) {
-                console.log(response);
-                location.href = baseurl + '/chat' + '/' + response.room
+            .then(res => res.json())
+            .then((res) => {
+                console.log(res);
+                location.href = baseurl + '/chat' + '/' + res.room
+            })
+            .catch((err) => {
+                console.log(err);
+                sessionStorage.removeItem('token');
+                location.href = baseurl
             })
     })
 });

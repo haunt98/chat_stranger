@@ -22,23 +22,23 @@ func (s *AdminService) FetchAll() ([]*models.Admin, []error) {
 	return s.adminRepo.FetchAll()
 }
 
-func (s *AdminService) Find(id uint) (*models.Admin, []error) {
+func (s *AdminService) Find(id int) (*models.Admin, []error) {
 	return s.adminRepo.Find(id)
 }
 
-func (s *AdminService) Create(upload *models.AdminUpload) (uint, []error) {
+func (s *AdminService) Create(upload *models.AdminUpload) (int, []error) {
 	return s.adminRepo.Create(upload)
 }
 
-func (s *AdminService) UpdateInfo(id uint, upload *models.AdminUpload) []error {
+func (s *AdminService) UpdateInfo(id int, upload *models.AdminUpload) []error {
 	return s.adminRepo.UpdateInfo(id, upload)
 }
 
-func (s *AdminService) UpdatePassword(id uint, auth *models.Authentication) []error {
+func (s *AdminService) UpdatePassword(id int, auth *models.Authentication) []error {
 	return s.adminRepo.UpdatePassword(id, auth)
 }
 
-func (s *AdminService) Delete(id uint) []error {
+func (s *AdminService) Delete(id int) []error {
 	return s.adminRepo.Delete(id)
 }
 

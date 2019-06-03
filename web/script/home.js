@@ -22,13 +22,16 @@ window.addEventListener('load', function () {
                 }
             )
         })
-            .then(response => response.json())
-            .then(function (response) {
-                console.log(response);
-                if (response.code === 206) {
-                    sessionStorage.setItem('token', response.token);
+            .then(res => res.json())
+            .then((res) => {
+                console.log(res);
+                if (res.code === 206) {
+                    sessionStorage.setItem('token', res.token);
                     location.href = baseurl + '/welcome_user'
                 }
+            })
+            .catch((err) => {
+                console.log(res)
             })
     });
 
@@ -50,10 +53,10 @@ window.addEventListener('load', function () {
                 }
             )
         })
-            .then(response => response.json())
-            .then(function (response) {
-                console.log(response);
-                if (response.code === 205) {
+            .then(res => res.json())
+            .then((res) => {
+                console.log(res);
+                if (res.code === 205) {
                     location.reload()
                 }
             })

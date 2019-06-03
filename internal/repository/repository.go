@@ -6,20 +6,20 @@ import (
 
 type UserRepo interface {
 	FetchAll() ([]*models.User, []error)
-	Find(uint) (*models.User, []error)
-	Create(*models.UserUpload) (uint, []error)
-	UpdateInfo(uint, *models.UserUpload) []error
-	UpdatePassword(uint, *models.Authentication) []error
-	Delete(uint) []error
+	Find(int) (*models.User, []error)
+	Create(*models.UserUpload) (int, []error)
+	UpdateInfo(int, *models.UserUpload) []error
+	UpdatePassword(int, *models.Authentication) []error
+	Delete(int) []error
 }
 
 type AdminRepo interface {
 	FetchAll() ([]*models.Admin, []error)
-	Find(uint) (*models.Admin, []error)
-	Create(*models.AdminUpload) (uint, []error)
-	UpdateInfo(uint, *models.AdminUpload) []error
-	UpdatePassword(uint, *models.Authentication) []error
-	Delete(uint) []error
+	Find(int) (*models.Admin, []error)
+	Create(*models.AdminUpload) (int, []error)
+	UpdateInfo(int, *models.AdminUpload) []error
+	UpdatePassword(int, *models.Authentication) []error
+	Delete(int) []error
 }
 
 type CredentialRepo interface {

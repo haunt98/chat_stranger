@@ -37,14 +37,14 @@ func (h *AdminHandler) FetchAll(c *gin.Context) {
 }
 
 func (h *AdminHandler) Find(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
 		return
 	}
 
-	admin, errs := h.service.Find(uint(id))
+	admin, errs := h.service.Find(id)
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -81,7 +81,7 @@ func (h *AdminHandler) Create(c *gin.Context) {
 }
 
 func (h *AdminHandler) UpdateInfo(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
@@ -95,7 +95,7 @@ func (h *AdminHandler) UpdateInfo(c *gin.Context) {
 		return
 	}
 
-	if errs := h.service.UpdateInfo(uint(id), &upload); len(errs) != 0 {
+	if errs := h.service.UpdateInfo(id, &upload); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -107,7 +107,7 @@ func (h *AdminHandler) UpdateInfo(c *gin.Context) {
 }
 
 func (h *AdminHandler) UpdatePassword(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
@@ -120,7 +120,7 @@ func (h *AdminHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	if errs := h.service.UpdatePassword(uint(id), &auth); len(errs) != 0 {
+	if errs := h.service.UpdatePassword(id, &auth); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -132,14 +132,14 @@ func (h *AdminHandler) UpdatePassword(c *gin.Context) {
 }
 
 func (h *AdminHandler) Delete(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 64)
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, Response(401))
 		return
 	}
 
-	if errs := h.service.Delete(uint(id)); len(errs) != 0 {
+	if errs := h.service.Delete(id); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}

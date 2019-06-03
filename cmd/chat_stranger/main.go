@@ -59,7 +59,7 @@ func main() {
 	router.GET("/welcome_user", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "welcome_user.html", gin.H{})
 	})
-	router.GET("/chat/:roomid", func(c *gin.Context) {
+	router.GET("/chat/:rid", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "chat.html", gin.H{})
 	})
 

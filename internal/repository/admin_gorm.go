@@ -33,7 +33,7 @@ func (g *AdminRepoGorm) FetchAll() ([]*models.Admin, []error) {
 	return admins, nil
 }
 
-func (g *AdminRepoGorm) Find(id uint) (*models.Admin, []error) {
+func (g *AdminRepoGorm) Find(id int) (*models.Admin, []error) {
 	var admin models.Admin
 	errs := g.db.Where("id = ?", id).First(&admin).GetErrors()
 	if len(errs) != 0 {
@@ -47,7 +47,7 @@ func (g *AdminRepoGorm) Find(id uint) (*models.Admin, []error) {
 	return &admin, nil
 }
 
-func (g *AdminRepoGorm) Create(upload *models.AdminUpload) (uint, []error) {
+func (g *AdminRepoGorm) Create(upload *models.AdminUpload) (int, []error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(upload.Password), bcrypt.DefaultCost)
 	if err != nil {
 		var errs []error
@@ -70,7 +70,7 @@ func (g *AdminRepoGorm) Create(upload *models.AdminUpload) (uint, []error) {
 	return admin.ID, nil
 }
 
-func (g *AdminRepoGorm) UpdateInfo(id uint, upload *models.AdminUpload) []error {
+func (g *AdminRepoGorm) UpdateInfo(id int, upload *models.AdminUpload) []error {
 	var admin models.Admin
 	if errs := g.db.Where("id = ?", id).First(&admin).Updates(
 		map[string]interface{}{
@@ -83,7 +83,7 @@ func (g *AdminRepoGorm) UpdateInfo(id uint, upload *models.AdminUpload) []error 
 	return nil
 }
 
-func (g *AdminRepoGorm) UpdatePassword(id uint, auth *models.Authentication) []error {
+func (g *AdminRepoGorm) UpdatePassword(id int, auth *models.Authentication) []error {
 	var admin models.Admin
 	var cre models.Credential
 	if errs := g.db.Where("id = ?", id).First(&admin).GetErrors(); len(errs) != 0 {
@@ -108,7 +108,7 @@ func (g *AdminRepoGorm) UpdatePassword(id uint, auth *models.Authentication) []e
 	return nil
 }
 
-func (g *AdminRepoGorm) Delete(id uint) []error {
+func (g *AdminRepoGorm) Delete(id int) []error {
 	tx := g.db.Begin()
 
 	var admin models.Admin

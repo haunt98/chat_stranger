@@ -22,23 +22,23 @@ func (s *UserService) FetchAll() ([]*models.User, []error) {
 	return s.userRepo.FetchAll()
 }
 
-func (s *UserService) Find(id uint) (*models.User, []error) {
+func (s *UserService) Find(id int) (*models.User, []error) {
 	return s.userRepo.Find(id)
 }
 
-func (s *UserService) Create(upload *models.UserUpload) (uint, []error) {
+func (s *UserService) Create(upload *models.UserUpload) (int, []error) {
 	return s.userRepo.Create(upload)
 }
 
-func (s *UserService) UpdateInfo(id uint, upload *models.UserUpload) []error {
+func (s *UserService) UpdateInfo(id int, upload *models.UserUpload) []error {
 	return s.userRepo.UpdateInfo(id, upload)
 }
 
-func (s *UserService) UpdatePassword(id uint, auth *models.Authentication) []error {
+func (s *UserService) UpdatePassword(id int, auth *models.Authentication) []error {
 	return s.userRepo.UpdatePassword(id, auth)
 }
 
-func (s *UserService) Delete(id uint) []error {
+func (s *UserService) Delete(id int) []error {
 	return s.userRepo.Delete(id)
 }
 

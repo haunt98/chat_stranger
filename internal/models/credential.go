@@ -7,7 +7,7 @@ import (
 )
 
 type Credential struct {
-	ID             uint      `json:"-"`
+	ID             int       `json:"-"`
 	CreatedAt      time.Time `json:"created_at"`
 	UpdatedAt      time.Time `json:"updated_at"`
 	Name           string    `gorm:"unique" json:"name"`
@@ -20,7 +20,7 @@ type Authentication struct {
 }
 
 type JWTClaims struct {
-	ID   uint
+	ID   int
 	Role string
 	jwt.StandardClaims
 }
