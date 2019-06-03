@@ -29,6 +29,25 @@ window.addEventListener('load', function () {
     let wsurl = 'ws:' + '//' + location.host + '/api/public/ws' + '?id=' + roomid;
     let conn = new WebSocket(wsurl);
 
+    let msgOpen = 'has joined';
+    let msgClose = 'has closed';
+
+    conn.onopen = function (event) {
+        // conn.send(JSON.stringify({
+        //     fullname: user.fullname,
+        //     body: msgOpen
+        // }))
+        // conn.send('Hi')
+    };
+
+    conn.onclose = function (event) {
+        // conn.send(JSON.stringify({
+        //     fullname: user.fullname,
+        //     body: msgClose
+        // }))
+        // conn.send('Bye')
+    };
+
     conn.onmessage = function (event) {
         let message = JSON.parse(event.data);
 
@@ -63,12 +82,14 @@ window.addEventListener('load', function () {
 
         let inputMessage = document.getElementById('inputMessage');
 
-        conn.send(JSON.stringify({
-            fullname: user.fullname,
-            body: inputMessage.value
-        }));
+        if (inputMessage.value !== '') {
+            conn.send(JSON.stringify({
+                fullname: user.fullname,
+                body: inputMessage.value
+            }));
 
-        inputMessage.value = ''
+            inputMessage.value = ''
+        }
     });
 
     let btnLeave = document.getElementById('btnLeave');

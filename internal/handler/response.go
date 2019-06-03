@@ -21,6 +21,7 @@ var ResponseCode = map[int]string{
 	408: "Auth token not valid",
 	409: "Role wrong",
 	410: "Room is full",
+	411: "No room id",
 	500: "Create token failed",
 	501: "Get ID failed",
 }

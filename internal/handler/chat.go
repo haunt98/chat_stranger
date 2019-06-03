@@ -1,31 +1,14 @@
 package handler
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"sync"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-)
-
-// https://github.com/gorilla/websocket/tree/master/examples/chat
-const (
-	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
-
-	// Time allowed to read the next pong message from the peer.
-	pongWait = 60 * time.Second
-
-	// Send pings to peer with this period. Must be less than pongWait.
-	pingPeriod = (pongWait * 9) / 10
-
-	// Maximum message size allowed from peer.
-	maxMessageSize = 512
 )
 
 type Message struct {
@@ -36,101 +19,23 @@ type Message struct {
 type Client struct {
 	Room *Room
 	Conn *websocket.Conn
-
-	// Buffered channel of outbound messages.
-	Send chan Message
 }
 
-// readPump pumps messages from the websocket connection to the hub.
-//
-// The application runs readPump in a per-connection goroutine. The application
-// ensures that there is at most one reader on a connection by executing all
-// reads from this goroutine.
-func (c *Client) readPump() {
+func (c *Client) Read() {
 	defer func() {
 		c.Room.Unregister <- c
 		if err := c.Conn.Close(); err != nil {
 			log.Println(err)
 		}
 	}()
-	c.Conn.SetReadLimit(maxMessageSize)
-	if err := c.Conn.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
-		log.Println(err)
-	}
-	c.Conn.SetPongHandler(func(string) error {
-		if err := c.Conn.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
-			log.Println(err)
-		}
-		return nil
-	})
+
 	for {
 		var message Message
-		err := c.Conn.ReadJSON(&message)
-		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Println(err)
-			}
-			break
+		if err := c.Conn.ReadJSON(&message); err != nil {
+			log.Println(err)
+			return
 		}
 		c.Room.Broadcast <- message
-	}
-}
-
-// writePump pumps messages from the hub to the websocket connection.
-//
-// A goroutine running writePump is started for each connection. The
-// application ensures that there is at most one writer to a connection by
-// executing all writes from this goroutine.
-func (c *Client) writePump() {
-	ticker := time.NewTicker(pingPeriod)
-	defer func() {
-		ticker.Stop()
-		if err := c.Conn.Close(); err != nil {
-			log.Println(err)
-		}
-	}()
-	for {
-		select {
-		case message, ok := <-c.Send:
-			if err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
-				log.Println(err)
-			}
-			if !ok {
-				// The hub closed the channel.
-				if err := c.Conn.WriteMessage(websocket.CloseMessage, nil); err != nil {
-					log.Println(err)
-				}
-				return
-			}
-
-			w, err := c.Conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			if err := json.NewEncoder(w).Encode(message); err != nil {
-				return
-			}
-
-			// Add queued chat messages to the current websocket message.
-			n := len(c.Send)
-			for i := 0; i < n; i++ {
-				if err := json.NewEncoder(w).Encode(<-c.Send); err != nil {
-					log.Println(err)
-					return
-				}
-			}
-			if err := w.Close(); err != nil {
-				return
-			}
-		case <-ticker.C:
-			if err := c.Conn.SetWriteDeadline(time.Now().Add(writeWait)); err != nil {
-				log.Println(err)
-			}
-			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				return
-			}
-		}
 	}
 }
 
@@ -154,20 +59,45 @@ func NewRoom() *Room {
 func (r *Room) Run() {
 	for {
 		select {
-		case client := <-r.Register:
-			r.Clients[client] = true
-		case client := <-r.Unregister:
-			if _, ok := r.Clients[client]; ok {
-				delete(r.Clients, client)
-				close(client.Send)
+		case c := <-r.Register:
+			for old_c := range r.Clients {
+				if err := old_c.Conn.WriteJSON(Message{
+					Fullname: "Server",
+					Body:     "User joined",
+				}); err != nil {
+					log.Println(err)
+					delete(r.Clients, old_c)
+					if err := old_c.Conn.Close(); err != nil {
+						log.Println(err)
+					}
+				}
+			}
+			r.Clients[c] = true
+		case c := <-r.Unregister:
+			delete(r.Clients, c)
+			if err := c.Conn.Close(); err != nil {
+				log.Println(err)
+			}
+			for old_c := range r.Clients {
+				if err := old_c.Conn.WriteJSON(Message{
+					Fullname: "Server",
+					Body:     "User leaved",
+				}); err != nil {
+					log.Println(err)
+					delete(r.Clients, old_c)
+					if err := old_c.Conn.Close(); err != nil {
+						log.Println(err)
+					}
+				}
 			}
 		case message := <-r.Broadcast:
-			for client := range r.Clients {
-				select {
-				case client.Send <- message:
-				default:
-					close(client.Send)
-					delete(r.Clients, client)
+			for c := range r.Clients {
+				if err := c.Conn.WriteJSON(message); err != nil {
+					log.Println(err)
+					delete(r.Clients, c)
+					if err := c.Conn.Close(); err != nil {
+						log.Println(err)
+					}
 				}
 			}
 		}
@@ -228,10 +158,7 @@ func (h *ChatHandler) JoinRoom() int {
 	return id
 }
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
+var upgrader = websocket.Upgrader{}
 
 func (h *ChatHandler) WS(c *gin.Context) {
 	id, err := strconv.Atoi(c.Query("id"))
@@ -240,6 +167,10 @@ func (h *ChatHandler) WS(c *gin.Context) {
 		return
 	}
 
+	if _, ok := h.Rooms[id]; !ok {
+		log.Println(fmt.Errorf(ResponseCode[411]))
+		return
+	}
 	if h.Rooms[id].IsFull() {
 		log.Println(fmt.Errorf(ResponseCode[410]))
 		return
@@ -254,14 +185,10 @@ func (h *ChatHandler) WS(c *gin.Context) {
 	client := &Client{
 		Conn: conn,
 		Room: h.Rooms[id],
-		Send: make(chan Message),
 	}
 	client.Room.Register <- client
 
-	// Allow collection of memory referenced by the caller by doing all work in
-	// new goroutines.
-	go client.writePump()
-	go client.readPump()
+	go client.Read()
 }
 
 func (h *ChatHandler) FindRoom(c *gin.Context) {
