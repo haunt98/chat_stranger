@@ -168,7 +168,7 @@ func (h *AdminHandler) Authenticate(c *gin.Context) {
 		return
 	}
 
-	s, err := service.CreateTokenString(models.JWTClaims{
+	s, err := service.CreateTokenString(service.JWTClaims{
 		ID:             admin.ID,
 		Role:           "Admin",
 		StandardClaims: jwt.StandardClaims{},

@@ -18,12 +18,39 @@ func NewUserService(creRepo repository.CredentialRepo, userRepo repository.UserR
 		userRepo:       userRepo,
 	}
 }
-func (s *UserService) FetchAll() ([]*models.User, []error) {
-	return s.userRepo.FetchAll()
+func (s *UserService) FetchAll() ([]*models.UserDownload, []error) {
+	users, errs := s.userRepo.FetchAll()
+	if len(errs) != 0 {
+		return nil, errs
+	}
+
+	var downs []*models.UserDownload
+	for _, user := range users {
+		downs = append(downs, &models.UserDownload{
+			ID:        user.ID,
+			FullName:  user.FullName,
+			Gender:    user.Gender,
+			BirthYear: user.BirthYear,
+			Introduce: user.Introduce,
+		})
+	}
+
+	return downs, nil
 }
 
-func (s *UserService) Find(id int) (*models.User, []error) {
-	return s.userRepo.Find(id)
+func (s *UserService) Find(id int) (*models.UserDownload, []error) {
+	user, errs := s.userRepo.Find(id)
+	if len(errs) != 0 {
+		return nil, errs
+	}
+
+	return &models.UserDownload{
+		ID:        user.ID,
+		FullName:  user.FullName,
+		Gender:    user.Gender,
+		BirthYear: user.BirthYear,
+		Introduce: user.Introduce,
+	}, nil
 }
 
 func (s *UserService) Create(upload *models.UserUpload) (int, []error) {
@@ -42,7 +69,7 @@ func (s *UserService) Delete(id int) []error {
 	return s.userRepo.Delete(id)
 }
 
-func (s *UserService) Authenticate(auth *models.Authentication) (*models.User, []error) {
+func (s *UserService) Authenticate(auth *models.Authentication) (*models.UserDownload, []error) {
 	cre, errs := s.credentialRepo.Find(auth.Name)
 	if len(errs) != 0 {
 		return nil, errs
@@ -59,5 +86,11 @@ func (s *UserService) Authenticate(auth *models.Authentication) (*models.User, [
 		return nil, errs
 	}
 
-	return user, nil
+	return &models.UserDownload{
+		ID:        user.ID,
+		FullName:  user.FullName,
+		Gender:    user.Gender,
+		BirthYear: user.BirthYear,
+		Introduce: user.Introduce,
+	}, nil
 }

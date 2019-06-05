@@ -60,7 +60,7 @@ func (g *AdminRepoGorm) Create(upload *models.AdminUpload) (int, []error) {
 			Name:           upload.Name,
 			HashedPassword: string(hashedPassword),
 		},
-		Fullname: upload.FullName,
+		FullName: upload.FullName,
 	}
 
 	if errs := g.db.Create(&admin).GetErrors(); len(errs) != 0 {

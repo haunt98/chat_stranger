@@ -18,12 +18,33 @@ func NewAdminService(creRepo repository.CredentialRepo, adminRepo repository.Adm
 	}
 }
 
-func (s *AdminService) FetchAll() ([]*models.Admin, []error) {
-	return s.adminRepo.FetchAll()
+func (s *AdminService) FetchAll() ([]*models.AdminDownload, []error) {
+	admins, errs := s.adminRepo.FetchAll()
+	if len(errs) != 0 {
+		return nil, errs
+	}
+
+	var downs []*models.AdminDownload
+	for _, admin := range admins {
+		downs = append(downs, &models.AdminDownload{
+			ID:       admin.ID,
+			FullName: admin.FullName,
+		})
+	}
+
+	return downs, nil
 }
 
-func (s *AdminService) Find(id int) (*models.Admin, []error) {
-	return s.adminRepo.Find(id)
+func (s *AdminService) Find(id int) (*models.AdminDownload, []error) {
+	admin, errs := s.adminRepo.Find(id)
+	if len(errs) != 0 {
+		return nil, errs
+	}
+
+	return &models.AdminDownload{
+		ID:       admin.ID,
+		FullName: admin.FullName,
+	}, nil
 }
 
 func (s *AdminService) Create(upload *models.AdminUpload) (int, []error) {
@@ -42,7 +63,7 @@ func (s *AdminService) Delete(id int) []error {
 	return s.adminRepo.Delete(id)
 }
 
-func (s *AdminService) Authenticate(auth *models.Authentication) (*models.Admin, []error) {
+func (s *AdminService) Authenticate(auth *models.Authentication) (*models.AdminDownload, []error) {
 	cre, errs := s.credentialRepo.Find(auth.Name)
 	if len(errs) != 0 {
 		return nil, errs
@@ -59,5 +80,8 @@ func (s *AdminService) Authenticate(auth *models.Authentication) (*models.Admin,
 		return nil, errs
 	}
 
-	return admin, nil
+	return &models.AdminDownload{
+		ID:       admin.ID,
+		FullName: admin.FullName,
+	}, nil
 }

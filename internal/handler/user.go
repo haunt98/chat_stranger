@@ -168,7 +168,7 @@ func (h *UserHandler) Authenticate(c *gin.Context) {
 		return
 	}
 
-	s, err := service.CreateTokenString(models.JWTClaims{
+	s, err := service.CreateTokenString(service.JWTClaims{
 		ID:             user.ID,
 		Role:           "User",
 		StandardClaims: jwt.StandardClaims{},

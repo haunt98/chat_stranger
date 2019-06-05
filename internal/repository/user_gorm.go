@@ -60,9 +60,9 @@ func (g *UserRepoGorm) Create(upload *models.UserUpload) (int, []error) {
 			Name:           upload.Name,
 			HashedPassword: string(hashedPassword),
 		},
-		Fullname:  upload.FullName,
+		FullName:  upload.FullName,
 		Gender:    upload.Gender,
-		Birthyear: upload.BirthYear,
+		BirthYear: upload.BirthYear,
 		Introduce: upload.Introduce,
 	}
 

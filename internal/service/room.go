@@ -57,7 +57,7 @@ func (r *Room) Run() {
 
 			for oldC := range r.clients {
 				if err := oldC.conn.WriteJSON(Message{
-					Fullname: u.Fullname,
+					Fullname: u.FullName,
 					Body:     "has joined",
 				}); err != nil {
 					log.Println(err)
@@ -82,7 +82,7 @@ func (r *Room) Run() {
 
 			for oldC := range r.clients {
 				if err := oldC.conn.WriteJSON(Message{
-					Fullname: u.Fullname,
+					Fullname: u.FullName,
 					Body:     "has leaved",
 				}); err != nil {
 					log.Println(err)
