@@ -17,7 +17,6 @@ window.addEventListener('load', function () {
             if (response.code !== 201) {
                 sessionStorage.removeItem('token');
                 location.href = baseurl;
-                return
             }
 
             let user = response.user;

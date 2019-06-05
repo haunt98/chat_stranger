@@ -25,13 +25,14 @@ window.addEventListener('load', function () {
             .then(res => res.json())
             .then((res) => {
                 console.log(res);
-                if (res.code === 206) {
-                    sessionStorage.setItem('token', res.token);
-                    location.href = baseurl + '/welcome_user'
+                if (res.code !== 206) {
+                    return
                 }
+                sessionStorage.setItem('token', res.token);
+                location.href = baseurl + '/welcome_user'
             })
             .catch((err) => {
-                console.log(res)
+                console.log(err)
             })
     });
 
@@ -56,9 +57,10 @@ window.addEventListener('load', function () {
             .then(res => res.json())
             .then((res) => {
                 console.log(res);
-                if (res.code === 205) {
-                    location.reload()
+                if (res.code !== 205) {
+                    return
                 }
+                location.reload()
             })
     })
 });

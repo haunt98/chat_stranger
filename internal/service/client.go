@@ -12,25 +12,36 @@ type Message struct {
 }
 
 type Client struct {
-	Room *Room
-	Conn *websocket.Conn
-	ID   int
+	conn *websocket.Conn
+	room *Room
+	id   int
+}
+
+func NewClient(conn *websocket.Conn, room *Room, id int) {
+	c := &Client{
+		conn: conn,
+		room: room,
+		id:   id,
+	}
+	c.room.register <- c
+
+	go c.Read()
 }
 
 func (c *Client) Read() {
 	defer func() {
-		c.Room.Unregister <- c
-		if err := c.Conn.Close(); err != nil {
+		c.room.unregister <- c
+		if err := c.conn.Close(); err != nil {
 			log.Println(err)
 		}
 	}()
 
 	for {
 		var message Message
-		if err := c.Conn.ReadJSON(&message); err != nil {
+		if err := c.conn.ReadJSON(&message); err != nil {
 			log.Println(err)
 			return
 		}
-		c.Room.Broadcast <- message
+		c.room.broadcast <- message
 	}
 }

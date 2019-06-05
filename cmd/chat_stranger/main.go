@@ -41,10 +41,11 @@ func main() {
 
 	userService := service.NewUserService(credentialRepo, userRepo)
 	adminService := service.NewAdminService(credentialRepo, adminRepo)
+	roomService := service.NewRoomService(userRepo)
 
 	userHandler := handler.NewUserHandler(userService)
 	adminHandler := handler.NewAdminHandler(adminService)
-	chatHandler := handler.NewChatHandler()
+	chatHandler := handler.NewChatHandler(roomService)
 
 	gin.SetMode(viper.GetString("gin.mode"))
 	gin.DisableConsoleColor()

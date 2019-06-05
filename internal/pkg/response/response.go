@@ -1,4 +1,4 @@
-package handler
+package response
 
 var ResponseCode = map[int]string{
 	200: "Fetch all OK",
@@ -6,7 +6,7 @@ var ResponseCode = map[int]string{
 	202: "Update info OK",
 	203: "Update password OK",
 	204: "Delete OK",
-	205: "Register OK",
+	205: "register OK",
 	206: "Login OK",
 	207: "New room OK",
 	208: "Next room OK",
@@ -20,10 +20,10 @@ var ResponseCode = map[int]string{
 	407: "Auth token not found",
 	408: "Auth token not valid",
 	409: "Role wrong",
-	410: "Room is full",
+	410: "room is full",
 	411: "No room id",
 	500: "Create token failed",
-	501: "Get ID failed",
+	501: "Get id failed",
 }
 
 func Response(code int) map[string]interface{} {
