@@ -19,7 +19,7 @@ window.addEventListener('load', function () {
                 location.href = baseurl
             }
 
-            document.getElementById('welcomeUsername').innerText = res.user.fullname
+            document.getElementById('welcome').innerText = res.user.fullname
 
             let btnLogOut = document.getElementById('btnLogOut');
             btnLogOut.addEventListener('click', function () {

@@ -18,7 +18,7 @@ func NewCredentialRepoGorm(db *gorm.DB) CredentialRepo {
 
 func (g *CredentialRepoGorm) Find(name string) (*models.Credential, []error) {
 	var credential models.Credential
-	errs := g.db.Where("name = ?", name).First(&credential).GetErrors()
+	errs := g.db.Where("reg_name = ?", name).First(&credential).GetErrors()
 	if len(errs) != 0 {
 		return nil, errs
 	}

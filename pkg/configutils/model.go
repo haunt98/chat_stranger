@@ -1,7 +1,7 @@
 package configutils
 
 type Environment struct {
-	EnvName     string `json:"Name"`
+	EnvName     string `json:"RegName"`
 	ServiceName string
 	ProjectName string
 	ConfigJson  string

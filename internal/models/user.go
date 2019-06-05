@@ -18,7 +18,7 @@ type User struct {
 }
 
 type UserUpload struct {
-	Name      string `json:"name"`
+	RegName   string `json:"regname"`
 	Password  string `json:"password"`
 	FullName  string `json:"fullname"`
 	Gender    string `json:"gender"`

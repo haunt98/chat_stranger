@@ -57,7 +57,7 @@ func (g *UserRepoGorm) Create(upload *models.UserUpload) (int, []error) {
 
 	user := models.User{
 		Credential: models.Credential{
-			Name:           upload.Name,
+			RegName:        upload.RegName,
 			HashedPassword: string(hashedPassword),
 		},
 		FullName:  upload.FullName,

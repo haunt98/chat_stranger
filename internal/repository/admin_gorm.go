@@ -57,7 +57,7 @@ func (g *AdminRepoGorm) Create(upload *models.AdminUpload) (int, []error) {
 
 	admin := models.Admin{
 		Credential: models.Credential{
-			Name:           upload.Name,
+			RegName:        upload.RegName,
 			HashedPassword: string(hashedPassword),
 		},
 		FullName: upload.FullName,

@@ -34,9 +34,9 @@ func main() {
 	userRepo := repository.NewUserRepoGorm(db)
 	adminRepo := repository.NewAdminRepoGorm(db)
 	adminRepo.Create(&models.AdminUpload{
-		Name:     viper.GetString("default_admin.name"),
-		Password: viper.GetString("default_admin.password"),
-		FullName: viper.GetString("default_admin.fullname"),
+		RegName:  viper.GetString("admin.regname"),
+		Password: viper.GetString("admin.password"),
+		FullName: viper.GetString("admin.fullname"),
 	})
 
 	userService := service.NewUserService(credentialRepo, userRepo)

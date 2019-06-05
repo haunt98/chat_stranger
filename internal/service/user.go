@@ -70,7 +70,7 @@ func (s *UserService) Delete(id int) []error {
 }
 
 func (s *UserService) Authenticate(auth *models.Authentication) (*models.UserDownload, []error) {
-	cre, errs := s.credentialRepo.Find(auth.Name)
+	cre, errs := s.credentialRepo.Find(auth.RegName)
 	if len(errs) != 0 {
 		return nil, errs
 	}

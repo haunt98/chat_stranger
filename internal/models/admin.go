@@ -15,7 +15,7 @@ type Admin struct {
 }
 
 type AdminUpload struct {
-	Name     string `json:"name"`
+	RegName  string `json:"regname"`
 	Password string `json:"password"`
 	FullName string `json:"fullname"`
 }

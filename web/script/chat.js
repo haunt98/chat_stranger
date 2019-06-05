@@ -11,15 +11,15 @@ window.addEventListener('load', function () {
             'Authorization': 'Bearer' + token
         }
     })
-        .then(response => response.json())
-        .then((response) => {
-            console.log(response);
-            if (response.code !== 201) {
+        .then(res => res.json())
+        .then((res) => {
+            console.log(res);
+            if (res.code !== 201) {
                 sessionStorage.removeItem('token');
                 location.href = baseurl;
             }
 
-            let user = response.user;
+            let user = res.user;
             let rid = location.href.split('/')[4];
             let uid = user.id;
 

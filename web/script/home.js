@@ -10,14 +10,14 @@ window.addEventListener('load', function () {
     formSignIn.addEventListener('submit', function (event) {
         event.preventDefault();
 
-        let username = document.getElementById('inputUsernameSignIn').value;
+        let regname = document.getElementById('inputRegNameSignIn').value;
         let password = document.getElementById('inputPasswordSignIn').value;
 
         fetch(baseurl + '/api/public/users/authenticate', {
             method: 'POST',
             body: JSON.stringify(
                 {
-                    name: username,
+                    regname: regname,
                     password: password
                 }
             )
@@ -40,7 +40,7 @@ window.addEventListener('load', function () {
     formSignUp.addEventListener('submit', function (event) {
         event.preventDefault();
 
-        let username = document.getElementById('inputUsernameSignUp').value;
+        let regname = document.getElementById('inputRegNameSignUp').value;
         let password = document.getElementById('inputPasswordSignUp').value;
         let fullname = document.getElementById('inputFullNameSignUp').value;
 
@@ -48,7 +48,7 @@ window.addEventListener('load', function () {
             method: 'POST',
             body: JSON.stringify(
                 {
-                    name: username,
+                    regname: regname,
                     password: password,
                     fullname: fullname
                 }

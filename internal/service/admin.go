@@ -64,7 +64,7 @@ func (s *AdminService) Delete(id int) []error {
 }
 
 func (s *AdminService) Authenticate(auth *models.Authentication) (*models.AdminDownload, []error) {
-	cre, errs := s.credentialRepo.Find(auth.Name)
+	cre, errs := s.credentialRepo.Find(auth.RegName)
 	if len(errs) != 0 {
 		return nil, errs
 	}
