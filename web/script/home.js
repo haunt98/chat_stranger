@@ -3,7 +3,7 @@ window.addEventListener('load', function () {
     let token = sessionStorage.getItem('token');
 
     if (token !== null) {
-        location.href = baseurl + '/welcome_user'
+        location.href = baseurl + '/web/chat_stranger/welcome_user'
     }
 
     let formSignIn = document.getElementById('formSignIn');
@@ -13,7 +13,7 @@ window.addEventListener('load', function () {
         let regname = document.getElementById('inputRegNameSignIn').value;
         let password = document.getElementById('inputPasswordSignIn').value;
 
-        fetch(baseurl + '/api/public/users/authenticate', {
+        fetch(baseurl + '/api/chat_stranger/public/users/authenticate', {
             method: 'POST',
             body: JSON.stringify(
                 {
@@ -29,7 +29,7 @@ window.addEventListener('load', function () {
                     return
                 }
                 sessionStorage.setItem('token', res.token);
-                location.href = baseurl + '/welcome_user'
+                location.href = baseurl + '/web/chat_stranger/welcome_user'
             })
             .catch((err) => {
                 console.log(err)
@@ -44,7 +44,7 @@ window.addEventListener('load', function () {
         let password = document.getElementById('inputPasswordSignUp').value;
         let fullname = document.getElementById('inputFullNameSignUp').value;
 
-        fetch(baseurl + '/api/public/users/register', {
+        fetch(baseurl + '/api/chat_stranger/public/users/register', {
             method: 'POST',
             body: JSON.stringify(
                 {

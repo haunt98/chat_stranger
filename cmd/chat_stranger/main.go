@@ -55,17 +55,17 @@ func main() {
 	router.Static("/web/script", "./web/script")
 
 	// Serve HTML
-	router.GET("/", func(c *gin.Context) {
+	router.GET("/web/chat_stranger", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "home.html", gin.H{})
 	})
-	router.GET("/welcome_user", func(c *gin.Context) {
+	router.GET("/web/chat_stranger/welcome_user", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "welcome_user.html", gin.H{})
 	})
-	router.GET("/chat/:rid", func(c *gin.Context) {
+	router.GET("/web/chat_stranger/chat/:rid", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "chat.html", gin.H{})
 	})
 
-	public := router.Group("/api/public")
+	public := router.Group("/api/chat_stranger/public")
 	{
 		public.POST("/users/register", userHandler.Create)
 		public.POST("/users/authenticate", userHandler.Authenticate)
@@ -73,7 +73,7 @@ func main() {
 		public.GET("/ws", chatHandler.WS)
 	}
 
-	roleUser := router.Group("/api/me", handler.VerifyRole("user"))
+	roleUser := router.Group("/api/chat_stranger/me", handler.VerifyRole("user"))
 	{
 		roleUser.GET("", userHandler.VerifyFind)
 		roleUser.DELETE("", userHandler.VerifyDelete)
@@ -81,7 +81,7 @@ func main() {
 		roleUser.GET("/room", chatHandler.FindRoom)
 	}
 
-	roleAdmin := router.Group("/api/me", handler.VerifyRole("admin"))
+	roleAdmin := router.Group("/api/chat_stranger/me", handler.VerifyRole("admin"))
 	{
 		roleAdmin.GET("/users", userHandler.FetchAll)
 		roleAdmin.GET("/users/:id", userHandler.Find)

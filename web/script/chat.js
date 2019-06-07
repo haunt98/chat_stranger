@@ -6,7 +6,7 @@ window.addEventListener('load', function () {
         location.href = baseurl
     }
 
-    fetch(baseurl + '/api/me', {
+    fetch(baseurl + '/api/chat_stranger/me', {
         headers: {
             'Authorization': 'Bearer' + token
         }
@@ -23,7 +23,7 @@ window.addEventListener('load', function () {
             let rid = location.href.split('/')[4];
             let uid = user.id;
 
-            let wsurl = 'ws:' + '//' + location.host + '/api/public/ws' + '?rid=' + rid + '&uid=' + uid;
+            let wsurl = 'ws:' + '//' + location.host + '/api/chat_stranger/public/ws' + '?rid=' + rid + '&uid=' + uid;
             let conn = new WebSocket(wsurl);
 
             conn.onmessage = event => {
@@ -73,12 +73,12 @@ window.addEventListener('load', function () {
             let btnLeave = document.getElementById('btnLeave');
             btnLeave.addEventListener('click', () => {
                 conn.close();
-                location.href = baseurl + '/welcome_user'
+                location.href = baseurl + '/web/chat_stranger/welcome_user'
             });
 
             let btnNext = document.getElementById('btnNext');
             btnNext.addEventListener('click', () => {
-                fetch(baseurl + '/api/me/room' + '?rid=' + rid, {
+                fetch(baseurl + '/api/chat_stranger/me/room' + '?rid=' + rid, {
                     headers: {
                         'Authorization': 'Bearer' + token
                     }
@@ -86,7 +86,7 @@ window.addEventListener('load', function () {
                     .then(res => res.json())
                     .then(res => {
                         console.log(res);
-                        location.href = baseurl + '/chat' + '/' + res.room
+                        location.href = baseurl + '/web/chat_stranger/chat' + '/' + res.room
                     })
                     .catch(err => {
                         console.log(err);

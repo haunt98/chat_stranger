@@ -6,7 +6,7 @@ window.addEventListener('load', function () {
         location.href = baseurl
     }
 
-    fetch(baseurl + '/api/me', {
+    fetch(baseurl + '/api/chat_stranger/me', {
         headers: {
             'Authorization': 'Bearer' + token
         }
@@ -25,12 +25,12 @@ window.addEventListener('load', function () {
             let btnLogOut = document.getElementById('btnLogOut');
             btnLogOut.addEventListener('click', () => {
                 sessionStorage.removeItem('token');
-                location.href = baseurl
+                location.href = baseurl + '/web/chat_stranger'
             });
 
             let btnStartChat = document.getElementById('btnStartChat');
             btnStartChat.addEventListener('click', () => {
-                fetch(baseurl + '/api/me/room', {
+                fetch(baseurl + '/api/chat_stranger/me/room', {
                     headers: {
                         'Authorization': 'Bearer' + token
                     }
@@ -38,12 +38,12 @@ window.addEventListener('load', function () {
                     .then(res => res.json())
                     .then(res => {
                         console.log(res);
-                        location.href = baseurl + '/chat' + '/' + res.room
+                        location.href = baseurl + '/web/chat_stranger/chat' + '/' + res.room
                     })
                     .catch(err => {
                         console.log(err);
                         sessionStorage.removeItem('token');
-                        location.href = baseurl
+                        location.href = baseurl + '/web/chat_stranger'
                     })
             })
         })
