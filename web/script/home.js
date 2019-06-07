@@ -7,7 +7,7 @@ window.addEventListener('load', function () {
     }
 
     let formSignIn = document.getElementById('formSignIn');
-    formSignIn.addEventListener('submit', function (event) {
+    formSignIn.addEventListener('submit', event => {
         event.preventDefault();
 
         let regname = document.getElementById('inputRegNameSignIn').value;
@@ -23,7 +23,7 @@ window.addEventListener('load', function () {
             )
         })
             .then(res => res.json())
-            .then((res) => {
+            .then(res => {
                 console.log(res);
                 if (res.code !== 206) {
                     return
@@ -37,7 +37,7 @@ window.addEventListener('load', function () {
     });
 
     let formSignUp = document.getElementById('formSignUp');
-    formSignUp.addEventListener('submit', function (event) {
+    formSignUp.addEventListener('submit', event => {
         event.preventDefault();
 
         let regname = document.getElementById('inputRegNameSignUp').value;
@@ -55,7 +55,7 @@ window.addEventListener('load', function () {
             )
         })
             .then(res => res.json())
-            .then((res) => {
+            .then(res => {
                 console.log(res);
                 if (res.code !== 205) {
                     return
@@ -64,4 +64,3 @@ window.addEventListener('load', function () {
             })
     })
 });
-

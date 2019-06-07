@@ -1,5 +1,5 @@
 package valid
 
-func CheckEmail(email string) error{
+func CheckEmail(email string) error {
 	return nil
 }

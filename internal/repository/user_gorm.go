@@ -3,7 +3,6 @@ package repository
 import (
 	"github.com/1612180/chat_stranger/internal/models"
 	"github.com/jinzhu/gorm"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepoGorm struct {
@@ -47,66 +46,25 @@ func (g *UserRepoGorm) Find(id int) (*models.User, []error) {
 	return &user, nil
 }
 
-func (g *UserRepoGorm) Create(upload *models.UserUpload) (int, []error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(upload.Password), bcrypt.DefaultCost)
-	if err != nil {
-		var errs []error
-		errs = append(errs, err)
-		return 0, errs
-	}
-
-	user := models.User{
-		Credential: models.Credential{
-			RegName:        upload.RegName,
-			HashedPassword: string(hashedPassword),
-		},
-		FullName:  upload.FullName,
-		Gender:    upload.Gender,
-		BirthYear: upload.BirthYear,
-		Introduce: upload.Introduce,
-	}
-
-	if errs := g.db.Create(&user).GetErrors(); len(errs) != 0 {
+func (g *UserRepoGorm) Create(user *models.User) (int, []error) {
+	if errs := g.db.Create(user).GetErrors(); len(errs) != 0 {
 		return 0, errs
 	}
 
 	return user.ID, nil
 }
 
-func (g *UserRepoGorm) UpdateInfo(id int, upload *models.UserUpload) []error {
-	var user models.User
-	if errs := g.db.Where("id = ?", id).First(&user).Updates(
+func (g *UserRepoGorm) UpdateInfo(id int, user *models.User) []error {
+	if errs := g.db.Table("users").Where("id = ?", id).Updates(
 		map[string]interface{}{
-			"full_name": upload.FullName,
+			"full_name":  user.FullName,
+			"gender":     user.Gender,
+			"birth_year": user.BirthYear,
+			"introduce":  user.Introduce,
 		},
 	).GetErrors(); len(errs) != 0 {
 		return errs
 	}
-	return nil
-}
-
-func (g *UserRepoGorm) UpdatePassword(id int, auth *models.Authentication) []error {
-	var user models.User
-	var cre models.Credential
-	if errs := g.db.Where("id = ?", id).First(&user).GetErrors(); len(errs) != 0 {
-		return errs
-	}
-
-	if errs := g.db.Model(&user).Related(&cre).GetErrors(); len(errs) != 0 {
-		return errs
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(auth.Password), bcrypt.DefaultCost)
-	if err != nil {
-		var errs []error
-		errs = append(errs, err)
-		return errs
-	}
-
-	if errs := g.db.Model(&cre).Update("hashed_password", hashedPassword).GetErrors(); len(errs) != 0 {
-		return errs
-	}
-
 	return nil
 }
 

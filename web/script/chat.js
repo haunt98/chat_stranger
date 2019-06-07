@@ -12,21 +12,21 @@ window.addEventListener('load', function () {
         }
     })
         .then(res => res.json())
-        .then((res) => {
+        .then(res => {
             console.log(res);
             if (res.code !== 201) {
                 sessionStorage.removeItem('token');
                 location.href = baseurl;
             }
 
-            let user = res.user;
+            let user = res.data;
             let rid = location.href.split('/')[4];
             let uid = user.id;
 
             let wsurl = 'ws:' + '//' + location.host + '/api/public/ws' + '?rid=' + rid + '&uid=' + uid;
             let conn = new WebSocket(wsurl);
 
-            conn.onmessage = (event) => {
+            conn.onmessage = event => {
                 let message = JSON.parse(event.data);
 
                 let divRow = document.createElement('div');
@@ -55,7 +55,7 @@ window.addEventListener('load', function () {
             };
 
             let formChat = document.getElementById('formChat');
-            formChat.addEventListener('submit', (event) => {
+            formChat.addEventListener('submit', event => {
                 event.preventDefault();
 
                 let inputMessage = document.getElementById('inputMessage');
@@ -71,7 +71,7 @@ window.addEventListener('load', function () {
             });
 
             let btnLeave = document.getElementById('btnLeave');
-            btnLeave.addEventListener('click', function () {
+            btnLeave.addEventListener('click', () => {
                 conn.close();
                 location.href = baseurl + '/welcome_user'
             });
@@ -84,11 +84,11 @@ window.addEventListener('load', function () {
                     }
                 })
                     .then(res => res.json())
-                    .then((res) => {
+                    .then(res => {
                         console.log(res);
                         location.href = baseurl + '/chat' + '/' + res.room
                     })
-                    .catch((err) => {
+                    .catch(err => {
                         console.log(err);
                         sessionStorage.removeItem('token');
                         location.href = baseurl;
@@ -96,7 +96,7 @@ window.addEventListener('load', function () {
             })
 
         })
-        .catch((err) => {
+        .catch(err => {
             console.log(err);
             sessionStorage.removeItem('token');
             location.href = baseurl;

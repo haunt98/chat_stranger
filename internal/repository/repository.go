@@ -7,18 +7,16 @@ import (
 type UserRepo interface {
 	FetchAll() ([]*models.User, []error)
 	Find(int) (*models.User, []error)
-	Create(*models.UserUpload) (int, []error)
-	UpdateInfo(int, *models.UserUpload) []error
-	UpdatePassword(int, *models.Authentication) []error
+	Create(user *models.User) (int, []error)
+	UpdateInfo(int, *models.User) []error
 	Delete(int) []error
 }
 
 type AdminRepo interface {
 	FetchAll() ([]*models.Admin, []error)
 	Find(int) (*models.Admin, []error)
-	Create(*models.AdminUpload) (int, []error)
-	UpdateInfo(int, *models.AdminUpload) []error
-	UpdatePassword(int, *models.Authentication) []error
+	Create(*models.Admin) (int, []error)
+	UpdateInfo(int, *models.Admin) []error
 	Delete(int) []error
 }
 

@@ -3,7 +3,6 @@ package repository
 import (
 	"github.com/1612180/chat_stranger/internal/models"
 	"github.com/jinzhu/gorm"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type AdminRepoGorm struct {
@@ -47,61 +46,20 @@ func (g *AdminRepoGorm) Find(id int) (*models.Admin, []error) {
 	return &admin, nil
 }
 
-func (g *AdminRepoGorm) Create(upload *models.AdminUpload) (int, []error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(upload.Password), bcrypt.DefaultCost)
-	if err != nil {
-		var errs []error
-		errs = append(errs, err)
-		return 0, errs
-	}
-
-	admin := models.Admin{
-		Credential: models.Credential{
-			RegName:        upload.RegName,
-			HashedPassword: string(hashedPassword),
-		},
-		FullName: upload.FullName,
-	}
-
-	if errs := g.db.Create(&admin).GetErrors(); len(errs) != 0 {
+func (g *AdminRepoGorm) Create(admin *models.Admin) (int, []error) {
+	if errs := g.db.Create(admin).GetErrors(); len(errs) != 0 {
 		return 0, errs
 	}
 
 	return admin.ID, nil
 }
 
-func (g *AdminRepoGorm) UpdateInfo(id int, upload *models.AdminUpload) []error {
-	var admin models.Admin
-	if errs := g.db.Where("id = ?", id).First(&admin).Updates(
+func (g *AdminRepoGorm) UpdateInfo(id int, admin *models.Admin) []error {
+	if errs := g.db.Table("admins").Where("id = ?", id).Updates(
 		map[string]interface{}{
-			"full_name": upload.FullName,
+			"full_name": admin.FullName,
 		},
 	).GetErrors(); len(errs) != 0 {
-		return errs
-	}
-
-	return nil
-}
-
-func (g *AdminRepoGorm) UpdatePassword(id int, auth *models.Authentication) []error {
-	var admin models.Admin
-	var cre models.Credential
-	if errs := g.db.Where("id = ?", id).First(&admin).GetErrors(); len(errs) != 0 {
-		return errs
-	}
-
-	if errs := g.db.Model(&admin).Related(&cre).GetErrors(); len(errs) != 0 {
-		return errs
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(auth.Password), bcrypt.DefaultCost)
-	if err != nil {
-		var errs []error
-		errs = append(errs, err)
-		return errs
-	}
-
-	if errs := g.db.Model(&cre).Update("hashed_password", hashedPassword).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 

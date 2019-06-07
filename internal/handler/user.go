@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/1612180/chat_stranger/internal/models"
+	"github.com/1612180/chat_stranger/internal/dtos"
 	"github.com/1612180/chat_stranger/internal/pkg/response"
 	"github.com/1612180/chat_stranger/internal/service"
 	"github.com/dgrijalva/jwt-go"
@@ -23,7 +23,7 @@ func NewUserHandler(s *service.UserService) *UserHandler {
 }
 
 func (h *UserHandler) FetchAll(c *gin.Context) {
-	users, errs := h.service.FetchAll()
+	userRess, errs := h.service.FetchAll()
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -33,7 +33,7 @@ func (h *UserHandler) FetchAll(c *gin.Context) {
 	}
 
 	res := response.Response(200)
-	res["users"] = users
+	res["data"] = userRess
 	c.JSON(http.StatusOK, res)
 }
 
@@ -45,7 +45,7 @@ func (h *UserHandler) Find(c *gin.Context) {
 		return
 	}
 
-	user, errs := h.service.Find(id)
+	userRes, errs := h.service.Find(id)
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -55,19 +55,19 @@ func (h *UserHandler) Find(c *gin.Context) {
 	}
 
 	res := response.Response(201)
-	res["user"] = user
+	res["data"] = userRes
 	c.JSON(http.StatusOK, res)
 }
 
 func (h *UserHandler) Create(c *gin.Context) {
-	var upload models.UserUpload
-	if err := c.ShouldBindJSON(&upload); err != nil {
+	var userReq dtos.UserRequest
+	if err := c.ShouldBindJSON(&userReq); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, response.Response(400))
 		return
 	}
 
-	id, errs := h.service.Create(&upload)
+	id, errs := h.service.Create(&userReq)
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -77,7 +77,7 @@ func (h *UserHandler) Create(c *gin.Context) {
 	}
 
 	res := response.Response(205)
-	res["userid"] = id
+	res["id"] = id
 	c.JSON(http.StatusOK, res)
 }
 
@@ -89,14 +89,14 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 		return
 	}
 
-	var upload models.UserUpload
-	if err = c.ShouldBindJSON(&upload); err != nil {
+	var userReq dtos.UserRequest
+	if err = c.ShouldBindJSON(&userReq); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, response.Response(400))
 		return
 	}
 
-	if errs := h.service.UpdateInfo(id, &upload); len(errs) != 0 {
+	if errs := h.service.UpdateInfo(id, &userReq); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -107,31 +107,6 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 	c.JSON(http.StatusOK, response.Response(202))
 }
 
-func (h *UserHandler) UpdatePassword(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(401))
-	}
-
-	var auth models.Authentication
-	if err = c.ShouldBindJSON(&auth); err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(400))
-		return
-	}
-
-	if errs := h.service.UpdatePassword(id, &auth); len(errs) != 0 {
-		for _, err := range errs {
-			log.Println(err)
-		}
-		c.JSON(http.StatusOK, response.Response(403))
-		return
-	}
-
-	c.JSON(http.StatusOK, response.Response(203))
-}
-
 func (h *UserHandler) Delete(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -140,7 +115,7 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if errs := h.service.Delete((id)); len(errs) != 0 {
+	if errs := h.service.Delete(id); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -152,14 +127,14 @@ func (h *UserHandler) Delete(c *gin.Context) {
 }
 
 func (h *UserHandler) Authenticate(c *gin.Context) {
-	var auth models.Authentication
+	var auth dtos.CredentialRequest
 	if err := c.ShouldBindJSON(&auth); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, response.Response(400))
 		return
 	}
 
-	user, errs := h.service.Authenticate(&auth)
+	userRes, errs := h.service.Authenticate(&auth)
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -169,8 +144,8 @@ func (h *UserHandler) Authenticate(c *gin.Context) {
 	}
 
 	s, err := service.CreateTokenString(service.JWTClaims{
-		ID:             user.ID,
-		Role:           "User",
+		ID:             userRes.ID,
+		Role:           "user",
 		StandardClaims: jwt.StandardClaims{},
 	})
 	if err != nil {
@@ -191,7 +166,7 @@ func (h *UserHandler) VerifyFind(c *gin.Context) {
 		return
 	}
 
-	user, errs := h.service.Find(id.(int))
+	userRes, errs := h.service.Find(id.(int))
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -201,7 +176,7 @@ func (h *UserHandler) VerifyFind(c *gin.Context) {
 	}
 
 	res := response.Response(201)
-	res["user"] = user
+	res["data"] = userRes
 	c.JSON(http.StatusOK, res)
 }
 
@@ -230,14 +205,14 @@ func (h *UserHandler) VerifyUpdateInfo(c *gin.Context) {
 		return
 	}
 
-	var upload models.UserUpload
-	if err := c.ShouldBindJSON(&upload); err != nil {
+	var userReq dtos.UserRequest
+	if err := c.ShouldBindJSON(&userReq); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, response.Response(400))
 		return
 	}
 
-	if errs := h.service.UpdateInfo(id.(int), &upload); len(errs) != 0 {
+	if errs := h.service.UpdateInfo(id.(int), &userReq); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -246,29 +221,4 @@ func (h *UserHandler) VerifyUpdateInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.Response(202))
-}
-
-func (h *UserHandler) VerifyUpdatePassword(c *gin.Context) {
-	id, ok := c.Get("id")
-	if !ok {
-		c.JSON(http.StatusInternalServerError, response.Response(501))
-		return
-	}
-
-	var auth models.Authentication
-	if err := c.ShouldBindJSON(&auth); err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(400))
-		return
-	}
-
-	if errs := h.service.UpdatePassword(id.(int), &auth); len(errs) != 0 {
-		for _, err := range errs {
-			log.Println(err)
-		}
-		c.JSON(http.StatusOK, response.Response(403))
-		return
-	}
-
-	c.JSON(http.StatusOK, response.Response(203))
 }

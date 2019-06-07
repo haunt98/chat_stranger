@@ -1,6 +1,6 @@
 package dtos
 
-type Authentication struct {
+type CredentialRequest struct {
 	RegName  string `json:"regname"`
 	Password string `json:"password"`
 }

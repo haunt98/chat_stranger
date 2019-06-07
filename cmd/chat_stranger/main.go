@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/1612180/chat_stranger/internal/dtos"
 	"github.com/1612180/chat_stranger/internal/handler"
-	"github.com/1612180/chat_stranger/internal/models"
 	"github.com/1612180/chat_stranger/internal/repository"
 	"github.com/1612180/chat_stranger/internal/service"
 	"github.com/1612180/chat_stranger/pkg/configutils"
@@ -33,15 +33,16 @@ func main() {
 	credentialRepo := repository.NewCredentialRepoGorm(db)
 	userRepo := repository.NewUserRepoGorm(db)
 	adminRepo := repository.NewAdminRepoGorm(db)
-	adminRepo.Create(&models.AdminUpload{
-		RegName:  viper.GetString("admin.regname"),
-		Password: viper.GetString("admin.password"),
-		FullName: viper.GetString("admin.fullname"),
-	})
 
 	userService := service.NewUserService(credentialRepo, userRepo)
 	adminService := service.NewAdminService(credentialRepo, adminRepo)
 	roomService := service.NewRoomService(userRepo)
+
+	adminService.Create(&dtos.AdminRequest{
+		RegName:  viper.GetString("admin.regname"),
+		Password: viper.GetString("admin.password"),
+		FullName: viper.GetString("admin.fullname"),
+	})
 
 	userHandler := handler.NewUserHandler(userService)
 	adminHandler := handler.NewAdminHandler(adminService)
@@ -72,28 +73,25 @@ func main() {
 		public.GET("/ws", chatHandler.WS)
 	}
 
-	roleUser := router.Group("/api/me", handler.VerifyRole("User"))
+	roleUser := router.Group("/api/me", handler.VerifyRole("user"))
 	{
 		roleUser.GET("", userHandler.VerifyFind)
 		roleUser.DELETE("", userHandler.VerifyDelete)
 		roleUser.PUT("/info", userHandler.VerifyUpdateInfo)
-		roleUser.PUT("/password", userHandler.VerifyUpdatePassword)
 		roleUser.GET("/room", chatHandler.FindRoom)
 	}
 
-	roleAdmin := router.Group("/api/me", handler.VerifyRole("Admin"))
+	roleAdmin := router.Group("/api/me", handler.VerifyRole("admin"))
 	{
 		roleAdmin.GET("/users", userHandler.FetchAll)
 		roleAdmin.GET("/users/:id", userHandler.Find)
 		roleAdmin.POST("/users", userHandler.Create)
 		roleAdmin.PUT("/users/:id/info", userHandler.UpdateInfo)
-		roleAdmin.PUT("/users/:id/password", userHandler.UpdatePassword)
 		roleAdmin.DELETE("/users/:id", userHandler.Delete)
 		roleAdmin.GET("/admins", adminHandler.FetchAll)
 		roleAdmin.GET("/admins/:id", adminHandler.Find)
 		roleAdmin.POST("/admins", adminHandler.Create)
 		roleAdmin.PUT("/admins/:id/info", adminHandler.UpdateInfo)
-		roleAdmin.PUT("/admins/:id/password", adminHandler.UpdatePassword)
 		roleAdmin.DELETE("/admins/:id", adminHandler.Delete)
 	}
 

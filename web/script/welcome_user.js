@@ -12,42 +12,43 @@ window.addEventListener('load', function () {
         }
     })
         .then(res => res.json())
-        .then((res) => {
+        .then(res => {
             console.log(res);
             if (res.code !== 201) {
                 sessionStorage.removeItem('token');
                 location.href = baseurl
             }
 
-            document.getElementById('welcome').innerText = res.user.fullname
+            let welcome = document.getElementById('welcome');
+            welcome.innerText = res.data.fullname;
 
             let btnLogOut = document.getElementById('btnLogOut');
-            btnLogOut.addEventListener('click', function () {
+            btnLogOut.addEventListener('click', () => {
                 sessionStorage.removeItem('token');
                 location.href = baseurl
             });
 
             let btnStartChat = document.getElementById('btnStartChat');
-            btnStartChat.addEventListener('click', function () {
+            btnStartChat.addEventListener('click', () => {
                 fetch(baseurl + '/api/me/room', {
                     headers: {
                         'Authorization': 'Bearer' + token
                     }
                 })
                     .then(res => res.json())
-                    .then((res) => {
+                    .then(res => {
                         console.log(res);
                         location.href = baseurl + '/chat' + '/' + res.room
                     })
-                    .catch((err) => {
+                    .catch(err => {
                         console.log(err);
                         sessionStorage.removeItem('token');
                         location.href = baseurl
                     })
             })
         })
-        .catch((err) => {
-            console.log(err)
+        .catch(err => {
+            console.log(err);
             sessionStorage.removeItem('token');
             location.href = baseurl
         })

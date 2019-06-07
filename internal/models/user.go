@@ -2,6 +2,9 @@ package models
 
 import (
 	"time"
+
+	"github.com/1612180/chat_stranger/internal/dtos"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // User belongs to Credential
@@ -17,19 +20,42 @@ type User struct {
 	Introduce    string
 }
 
-type UserUpload struct {
-	RegName   string `json:"regname"`
-	Password  string `json:"password"`
-	FullName  string `json:"fullname"`
-	Gender    string `json:"gender"`
-	BirthYear int    `json:"birthyear"`
-	Introduce string `json:"introduce"`
+func (user *User) FromRequest(userReq *dtos.UserRequest) (*User, []error) {
+	var cre Credential
+	cre.RegName = userReq.RegName
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userReq.Password), bcrypt.DefaultCost)
+	if err != nil {
+		var errs []error
+		errs = append(errs, err)
+		return nil, errs
+	}
+	cre.HashedPassword = string(hashedPassword)
+
+	user.Credential = cre
+	user.FullName = userReq.FullName
+	user.Gender = userReq.Gender
+	user.BirthYear = userReq.BirthYear
+	user.Introduce = userReq.Introduce
+
+	return user, nil
 }
 
-type UserDownload struct {
-	ID        int    `json:"id"`
-	FullName  string `json:"fullname"`
-	Gender    string `json:"gender"`
-	BirthYear int    `json:"birthyear"`
-	Introduce string `json:"introduce"`
+func (user *User) UpdateFromRequest(userReq *dtos.UserRequest) *User {
+	user.FullName = userReq.FullName
+	user.Gender = userReq.Gender
+	user.BirthYear = userReq.BirthYear
+	user.Introduce = userReq.Introduce
+
+	return user
+}
+
+func (user *User) ToResponse() *dtos.UserResponse {
+	return &dtos.UserResponse{
+		ID:        user.ID,
+		FullName:  user.FullName,
+		Gender:    user.Gender,
+		BirthYear: user.BirthYear,
+		Introduce: user.Introduce,
+	}
 }

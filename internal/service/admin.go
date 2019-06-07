@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/1612180/chat_stranger/internal/dtos"
 	"github.com/1612180/chat_stranger/internal/models"
 	"github.com/1612180/chat_stranger/internal/repository"
 	"golang.org/x/crypto/bcrypt"
@@ -18,53 +19,49 @@ func NewAdminService(creRepo repository.CredentialRepo, adminRepo repository.Adm
 	}
 }
 
-func (s *AdminService) FetchAll() ([]*models.AdminDownload, []error) {
+func (s *AdminService) FetchAll() ([]*dtos.AdminResponse, []error) {
 	admins, errs := s.adminRepo.FetchAll()
 	if len(errs) != 0 {
 		return nil, errs
 	}
 
-	var downs []*models.AdminDownload
+	var adminRess []*dtos.AdminResponse
 	for _, admin := range admins {
-		downs = append(downs, &models.AdminDownload{
-			ID:       admin.ID,
-			FullName: admin.FullName,
-		})
+		adminRess = append(adminRess, admin.ToResponse())
 	}
 
-	return downs, nil
+	return adminRess, nil
 }
 
-func (s *AdminService) Find(id int) (*models.AdminDownload, []error) {
+func (s *AdminService) Find(id int) (*dtos.AdminResponse, []error) {
 	admin, errs := s.adminRepo.Find(id)
 	if len(errs) != 0 {
 		return nil, errs
 	}
 
-	return &models.AdminDownload{
-		ID:       admin.ID,
-		FullName: admin.FullName,
-	}, nil
+	return admin.ToResponse(), nil
 }
 
-func (s *AdminService) Create(upload *models.AdminUpload) (int, []error) {
-	return s.adminRepo.Create(upload)
+func (s *AdminService) Create(adminReq *dtos.AdminRequest) (int, []error) {
+	admin, errs := (&models.Admin{}).FromRequest(adminReq)
+	if len(errs) != 0 {
+		return 0, errs
+	}
+
+	return s.adminRepo.Create(admin)
 }
 
-func (s *AdminService) UpdateInfo(id int, upload *models.AdminUpload) []error {
-	return s.adminRepo.UpdateInfo(id, upload)
-}
-
-func (s *AdminService) UpdatePassword(id int, auth *models.Authentication) []error {
-	return s.adminRepo.UpdatePassword(id, auth)
+func (s *AdminService) UpdateInfo(id int, adminReq *dtos.AdminRequest) []error {
+	admin := (&models.Admin{}).UpdateFromRequest(adminReq)
+	return s.adminRepo.UpdateInfo(id, admin)
 }
 
 func (s *AdminService) Delete(id int) []error {
 	return s.adminRepo.Delete(id)
 }
 
-func (s *AdminService) Authenticate(auth *models.Authentication) (*models.AdminDownload, []error) {
-	cre, errs := s.credentialRepo.Find(auth.RegName)
+func (s *AdminService) Authenticate(credReq *dtos.CredentialRequest) (*dtos.AdminResponse, []error) {
+	cre, errs := s.credentialRepo.Find(credReq.RegName)
 	if len(errs) != 0 {
 		return nil, errs
 	}
@@ -74,14 +71,11 @@ func (s *AdminService) Authenticate(auth *models.Authentication) (*models.AdminD
 		return nil, errs
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(cre.HashedPassword), []byte(auth.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(cre.HashedPassword), []byte(credReq.Password)); err != nil {
 		var errs []error
 		errs = append(errs, err)
 		return nil, errs
 	}
 
-	return &models.AdminDownload{
-		ID:       admin.ID,
-		FullName: admin.FullName,
-	}, nil
+	return admin.ToResponse(), nil
 }

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/1612180/chat_stranger/internal/models"
+	"github.com/1612180/chat_stranger/internal/dtos"
 	"github.com/1612180/chat_stranger/internal/pkg/response"
 	"github.com/1612180/chat_stranger/internal/service"
 	"github.com/dgrijalva/jwt-go"
@@ -23,7 +23,7 @@ func NewAdminHandler(s *service.AdminService) *AdminHandler {
 }
 
 func (h *AdminHandler) FetchAll(c *gin.Context) {
-	admins, errs := h.service.FetchAll()
+	adminRess, errs := h.service.FetchAll()
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -33,7 +33,7 @@ func (h *AdminHandler) FetchAll(c *gin.Context) {
 	}
 
 	res := response.Response(200)
-	res["admins"] = admins
+	res["data"] = adminRess
 	c.JSON(http.StatusOK, res)
 }
 
@@ -45,7 +45,7 @@ func (h *AdminHandler) Find(c *gin.Context) {
 		return
 	}
 
-	admin, errs := h.service.Find(id)
+	adminRes, errs := h.service.Find(id)
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -55,19 +55,19 @@ func (h *AdminHandler) Find(c *gin.Context) {
 	}
 
 	res := response.Response(201)
-	res["admin"] = admin
+	res["data"] = adminRes
 	c.JSON(http.StatusOK, res)
 }
 
 func (h *AdminHandler) Create(c *gin.Context) {
-	var upload models.AdminUpload
-	if err := c.ShouldBindJSON(&upload); err != nil {
+	var adminReq dtos.AdminRequest
+	if err := c.ShouldBindJSON(&adminReq); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, response.Response(400))
 		return
 	}
 
-	id, errs := h.service.Create(&upload)
+	id, errs := h.service.Create(&adminReq)
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -77,7 +77,7 @@ func (h *AdminHandler) Create(c *gin.Context) {
 	}
 
 	res := response.Response(205)
-	res["adminid"] = id
+	res["id"] = id
 	c.JSON(http.StatusOK, res)
 }
 
@@ -89,14 +89,14 @@ func (h *AdminHandler) UpdateInfo(c *gin.Context) {
 		return
 	}
 
-	var upload models.AdminUpload
-	if err = c.ShouldBindJSON(&upload); err != nil {
+	var adminReq dtos.AdminRequest
+	if err = c.ShouldBindJSON(&adminReq); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, response.Response(400))
 		return
 	}
 
-	if errs := h.service.UpdateInfo(id, &upload); len(errs) != 0 {
+	if errs := h.service.UpdateInfo(id, &adminReq); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -105,31 +105,6 @@ func (h *AdminHandler) UpdateInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.Response(202))
-}
-
-func (h *AdminHandler) UpdatePassword(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(401))
-	}
-
-	var auth models.Authentication
-	if err = c.ShouldBindJSON(&auth); err != nil {
-		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(400))
-		return
-	}
-
-	if errs := h.service.UpdatePassword(id, &auth); len(errs) != 0 {
-		for _, err := range errs {
-			log.Println(err)
-		}
-		c.JSON(http.StatusOK, response.Response(403))
-		return
-	}
-
-	c.JSON(http.StatusOK, response.Response(203))
 }
 
 func (h *AdminHandler) Delete(c *gin.Context) {
@@ -152,14 +127,14 @@ func (h *AdminHandler) Delete(c *gin.Context) {
 }
 
 func (h *AdminHandler) Authenticate(c *gin.Context) {
-	var auth models.Authentication
-	if err := c.ShouldBindJSON(&auth); err != nil {
+	var creReq dtos.CredentialRequest
+	if err := c.ShouldBindJSON(&creReq); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, response.Response(400))
 		return
 	}
 
-	admin, errs := h.service.Authenticate(&auth)
+	adminRes, errs := h.service.Authenticate(&creReq)
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -169,8 +144,8 @@ func (h *AdminHandler) Authenticate(c *gin.Context) {
 	}
 
 	s, err := service.CreateTokenString(service.JWTClaims{
-		ID:             admin.ID,
-		Role:           "Admin",
+		ID:             adminRes.ID,
+		Role:           "admin",
 		StandardClaims: jwt.StandardClaims{},
 	})
 	if err != nil {

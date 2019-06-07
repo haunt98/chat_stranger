@@ -11,8 +11,3 @@ type Credential struct {
 	RegName        string `gorm:"unique"`
 	HashedPassword string
 }
-
-type Authentication struct {
-	RegName  string `json:"regname"`
-	Password string `json:"password"`
-}

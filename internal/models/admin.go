@@ -2,6 +2,9 @@ package models
 
 import (
 	"time"
+
+	"github.com/1612180/chat_stranger/internal/dtos"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Admin belongs to Credential
@@ -14,13 +17,33 @@ type Admin struct {
 	FullName     string
 }
 
-type AdminUpload struct {
-	RegName  string `json:"regname"`
-	Password string `json:"password"`
-	FullName string `json:"fullname"`
+func (admin *Admin) FromRequest(adminReq *dtos.AdminRequest) (*Admin, []error) {
+	var cre Credential
+	cre.RegName = adminReq.RegName
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminReq.Password), bcrypt.DefaultCost)
+	if err != nil {
+		var errs []error
+		errs = append(errs, err)
+		return nil, errs
+	}
+	cre.HashedPassword = string(hashedPassword)
+
+	admin.Credential = cre
+	admin.FullName = adminReq.FullName
+
+	return admin, nil
 }
 
-type AdminDownload struct {
-	ID       int    `json:"id"`
-	FullName string `json:"fullname"`
+func (admin *Admin) UpdateFromRequest(adminReq *dtos.AdminRequest) *Admin {
+	admin.FullName = adminReq.FullName
+
+	return admin
+}
+
+func (admin *Admin) ToResponse() *dtos.AdminResponse {
+	return &dtos.AdminResponse{
+		ID:       admin.ID,
+		FullName: admin.FullName,
+	}
 }
