@@ -54,45 +54,51 @@ func main() {
 	router.LoadHTMLGlob("./web/*.html")
 	router.Static("/web/script", "./web/script")
 
-	// Serve HTML
-	router.GET("/web/chat_stranger", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "home.html", gin.H{})
-	})
-	router.GET("/web/chat_stranger/welcome_user", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "welcome_user.html", gin.H{})
-	})
-	router.GET("/web/chat_stranger/chat/:rid", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "chat.html", gin.H{})
-	})
-
-	public := router.Group("/api/chat_stranger/public")
+	web := router.Group("/chat_stranger/web")
 	{
-		public.POST("/users/register", userHandler.Create)
-		public.POST("/users/authenticate", userHandler.Authenticate)
-		public.POST("/admins/authenticate", adminHandler.Authenticate)
-		public.GET("/ws", chatHandler.WS)
+		web.GET("", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "home.html", gin.H{})
+		})
+		web.GET("/welcome", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "welcome.html", gin.H{})
+		})
+		web.GET("/chat", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "chat.html", gin.H{})
+		})
 	}
 
-	roleUser := router.Group("/api/chat_stranger/me", handler.VerifyRole("user"))
+	r1 := router.Group("/chat_stranger/api")
 	{
-		roleUser.GET("", userHandler.VerifyFind)
-		roleUser.DELETE("", userHandler.VerifyDelete)
-		roleUser.PUT("/info", userHandler.VerifyUpdateInfo)
-		roleUser.GET("/room", chatHandler.FindRoom)
+		r1.POST("/register", userHandler.Create)
+		r1.POST("/auth", userHandler.Authenticate)
+		r1.POST("/auth/admin", adminHandler.Authenticate)
+		r1.GET("/ws", chatHandler.WS)
 	}
 
-	roleAdmin := router.Group("/api/chat_stranger/me", handler.VerifyRole("admin"))
+	r2 := router.Group("/chat_stranger/api/me", handler.VerifyRole("user"))
 	{
-		roleAdmin.GET("/users", userHandler.FetchAll)
-		roleAdmin.GET("/users/:id", userHandler.Find)
-		roleAdmin.POST("/users", userHandler.Create)
-		roleAdmin.PUT("/users/:id/info", userHandler.UpdateInfo)
-		roleAdmin.DELETE("/users/:id", userHandler.Delete)
-		roleAdmin.GET("/admins", adminHandler.FetchAll)
-		roleAdmin.GET("/admins/:id", adminHandler.Find)
-		roleAdmin.POST("/admins", adminHandler.Create)
-		roleAdmin.PUT("/admins/:id/info", adminHandler.UpdateInfo)
-		roleAdmin.DELETE("/admins/:id", adminHandler.Delete)
+		r2.GET("", userHandler.VerifyFind)
+		r2.DELETE("", userHandler.VerifyDelete)
+		r2.PUT("", userHandler.VerifyUpdateInfo)
+		r2.GET("/room", chatHandler.FindRoom)
+	}
+
+	r3 := router.Group("/chat_stranger/api/users", handler.VerifyRole("admin"))
+	{
+		r3.GET("", userHandler.FetchAll)
+		r3.GET("/:id", userHandler.Find)
+		r3.POST("", userHandler.Create)
+		r3.PUT("/:id", userHandler.UpdateInfo)
+		r3.DELETE("/:id", userHandler.Delete)
+	}
+
+	r4 := router.Group("/chat_stranger/api/admins", handler.VerifyRole("admin"))
+	{
+		r4.GET("", adminHandler.FetchAll)
+		r4.GET("/:id", adminHandler.Find)
+		r4.POST("", adminHandler.Create)
+		r4.PUT("/:id", adminHandler.UpdateInfo)
+		r4.DELETE("/:id", adminHandler.Delete)
 	}
 
 	if err = router.Run(":" + viper.GetString("port")); err != nil {
