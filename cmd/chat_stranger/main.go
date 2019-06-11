@@ -69,9 +69,12 @@ func main() {
 
 	r1 := router.Group("/chat_stranger/api")
 	{
-		r1.POST("/register", userHandler.Create)
-		r1.POST("/auth", userHandler.Authenticate)
-		r1.POST("/auth/admin", adminHandler.Authenticate)
+		auth := r1.Group("/auth")
+		{
+			auth.POST("/register", userHandler.Create)
+			auth.POST("/login", userHandler.Authenticate)
+			auth.POST("/login/admin", adminHandler.Authenticate)
+		}
 		r1.GET("/ws", chatHandler.WS)
 	}
 

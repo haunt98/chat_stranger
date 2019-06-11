@@ -6,7 +6,7 @@ function SignIn() {
     let regname = document.getElementById("inputRegNameSignIn").value;
     let password = document.getElementById("inputPasswordSignIn").value;
 
-    let res = await fetch("/chat_stranger/api/auth", {
+    let res = await fetch("/chat_stranger/api/auth/login", {
       method: "POST",
       body: JSON.stringify({
         regname: regname,
@@ -32,7 +32,7 @@ function SignUp() {
     let password = document.getElementById("inputPasswordSignUp").value;
     let fullname = document.getElementById("inputFullNameSignUp").value;
 
-    let res = await fetch("/chat_stranger/api/register", {
+    let res = await fetch("/chat_stranger/api/auth/register", {
       method: "POST",
       body: JSON.stringify({
         regname: regname,
