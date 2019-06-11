@@ -52,7 +52,7 @@ func main() {
 	gin.DisableConsoleColor()
 	router := gin.Default()
 	router.LoadHTMLGlob("./web/*.html")
-	router.Static("/web/script", "./web/script")
+	router.Static("/chat_stranger/web/script", "./web/script")
 
 	web := router.Group("/chat_stranger/web")
 	{

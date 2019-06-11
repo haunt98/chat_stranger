@@ -24,6 +24,24 @@ function ShowMessage(message) {
   content.appendChild(divRow);
 }
 
+function CreateWSConn(rid, uid) {
+  let url = "";
+  if (location.protocol === "https:") {
+    url += "wss:";
+  } else {
+    url += "ws:";
+  }
+  url +=
+    "//" +
+    location.host +
+    "/chat_stranger/api/ws" +
+    "?rid=" +
+    rid +
+    "&uid=" +
+    uid;
+  return new WebSocket(url);
+}
+
 function Leave(conn) {
   let btnLeave = document.getElementById("btnLeave");
   btnLeave.addEventListener("click", () => {
@@ -91,16 +109,7 @@ window.addEventListener("load", async () => {
     return;
   }
 
-  let wsurl =
-    "ws:" +
-    "//" +
-    location.host +
-    "/chat_stranger/api/ws" +
-    "?rid=" +
-    rid +
-    "&uid=" +
-    uid;
-  let conn = new WebSocket(wsurl);
+  conn = CreateWSConn(rid, uid);
   conn.onmessage = event => {
     let message = JSON.parse(event.data);
     ShowMessage(message);
