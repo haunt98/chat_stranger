@@ -55,24 +55,24 @@ func (h *ChatHandler) WS(c *gin.Context) {
 func (h *ChatHandler) FindRoom(c *gin.Context) {
 	_, ok := c.Get("id")
 	if !ok {
-		c.JSON(http.StatusInternalServerError, response.Response(501))
+		c.JSON(http.StatusInternalServerError, response.Make(501))
 		return
 	}
 
 	q := c.Query("rid")
 	if q == "" {
-		res := response.Response(207)
+		res := response.Make(207)
 		res["room"] = h.service.JoinRoom()
 		c.JSON(http.StatusOK, res)
 	} else {
 		rid, err := strconv.Atoi(q)
 		if err != nil {
 			log.Println(err)
-			c.JSON(http.StatusOK, response.Response(401))
+			c.JSON(http.StatusOK, response.Make(401))
 			return
 		}
 
-		res := response.Response(208)
+		res := response.Make(208)
 		res["room"] = h.service.NextRoom(rid)
 		c.JSON(http.StatusOK, res)
 	}

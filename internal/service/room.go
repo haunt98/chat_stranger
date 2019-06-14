@@ -147,11 +147,11 @@ func (s *RoomService) JoinRoom() int {
 
 func (s *RoomService) CheckRoom(id int) error {
 	if _, ok := s.rooms[id]; !ok {
-		return fmt.Errorf(response.ResponseCode[411])
+		return fmt.Errorf(response.Codes[411])
 	}
 
 	if s.rooms[id].IsFull() {
-		return fmt.Errorf(response.ResponseCode[410])
+		return fmt.Errorf(response.Codes[410])
 	}
 
 	return nil

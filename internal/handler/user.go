@@ -28,11 +28,11 @@ func (h *UserHandler) FetchAll(c *gin.Context) {
 		for _, err := range errs {
 			log.Println(err)
 		}
-		c.JSON(http.StatusOK, response.Response(402))
+		c.JSON(http.StatusOK, response.Make(402))
 		return
 	}
 
-	res := response.Response(200)
+	res := response.Make(200)
 	res["data"] = userRess
 	c.JSON(http.StatusOK, res)
 }
@@ -41,7 +41,7 @@ func (h *UserHandler) Find(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(401))
+		c.JSON(http.StatusBadRequest, response.Make(401))
 		return
 	}
 
@@ -50,20 +50,27 @@ func (h *UserHandler) Find(c *gin.Context) {
 		for _, err := range errs {
 			log.Println(err)
 		}
-		c.JSON(http.StatusOK, response.Response(403))
+		c.JSON(http.StatusOK, response.Make(403))
 		return
 	}
 
-	res := response.Response(201)
+	res := response.Make(201)
 	res["data"] = userRes
 	c.JSON(http.StatusOK, res)
 }
 
 func (h *UserHandler) Create(c *gin.Context) {
 	var userReq dtos.UserRequest
+
 	if err := c.ShouldBindJSON(&userReq); err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(400))
+		c.JSON(http.StatusBadRequest, response.Make(400))
+		return
+	}
+
+	if code := userReq.Check(); code != 0 {
+		log.Println(response.Codes[code])
+		c.JSON(http.StatusOK, response.Make(code))
 		return
 	}
 
@@ -72,11 +79,11 @@ func (h *UserHandler) Create(c *gin.Context) {
 		for _, err := range errs {
 			log.Println(err)
 		}
-		c.JSON(http.StatusOK, response.Response(404))
+		c.JSON(http.StatusOK, response.Make(404))
 		return
 	}
 
-	res := response.Response(205)
+	res := response.Make(205)
 	res["id"] = id
 	c.JSON(http.StatusOK, res)
 }
@@ -85,14 +92,14 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(401))
+		c.JSON(http.StatusBadRequest, response.Make(401))
 		return
 	}
 
 	var userReq dtos.UserRequest
 	if err = c.ShouldBindJSON(&userReq); err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(400))
+		c.JSON(http.StatusBadRequest, response.Make(400))
 		return
 	}
 
@@ -100,18 +107,18 @@ func (h *UserHandler) UpdateInfo(c *gin.Context) {
 		for _, err := range errs {
 			log.Println(err)
 		}
-		c.JSON(http.StatusOK, response.Response(403))
+		c.JSON(http.StatusOK, response.Make(403))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.Response(202))
+	c.JSON(http.StatusOK, response.Make(202))
 }
 
 func (h *UserHandler) Delete(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(401))
+		c.JSON(http.StatusBadRequest, response.Make(401))
 		return
 	}
 
@@ -119,18 +126,18 @@ func (h *UserHandler) Delete(c *gin.Context) {
 		for _, err := range errs {
 			log.Println(err)
 		}
-		c.JSON(http.StatusOK, response.Response(403))
+		c.JSON(http.StatusOK, response.Make(403))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.Response(204))
+	c.JSON(http.StatusOK, response.Make(204))
 }
 
 func (h *UserHandler) Authenticate(c *gin.Context) {
 	var auth dtos.CredentialRequest
 	if err := c.ShouldBindJSON(&auth); err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(400))
+		c.JSON(http.StatusBadRequest, response.Make(400))
 		return
 	}
 
@@ -139,7 +146,7 @@ func (h *UserHandler) Authenticate(c *gin.Context) {
 		for _, err := range errs {
 			log.Println(err)
 		}
-		c.JSON(http.StatusOK, response.Response(405))
+		c.JSON(http.StatusOK, response.Make(405))
 		return
 	}
 
@@ -150,11 +157,11 @@ func (h *UserHandler) Authenticate(c *gin.Context) {
 	})
 	if err != nil {
 		log.Println(err)
-		c.JSON(http.StatusInternalServerError, response.Response(500))
+		c.JSON(http.StatusInternalServerError, response.Make(500))
 		return
 	}
 
-	res := response.Response(206)
+	res := response.Make(206)
 	res["token"] = s
 	c.JSON(http.StatusOK, res)
 }
@@ -162,7 +169,7 @@ func (h *UserHandler) Authenticate(c *gin.Context) {
 func (h *UserHandler) VerifyFind(c *gin.Context) {
 	id, ok := c.Get("id")
 	if !ok {
-		c.JSON(http.StatusBadRequest, response.Response(501))
+		c.JSON(http.StatusBadRequest, response.Make(501))
 		return
 	}
 
@@ -171,11 +178,11 @@ func (h *UserHandler) VerifyFind(c *gin.Context) {
 		for _, err := range errs {
 			log.Println(err)
 		}
-		c.JSON(http.StatusOK, response.Response(403))
+		c.JSON(http.StatusOK, response.Make(403))
 		return
 	}
 
-	res := response.Response(201)
+	res := response.Make(201)
 	res["data"] = userRes
 	c.JSON(http.StatusOK, res)
 }
@@ -183,7 +190,7 @@ func (h *UserHandler) VerifyFind(c *gin.Context) {
 func (h *UserHandler) VerifyDelete(c *gin.Context) {
 	id, ok := c.Get("id")
 	if !ok {
-		c.JSON(http.StatusBadRequest, response.Response(501))
+		c.JSON(http.StatusBadRequest, response.Make(501))
 		return
 	}
 
@@ -191,24 +198,24 @@ func (h *UserHandler) VerifyDelete(c *gin.Context) {
 		for _, err := range errs {
 			log.Println(err)
 		}
-		c.JSON(http.StatusOK, response.Response(403))
+		c.JSON(http.StatusOK, response.Make(403))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.Response(204))
+	c.JSON(http.StatusOK, response.Make(204))
 }
 
 func (h *UserHandler) VerifyUpdateInfo(c *gin.Context) {
 	id, ok := c.Get("id")
 	if !ok {
-		c.JSON(http.StatusInternalServerError, response.Response(501))
+		c.JSON(http.StatusInternalServerError, response.Make(501))
 		return
 	}
 
 	var userReq dtos.UserRequest
 	if err := c.ShouldBindJSON(&userReq); err != nil {
 		log.Println(err)
-		c.JSON(http.StatusBadRequest, response.Response(400))
+		c.JSON(http.StatusBadRequest, response.Make(400))
 		return
 	}
 
@@ -216,9 +223,9 @@ func (h *UserHandler) VerifyUpdateInfo(c *gin.Context) {
 		for _, err := range errs {
 			log.Println(err)
 		}
-		c.JSON(http.StatusOK, response.Response(403))
+		c.JSON(http.StatusOK, response.Make(403))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.Response(202))
+	c.JSON(http.StatusOK, response.Make(202))
 }

@@ -14,18 +14,18 @@ import (
 func GetTokenHeader(c *gin.Context) (string, error) {
 	header := c.GetHeader("Authorization")
 	if header == "" {
-		return "", fmt.Errorf(response.ResponseCode[407])
+		return "", fmt.Errorf(response.Codes[407])
 	}
 
 	headers := strings.Split(header, "Bearer")
 	if len(headers) < 2 {
-		return "", fmt.Errorf(response.ResponseCode[407])
+		return "", fmt.Errorf(response.Codes[407])
 	}
 
 	s := strings.TrimSpace(headers[1])
 
 	if s == "" {
-		return "", fmt.Errorf(response.ResponseCode[407])
+		return "", fmt.Errorf(response.Codes[407])
 	}
 
 	return s, nil
@@ -36,7 +36,7 @@ func VerifyRole(role string) gin.HandlerFunc {
 		s, err := GetTokenHeader(c)
 		if err != nil {
 			log.Println(err)
-			c.JSON(http.StatusForbidden, response.Response(407))
+			c.JSON(http.StatusForbidden, response.Make(407))
 			c.Abort()
 			return
 		}
@@ -44,14 +44,14 @@ func VerifyRole(role string) gin.HandlerFunc {
 		claims, err := service.VerifyTokenString(s)
 		if err != nil {
 			log.Println(err)
-			c.JSON(http.StatusForbidden, response.Response(408))
+			c.JSON(http.StatusForbidden, response.Make(408))
 			c.Abort()
 			return
 		}
 
 		if claims.Role != role {
-			log.Println(fmt.Errorf(response.ResponseCode[409]))
-			c.JSON(http.StatusForbidden, response.Response(409))
+			log.Println(fmt.Errorf(response.Codes[409]))
+			c.JSON(http.StatusForbidden, response.Make(409))
 			c.Abort()
 			return
 		}
