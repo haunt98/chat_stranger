@@ -18,13 +18,14 @@ type User struct {
 	Gender       string
 	BirthYear    int
 	Introduce    string
+	Favorites    []*Favorite `gorm:"many2many:user_favorites;"`
 }
 
-func (user *User) FromRequest(userReq *dtos.UserRequest) (*User, []error) {
+func (user *User) FromRequest(req *dtos.UserRequest) (*User, []error) {
 	var cre Credential
-	cre.RegName = userReq.RegName
+	cre.RegName = req.RegName
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userReq.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		var errs []error
 		errs = append(errs, err)
@@ -33,19 +34,19 @@ func (user *User) FromRequest(userReq *dtos.UserRequest) (*User, []error) {
 	cre.HashedPassword = string(hashedPassword)
 
 	user.Credential = cre
-	user.FullName = userReq.FullName
-	user.Gender = userReq.Gender
-	user.BirthYear = userReq.BirthYear
-	user.Introduce = userReq.Introduce
+	user.FullName = req.FullName
+	user.Gender = req.Gender
+	user.BirthYear = req.BirthYear
+	user.Introduce = req.Introduce
 
 	return user, nil
 }
 
-func (user *User) UpdateFromRequest(userReq *dtos.UserRequest) *User {
-	user.FullName = userReq.FullName
-	user.Gender = userReq.Gender
-	user.BirthYear = userReq.BirthYear
-	user.Introduce = userReq.Introduce
+func (user *User) UpdateFromRequest(req *dtos.UserRequest) *User {
+	user.FullName = req.FullName
+	user.Gender = req.Gender
+	user.BirthYear = req.BirthYear
+	user.Introduce = req.Introduce
 
 	return user
 }

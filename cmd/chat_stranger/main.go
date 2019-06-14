@@ -33,10 +33,12 @@ func main() {
 	credentialRepo := repository.NewCredentialRepoGorm(db)
 	userRepo := repository.NewUserRepoGorm(db)
 	adminRepo := repository.NewAdminRepoGorm(db)
+	favRepo := repository.NewFavoriteRepoGorm(db)
 
 	userService := service.NewUserService(credentialRepo, userRepo)
 	adminService := service.NewAdminService(credentialRepo, adminRepo)
 	roomService := service.NewRoomService(userRepo)
+	favService := service.NewFavoriteService(favRepo)
 
 	adminService.Create(&dtos.AdminRequest{
 		RegName:  viper.GetString("admin.regname"),
@@ -47,6 +49,7 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 	adminHandler := handler.NewAdminHandler(adminService)
 	chatHandler := handler.NewChatHandler(roomService)
+	favHandler := handler.NewFavoriteHandler(favService)
 
 	gin.SetMode(viper.GetString("gin.mode"))
 	gin.DisableConsoleColor()
@@ -67,41 +70,49 @@ func main() {
 		})
 	}
 
-	r1 := router.Group("/chat_stranger/api")
+	public := router.Group("/chat_stranger/api")
 	{
-		auth := r1.Group("/auth")
+		auth := public.Group("/auth")
 		{
 			auth.POST("/register", userHandler.Create)
 			auth.POST("/login", userHandler.Authenticate)
 			auth.POST("/login/admin", adminHandler.Authenticate)
 		}
-		r1.GET("/ws", chatHandler.WS)
+		public.GET("/ws", chatHandler.WS)
 	}
 
-	r2 := router.Group("/chat_stranger/api/me", handler.VerifyRole("user"))
+	me := router.Group("/chat_stranger/api/me", handler.VerifyRole("user"))
 	{
-		r2.GET("", userHandler.VerifyFind)
-		r2.DELETE("", userHandler.VerifyDelete)
-		r2.PUT("", userHandler.VerifyUpdateInfo)
-		r2.GET("/room", chatHandler.FindRoom)
+		me.GET("", userHandler.VerifyFind)
+		me.DELETE("", userHandler.VerifyDelete)
+		me.PUT("", userHandler.VerifyUpdateInfo)
+		me.GET("/room", chatHandler.FindRoom)
 	}
 
-	r3 := router.Group("/chat_stranger/api/users", handler.VerifyRole("admin"))
+	admin := router.Group("/chat_stranger/api", handler.VerifyRole("admin"))
 	{
-		r3.GET("", userHandler.FetchAll)
-		r3.GET("/:id", userHandler.Find)
-		r3.POST("", userHandler.Create)
-		r3.PUT("/:id", userHandler.UpdateInfo)
-		r3.DELETE("/:id", userHandler.Delete)
-	}
+		RESTUser := admin.Group("/users")
+		{
+			RESTUser.GET("", userHandler.FetchAll)
+			RESTUser.GET("/:id", userHandler.Find)
+			RESTUser.POST("", userHandler.Create)
+			RESTUser.PUT("/:id", userHandler.UpdateInfo)
+			RESTUser.DELETE("/:id", userHandler.Delete)
+		}
 
-	r4 := router.Group("/chat_stranger/api/admins", handler.VerifyRole("admin"))
-	{
-		r4.GET("", adminHandler.FetchAll)
-		r4.GET("/:id", adminHandler.Find)
-		r4.POST("", adminHandler.Create)
-		r4.PUT("/:id", adminHandler.UpdateInfo)
-		r4.DELETE("/:id", adminHandler.Delete)
+		RESTAdmin := admin.Group("/admins")
+		{
+			RESTAdmin.GET("", adminHandler.FetchAll)
+			RESTAdmin.GET("/:id", adminHandler.Find)
+			RESTAdmin.POST("", adminHandler.Create)
+			RESTAdmin.PUT("/:id", adminHandler.UpdateInfo)
+			RESTAdmin.DELETE("/:id", adminHandler.Delete)
+		}
+
+		RESTFav := admin.Group("/favorites")
+		{
+			RESTFav.GET("", favHandler.FetchAll)
+		}
 	}
 
 	if err = router.Run(":" + viper.GetString("port")); err != nil {

@@ -25,3 +25,10 @@ type CredentialRepo interface {
 	TryAdmin(*models.Credential) (*models.Admin, []error)
 	TryUser(*models.Credential) (*models.User, []error)
 }
+
+type FavoriteRepo interface {
+	FetchAll() ([]*models.Favorite, []error)
+	Find(string) (*models.Favorite, []error)
+	Create(*models.Favorite) (int, []error)
+	Delete(int) []error
+}

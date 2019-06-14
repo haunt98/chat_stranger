@@ -19,6 +19,7 @@ func NewUserService(creRepo repository.CredentialRepo, userRepo repository.UserR
 		userRepo:       userRepo,
 	}
 }
+
 func (s *UserService) FetchAll() ([]*dtos.UserResponse, []error) {
 	users, errs := s.userRepo.FetchAll()
 	if len(errs) != 0 {

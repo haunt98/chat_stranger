@@ -17,11 +17,11 @@ type Admin struct {
 	FullName     string
 }
 
-func (admin *Admin) FromRequest(adminReq *dtos.AdminRequest) (*Admin, []error) {
+func (admin *Admin) FromRequest(req *dtos.AdminRequest) (*Admin, []error) {
 	var cre Credential
-	cre.RegName = adminReq.RegName
+	cre.RegName = req.RegName
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminReq.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		var errs []error
 		errs = append(errs, err)
@@ -30,13 +30,13 @@ func (admin *Admin) FromRequest(adminReq *dtos.AdminRequest) (*Admin, []error) {
 	cre.HashedPassword = string(hashedPassword)
 
 	admin.Credential = cre
-	admin.FullName = adminReq.FullName
+	admin.FullName = req.FullName
 
 	return admin, nil
 }
 
-func (admin *Admin) UpdateFromRequest(adminReq *dtos.AdminRequest) *Admin {
-	admin.FullName = adminReq.FullName
+func (admin *Admin) UpdateFromRequest(req *dtos.AdminRequest) *Admin {
+	admin.FullName = req.FullName
 
 	return admin
 }

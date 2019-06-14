@@ -20,7 +20,7 @@ type UserResponse struct {
 }
 
 func (u *UserRequest) Check() int {
-	if c:= valid.CheckRegName(u.RegName); c!= 0 {
+	if c := valid.CheckRegName(u.RegName); c != 0 {
 		return c
 	}
 

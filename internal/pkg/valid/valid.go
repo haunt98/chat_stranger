@@ -4,7 +4,7 @@ func CheckRegName(regname string) int {
 	if regname == "" {
 		return 412
 	}
-	
+
 	return 0
 }
 
