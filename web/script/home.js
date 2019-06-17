@@ -15,8 +15,8 @@ function SignIn() {
     });
     res = await res.json();
     if (res.code !== 206) {
-      signInErr = document.getElementById("signInErr")
-      signInErr.innerText = res.message
+      signInErr = document.getElementById("signInErr");
+      signInErr.innerText = res.message;
       return;
     }
     sessionStorage.setItem("token", res.token);
@@ -43,8 +43,8 @@ function SignUp() {
     });
     res = await res.json();
     if (res.code !== 205) {
-      signOutErr = document.getElementById("signOutErr")
-      signOutErr.innerText = res.message
+      signOutErr = document.getElementById("signOutErr");
+      signOutErr.innerText = res.message;
       return;
     }
     location.reload()

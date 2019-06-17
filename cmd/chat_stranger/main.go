@@ -37,7 +37,7 @@ func main() {
 
 	userService := service.NewUserService(credentialRepo, userRepo)
 	adminService := service.NewAdminService(credentialRepo, adminRepo)
-	roomService := service.NewRoomService(userRepo)
+	//roomService := service.NewRoomService(userRepo)
 	favService := service.NewFavoriteService(favRepo)
 
 	adminService.Create(&dtos.AdminRequest{
@@ -48,7 +48,7 @@ func main() {
 
 	userHandler := handler.NewUserHandler(userService)
 	adminHandler := handler.NewAdminHandler(adminService)
-	chatHandler := handler.NewChatHandler(roomService)
+	// chatHandler := handler.NewChatHandler(roomService)
 	favHandler := handler.NewFavoriteHandler(favService)
 
 	gin.SetMode(viper.GetString("gin.mode"))
@@ -78,7 +78,7 @@ func main() {
 			auth.POST("/login", userHandler.Authenticate)
 			auth.POST("/login/admin", adminHandler.Authenticate)
 		}
-		public.GET("/ws", chatHandler.WS)
+		// public.GET("/ws", chatHandler.WS)
 	}
 
 	me := router.Group("/chat_stranger/api/me", handler.VerifyRole("user"))
@@ -86,7 +86,7 @@ func main() {
 		me.GET("", userHandler.VerifyFind)
 		me.DELETE("", userHandler.VerifyDelete)
 		me.PUT("", userHandler.VerifyUpdateInfo)
-		me.GET("/room", chatHandler.FindRoom)
+		//me.GET("/room", chatHandler.FindRoom)
 	}
 
 	admin := router.Group("/chat_stranger/api", handler.VerifyRole("admin"))

@@ -10,6 +10,7 @@ var Codes = map[int]string{
 	206: "Login OK",
 	207: "New room OK",
 	208: "Next room OK",
+	209: "Get empty room OK",
 	400: "JSON body is wrong",
 	401: "id param is wrong",
 	402: "Fetch all failed",
@@ -25,6 +26,7 @@ var Codes = map[int]string{
 	412: "Register name is missing",
 	413: "Password is missing",
 	414: "Full name is missing",
+	415: "Get empty room failed",
 	500: "Create token failed",
 	501: "Get id failed",
 }

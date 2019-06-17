@@ -18,8 +18,7 @@ func NewFavoriteRepoGorm(db *gorm.DB) FavoriteRepo {
 
 func (g *FavoriteRepoGorm) FetchAll() ([]*models.Favorite, []error) {
 	var favs []*models.Favorite
-	errs := g.db.Find(&favs).GetErrors()
-	if len(errs) != 0 {
+	if errs := g.db.Find(&favs).GetErrors(); len(errs) != 0 {
 		return nil, errs
 	}
 
@@ -28,8 +27,7 @@ func (g *FavoriteRepoGorm) FetchAll() ([]*models.Favorite, []error) {
 
 func (g *FavoriteRepoGorm) Find(name string) (*models.Favorite, []error) {
 	var fav models.Favorite
-	errs := g.db.Where("name = ?", name).First(&fav).GetErrors()
-	if len(errs) != 0 {
+	if errs := g.db.Where("name = ?", name).First(&fav).GetErrors(); len(errs) != 0 {
 		return nil, errs
 	}
 

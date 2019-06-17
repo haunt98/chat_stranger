@@ -19,6 +19,7 @@ type User struct {
 	BirthYear    int
 	Introduce    string
 	Favorites    []*Favorite `gorm:"many2many:user_favorites;"`
+	Rooms        []*Room     `gorm:"many2many:room_users;"`
 }
 
 func (user *User) FromRequest(req *dtos.UserRequest) (*User, []error) {

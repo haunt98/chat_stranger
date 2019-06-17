@@ -32,3 +32,11 @@ type FavoriteRepo interface {
 	Create(*models.Favorite) (int, []error)
 	Delete(int) []error
 }
+
+type RoomRepo interface {
+	FetchAll() ([]*models.Room, []error)
+	Find(int) (*models.Room, []error)
+	Create() (int, []error)
+	Delete(int) []error
+	FindEmpty() (int, []error)
+}
