@@ -11,39 +11,47 @@ function LogOut() {
   });
 }
 
-function Chat(token) {
+function Chat() {
   let btnStartChat = document.getElementById("btnStartChat");
   btnStartChat.addEventListener("click", async () => {
-    let res = await fetch("/chat_stranger/api/me/room", {
+    let res_empty = await fetch("/chat_stranger/api/chat/empty", {
       headers: {
-        Authorization: "Bearer" + token
+        Authorization: "Bearer" + sessionStorage.getItem("token")
       }
     });
-    res = await res.json();
-    location.href = "/chat_stranger/web/chat" + "?rid=" + res.room;
+    res_empty = await res_empty.json();
+    sessionStorage.setItem("rid", res_empty.data);
+
+    let res_join = await fetch("/chat_stranger/api/chat/join", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer" + sessionStorage.getItem("token"),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: res_empty.data
+      })
+    });
+    res_join = await res_join.json();
+
+    location.href = "/chat_stranger/web/chat";
   });
 }
 
 window.addEventListener("load", async () => {
-  let token = sessionStorage.getItem("token");
-  if (!token) {
-    location.href = "/chat_stranger/web";
-    return
-  }
-
   let res = await fetch("/chat_stranger/api/me", {
     headers: {
-      Authorization: "Bearer" + token
+      Authorization: "Bearer" + sessionStorage.getItem("token")
     }
   });
   res = await res.json();
   if (res.code !== 201) {
     sessionStorage.removeItem("token");
     location.href = "/chat_stranger/web";
-    return
+    return;
   }
 
   Show(res);
   LogOut();
-  Chat(token);
+  Chat();
 });

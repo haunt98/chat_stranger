@@ -34,11 +34,12 @@ func main() {
 	userRepo := repository.NewUserRepoGorm(db)
 	adminRepo := repository.NewAdminRepoGorm(db)
 	favRepo := repository.NewFavoriteRepoGorm(db)
+	roomRepo := repository.NewRoomRepoGorm(db)
 
 	userService := service.NewUserService(credentialRepo, userRepo)
 	adminService := service.NewAdminService(credentialRepo, adminRepo)
-	//roomService := service.NewRoomService(userRepo)
 	favService := service.NewFavoriteService(favRepo)
+	roomService := service.NewRoomService(roomRepo, userRepo)
 
 	adminService.Create(&dtos.AdminRequest{
 		RegName:  viper.GetString("admin.regname"),
@@ -48,8 +49,8 @@ func main() {
 
 	userHandler := handler.NewUserHandler(userService)
 	adminHandler := handler.NewAdminHandler(adminService)
-	// chatHandler := handler.NewChatHandler(roomService)
 	favHandler := handler.NewFavoriteHandler(favService)
+	roomHandler := handler.NewRoomHandler(roomService)
 
 	gin.SetMode(viper.GetString("gin.mode"))
 	gin.DisableConsoleColor()
@@ -78,20 +79,30 @@ func main() {
 			auth.POST("/login", userHandler.Authenticate)
 			auth.POST("/login/admin", adminHandler.Authenticate)
 		}
-		// public.GET("/ws", chatHandler.WS)
 	}
 
-	me := router.Group("/chat_stranger/api/me", handler.VerifyRole("user"))
+	userRoute := router.Group("/chat_stranger/api", handler.VerifyRole("user"))
 	{
-		me.GET("", userHandler.VerifyFind)
-		me.DELETE("", userHandler.VerifyDelete)
-		me.PUT("", userHandler.VerifyUpdateInfo)
-		//me.GET("/room", chatHandler.FindRoom)
+		me := userRoute.Group("/me")
+		{
+			me.GET("", userHandler.VerifyFind)
+			me.DELETE("", userHandler.VerifyDelete)
+			me.PUT("", userHandler.VerifyUpdateInfo)
+		}
+
+		chat := userRoute.Group("/chat")
+		{
+			chat.GET("/empty", roomHandler.FindEmpty)
+			chat.POST("/join", roomHandler.Join)
+			chat.POST("/leave", roomHandler.Leave)
+			chat.POST("/send", roomHandler.ReceiveMsg)
+			chat.POST("/receive", roomHandler.SendMsg)
+		}
 	}
 
-	admin := router.Group("/chat_stranger/api", handler.VerifyRole("admin"))
+	adminRoute := router.Group("/chat_stranger/api", handler.VerifyRole("admin"))
 	{
-		RESTUser := admin.Group("/users")
+		RESTUser := adminRoute.Group("/users")
 		{
 			RESTUser.GET("", userHandler.FetchAll)
 			RESTUser.GET("/:id", userHandler.Find)
@@ -100,7 +111,7 @@ func main() {
 			RESTUser.DELETE("/:id", userHandler.Delete)
 		}
 
-		RESTAdmin := admin.Group("/admins")
+		RESTAdmin := adminRoute.Group("/admins")
 		{
 			RESTAdmin.GET("", adminHandler.FetchAll)
 			RESTAdmin.GET("/:id", adminHandler.Find)
@@ -109,9 +120,14 @@ func main() {
 			RESTAdmin.DELETE("/:id", adminHandler.Delete)
 		}
 
-		RESTFav := admin.Group("/favorites")
+		RESTFav := adminRoute.Group("/favorites")
 		{
 			RESTFav.GET("", favHandler.FetchAll)
+		}
+
+		RESTRoom := adminRoute.Group("/rooms")
+		{
+			RESTRoom.GET("", roomHandler.FetchAll)
 		}
 	}
 

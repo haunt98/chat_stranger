@@ -1,4 +1,4 @@
-function ShowMessage(message) {
+function ShowMessage(res) {
   let divRow = document.createElement("div");
   divRow.className = "row";
 
@@ -14,83 +14,76 @@ function ShowMessage(message) {
   let pname = document.createElement("p");
   pname.className = "font-weight-bold";
   divCol2.appendChild(pname);
-  pname.innerText = message.fullname;
+  pname.innerText = res.data.sender;
 
   let pmessage = document.createElement("p");
   divCol10.appendChild(pmessage);
-  pmessage.innerText = message.body;
+  pmessage.innerText = res.data.body;
 
   let content = document.getElementById("content");
   content.appendChild(divRow);
 }
 
-function CreateWSConn(rid, uid) {
-  let url = "";
-  if (location.protocol === "https:") {
-    url += "wss:";
-  } else {
-    url += "ws:";
-  }
-  url +=
-    "//" +
-    location.host +
-    "/chat_stranger/api/ws" +
-    "?rid=" +
-    rid +
-    "&uid=" +
-    uid;
-  return new WebSocket(url);
-}
+function Leave() {}
 
-function Leave(conn) {
-  let btnLeave = document.getElementById("btnLeave");
-  btnLeave.addEventListener("click", () => {
-    conn.close();
-    location.href = "/chat_stranger/web/welcome";
-  });
-}
+function Next() {}
 
-function Next(token, rid) {
-  let btnNext = document.getElementById("btnNext");
-  btnNext.addEventListener("click", async () => {
-    let res = await fetch("/chat_stranger/api/me/room" + "?rid=" + rid, {
-      headers: {
-        Authorization: "Bearer" + token
-      }
-    });
-    res = await res.json();
-    location.href = "/chat_stranger/web/chat" + "?rid=" + res.room;
-  });
-}
-
-function Form(res, conn) {
+function Form() {
   let formChat = document.getElementById("formChat");
-  formChat.addEventListener("submit", event => {
+  formChat.addEventListener("submit", async event => {
     event.preventDefault();
 
     let inputMessage = document.getElementById("inputMessage");
     if (inputMessage.value !== "") {
-      conn.send(
-        JSON.stringify({
-          fullname: res.data.fullname,
+      let res = await fetch("/chat_stranger/api/chat/send", {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer" + sessionStorage.getItem("token"),
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          rid: parseInt(sessionStorage.getItem("rid")),
           body: inputMessage.value
         })
-      );
+      });
+      res = await res.json();
+      console.log(res)
+
+      if (res.code !== 212){
+        return
+      }
+
       inputMessage.value = "";
     }
   });
 }
 
-window.addEventListener("load", async () => {
-  let token = sessionStorage.getItem("token");
-  if (!token) {
-    location.href = "/chat_stranger/web";
-    return;
-  }
+function ReceiveMsg(callback) {
+  fetch("/chat_stranger/api/chat/receive",{
+    method: "POST",
+    headers: {
+      Authorization: "Bearer" + sessionStorage.getItem("token"),
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      id: parseInt(sessionStorage.getItem("rid")),
+    })
+  }).then(res => res.json())
+  .then(res => {
+    if (res.code !== 213){
+      console.log(res)
+      alert("Bad")
+      return
+    }
+    callback(res)
+    ReceiveMsg(callback)
+  })
+}
 
+window.addEventListener("load", async () => {
   let res = await fetch("/chat_stranger/api/me", {
     headers: {
-      Authorization: "Bearer" + token
+      Authorization: "Bearer" + sessionStorage.getItem("token")
     }
   });
   res = await res.json();
@@ -101,21 +94,8 @@ window.addEventListener("load", async () => {
     return;
   }
 
-  let uid = res.data.id;
-  let params = await new this.URL(location.href);
-  let rid = await params.searchParams.get("rid");
-  if (!rid) {
-    location.href = "/chat_stranger/web";
-    return;
-  }
-
-  conn = CreateWSConn(rid, uid);
-  conn.onmessage = event => {
-    let message = JSON.parse(event.data);
-    ShowMessage(message);
-  };
-
-  Form(res, conn);
-  Leave(conn);
-  Next(token, rid);
+  Form();
+  Leave();
+  Next();
+  ReceiveMsg(ShowMessage)
 });

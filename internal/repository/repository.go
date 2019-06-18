@@ -39,4 +39,7 @@ type RoomRepo interface {
 	Create() (int, []error)
 	Delete(int) []error
 	FindEmpty() (int, []error)
+	Join(int, int) []error
+	Leave(int, int) []error
+	Check(int, int) []error
 }
