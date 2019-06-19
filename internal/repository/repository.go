@@ -34,6 +34,7 @@ type FavoriteRepo interface {
 }
 
 type RoomRepo interface {
+	Limit() int
 	FetchAll() ([]*models.Room, []error)
 	Find(int) (*models.Room, []error)
 	Create() (int, []error)
@@ -42,4 +43,10 @@ type RoomRepo interface {
 	Join(int, int) []error
 	Leave(int, int) []error
 	Check(int, int) []error
+}
+
+type MessageRepo interface {
+	FetchAll(int) ([]*models.Message, []error)
+	FetchLatest(int, int) (*models.Message, int, []error)
+	Create(*models.Message) []error
 }

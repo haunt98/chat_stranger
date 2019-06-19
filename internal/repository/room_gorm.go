@@ -13,11 +13,16 @@ type RoomRepoGorm struct {
 
 func NewRoomRepoGorm(db *gorm.DB) RoomRepo {
 	db.DropTableIfExists(&models.Room{})
+	db.DropTableIfExists("room_users")
 	db.AutoMigrate(&models.Room{})
 
 	return &RoomRepoGorm{
 		db: db,
 	}
+}
+
+func (g *RoomRepoGorm) Limit() int {
+	return 2
 }
 
 func (g *RoomRepoGorm) FetchAll() ([]*models.Room, []error) {
@@ -77,7 +82,7 @@ func (g *RoomRepoGorm) FindEmpty() (int, []error) {
 		if errs := g.db.Model(room).Related(&users, "Users").GetErrors(); len(errs) != 0 {
 			return 0, errs
 		}
-		if len(users) < 2 {
+		if len(users) < g.Limit() {
 			return room.ID, nil
 		}
 	}
@@ -85,9 +90,9 @@ func (g *RoomRepoGorm) FindEmpty() (int, []error) {
 	return g.Create()
 }
 
-func (g *RoomRepoGorm) Join(uid, rid int) []error {
+func (g *RoomRepoGorm) Join(userid, rooomid int) []error {
 	var room models.Room
-	if errs := g.db.Where("id = ?", rid).First(&room).GetErrors(); len(errs) != 0 {
+	if errs := g.db.Where("id = ?", rooomid).First(&room).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 
@@ -95,7 +100,7 @@ func (g *RoomRepoGorm) Join(uid, rid int) []error {
 		return errs
 	}
 
-	if len(room.Users) >= 2 {
+	if len(room.Users) >= g.Limit() {
 		err := fmt.Errorf("room %d is full", room.ID)
 		var errs []error
 		errs = append(errs, err)
@@ -103,7 +108,7 @@ func (g *RoomRepoGorm) Join(uid, rid int) []error {
 	}
 
 	var user models.User
-	if errs := g.db.Where("id = ?", uid).First(&user).GetErrors(); len(errs) != 0 {
+	if errs := g.db.Where("id = ?", userid).First(&user).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 
@@ -126,13 +131,6 @@ func (g *RoomRepoGorm) Leave(uid, rid int) []error {
 		return errs
 	}
 
-	if len(room.Users) >= 2 {
-		err := fmt.Errorf("room %d is full", room.ID)
-		var errs []error
-		errs = append(errs, err)
-		return errs
-	}
-
 	var user models.User
 	if errs := g.db.Where("id = ?", uid).First(&user).GetErrors(); len(errs) != 0 {
 		return errs
@@ -144,16 +142,12 @@ func (g *RoomRepoGorm) Leave(uid, rid int) []error {
 		return errs
 	}
 
-	if errs := g.db.Save(&room).GetErrors(); len(errs) != 0 {
-		return errs
-	}
-
 	return nil
 }
 
-func (g *RoomRepoGorm) Check(uid, rid int) []error {
+func (g *RoomRepoGorm) Check(userid, roomid int) []error {
 	var room models.Room
-	if errs := g.db.Where("id = ?", rid).First(&room).GetErrors(); len(errs) != 0 {
+	if errs := g.db.Where("id = ?", roomid).First(&room).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 
@@ -162,7 +156,7 @@ func (g *RoomRepoGorm) Check(uid, rid int) []error {
 	}
 
 	var user models.User
-	if errs := g.db.Where("id = ?", uid).First(&user).GetErrors(); len(errs) != 0 {
+	if errs := g.db.Where("id = ?", userid).First(&user).GetErrors(); len(errs) != 0 {
 		return errs
 	}
 
@@ -172,7 +166,7 @@ func (g *RoomRepoGorm) Check(uid, rid int) []error {
 		}
 	}
 
-	err := fmt.Errorf("user %d not in room %d", uid, rid)
+	err := fmt.Errorf("user %d not in room %d", userid, roomid)
 	var errs []error
 	errs = append(errs, err)
 	return errs

@@ -20,7 +20,7 @@ function Chat() {
       }
     });
     res_empty = await res_empty.json();
-    sessionStorage.setItem("rid", res_empty.data);
+    sessionStorage.setItem("roomid", res_empty.data);
 
     let res_join = await fetch("/chat_stranger/api/chat/join", {
       method: "POST",
@@ -33,6 +33,11 @@ function Chat() {
       })
     });
     res_join = await res_join.json();
+    if (res_join.code !== 210) {
+      sessionStorage.removeItem("roomid");
+      location.reload();
+      return;
+    }
 
     location.href = "/chat_stranger/web/chat";
   });

@@ -37,6 +37,7 @@ var Codes = map[int]string{
 	419: "Receive message failed",
 	420: "Send message failed",
 	421: "User already in room",
+	422: "Token userid mismatch message from user id",
 	500: "Create token failed",
 	501: "Get id failed",
 }

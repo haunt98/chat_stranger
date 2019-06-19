@@ -11,6 +11,7 @@ type FavoriteRepoGorm struct {
 
 func NewFavoriteRepoGorm(db *gorm.DB) FavoriteRepo {
 	db.DropTableIfExists(&models.Favorite{})
+	db.DropTableIfExists("user_favorites")
 	db.AutoMigrate(&models.Favorite{})
 
 	return &FavoriteRepoGorm{db: db}

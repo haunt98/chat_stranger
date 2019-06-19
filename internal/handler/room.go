@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 
@@ -37,7 +36,7 @@ func (h *RoomHandler) FetchAll(c *gin.Context) {
 }
 
 func (h *RoomHandler) FindEmpty(c *gin.Context) {
-	rid, errs := h.service.FindEmpty()
+	roomid, errs := h.service.FindEmpty()
 	if len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
@@ -47,12 +46,12 @@ func (h *RoomHandler) FindEmpty(c *gin.Context) {
 	}
 
 	res := response.Make(209)
-	res["data"] = rid
+	res["data"] = roomid
 	c.JSON(http.StatusOK, res)
 }
 
 func (h *RoomHandler) Join(c *gin.Context) {
-	uid, ok := c.Get("id")
+	userid, ok := c.Get("id")
 	if !ok {
 		c.JSON(http.StatusBadRequest, response.Make(501))
 		return
@@ -67,7 +66,7 @@ func (h *RoomHandler) Join(c *gin.Context) {
 
 	// TODO user leave all room
 
-	if errs := h.service.Join(uid.(int), roomReq.ID); len(errs) != 0 {
+	if errs := h.service.Join(userid.(int), roomReq.ID); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -79,7 +78,7 @@ func (h *RoomHandler) Join(c *gin.Context) {
 }
 
 func (h *RoomHandler) Leave(c *gin.Context) {
-	uid, ok := c.Get("id")
+	userid, ok := c.Get("id")
 	if !ok {
 		c.JSON(http.StatusBadRequest, response.Make(501))
 		return
@@ -92,16 +91,7 @@ func (h *RoomHandler) Leave(c *gin.Context) {
 		return
 	}
 
-	// to leave room, user must join that room
-	if errs := h.service.Check(uid.(int), roomReq.ID); len(errs) != 0 {
-		for _, err := range errs {
-			log.Println(err)
-		}
-		c.JSON(http.StatusOK, response.Make(418))
-		return
-	}
-
-	if errs := h.service.Leave(uid.(int), roomReq.ID); len(errs) != 0 {
+	if errs := h.service.Leave(userid.(int), roomReq.ID); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
@@ -112,29 +102,21 @@ func (h *RoomHandler) Leave(c *gin.Context) {
 	c.JSON(http.StatusOK, response.Make(211))
 }
 
-func (h *RoomHandler) SendMsg(c *gin.Context) {
-	uid, ok := c.Get("id")
+func (h *RoomHandler) SendLatestMsg(c *gin.Context) {
+	userid, ok := c.Get("id")
 	if !ok {
 		c.JSON(http.StatusBadRequest, response.Make(501))
 		return
 	}
 
-	var roomReq dtos.RoomRequest
-	if err := c.ShouldBindJSON(&roomReq); err != nil {
+	var latestReq dtos.LatestRequest
+	if err := c.ShouldBindJSON(&latestReq); err != nil {
 		log.Println(err)
 		c.JSON(http.StatusBadRequest, response.Make(400))
 		return
 	}
 
-	if errs := h.service.Check(uid.(int), roomReq.ID); len(errs) != 0 {
-		for _, err := range errs {
-			log.Println(err)
-		}
-		c.JSON(http.StatusOK, response.Make(418))
-		return
-	}
-
-	msgRes, err := h.service.SendMsg(roomReq.ID, 30e9)
+	msgRes, newLatest, err := h.service.SendLatestMsg(userid.(int), latestReq.RoomID, latestReq.Latest)
 	if err != nil {
 		log.Println(err)
 		c.JSON(http.StatusOK, response.Make(420))
@@ -143,11 +125,12 @@ func (h *RoomHandler) SendMsg(c *gin.Context) {
 
 	res := response.Make(213)
 	res["data"] = msgRes
+	res["latest"] = newLatest
 	c.JSON(http.StatusOK, res)
 }
 
 func (h *RoomHandler) ReceiveMsg(c *gin.Context) {
-	uid, ok := c.Get("id")
+	userid, ok := c.Get("id")
 	if !ok {
 		c.JSON(http.StatusBadRequest, response.Make(501))
 		return
@@ -160,25 +143,18 @@ func (h *RoomHandler) ReceiveMsg(c *gin.Context) {
 		return
 	}
 
-	if errs := h.service.Check(uid.(int), msgReq.Rid); len(errs) != 0 {
-		for _, err := range errs {
-			log.Println(err)
-		}
-		c.JSON(http.StatusOK, response.Make(418))
+	if userid != msgReq.FromUserID {
+		c.JSON(http.StatusOK, response.Make(422))
 		return
 	}
 
-	fmt.Println(uid.(int), msgReq)
-
-	if errs := h.service.ReceiveMsg(uid.(int), msgReq); len(errs) != 0 {
+	if errs := h.service.ReceiveMsg(&msgReq); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}
 		c.JSON(http.StatusOK, response.Make(419))
 		return
 	}
-
-	fmt.Println("Hello")
 
 	c.JSON(http.StatusOK, response.Make(212))
 }

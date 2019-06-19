@@ -35,11 +35,12 @@ func main() {
 	adminRepo := repository.NewAdminRepoGorm(db)
 	favRepo := repository.NewFavoriteRepoGorm(db)
 	roomRepo := repository.NewRoomRepoGorm(db)
+	msgRepo := repository.NewMessageRepoGorm(db)
 
 	userService := service.NewUserService(credentialRepo, userRepo)
 	adminService := service.NewAdminService(credentialRepo, adminRepo)
 	favService := service.NewFavoriteService(favRepo)
-	roomService := service.NewRoomService(roomRepo, userRepo)
+	roomService := service.NewRoomService(roomRepo, userRepo, msgRepo)
 
 	adminService.Create(&dtos.AdminRequest{
 		RegName:  viper.GetString("admin.regname"),
@@ -96,7 +97,7 @@ func main() {
 			chat.POST("/join", roomHandler.Join)
 			chat.POST("/leave", roomHandler.Leave)
 			chat.POST("/send", roomHandler.ReceiveMsg)
-			chat.POST("/receive", roomHandler.SendMsg)
+			chat.POST("/receive", roomHandler.SendLatestMsg)
 		}
 	}
 

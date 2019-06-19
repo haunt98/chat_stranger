@@ -14,7 +14,7 @@ function ShowMessage(res) {
   let pname = document.createElement("p");
   pname.className = "font-weight-bold";
   divCol2.appendChild(pname);
-  pname.innerText = res.data.sender;
+  pname.innerText = res.data.fromuser;
 
   let pmessage = document.createElement("p");
   divCol10.appendChild(pmessage);
@@ -28,7 +28,7 @@ function Leave() {}
 
 function Next() {}
 
-function Form() {
+function SendMsg(userid) {
   let formChat = document.getElementById("formChat");
   formChat.addEventListener("submit", async event => {
     event.preventDefault();
@@ -42,15 +42,16 @@ function Form() {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          rid: parseInt(sessionStorage.getItem("rid")),
+          roomid: parseInt(sessionStorage.getItem("roomid")),
+          fromuserid: userid,
           body: inputMessage.value
         })
       });
       res = await res.json();
-      console.log(res)
+      console.log(res);
 
-      if (res.code !== 212){
-        return
+      if (res.code !== 212) {
+        return;
       }
 
       inputMessage.value = "";
@@ -58,26 +59,32 @@ function Form() {
   });
 }
 
-function ReceiveMsg(callback) {
-  fetch("/chat_stranger/api/chat/receive",{
+async function ReceiveMsg() {
+  let res = await fetch("/chat_stranger/api/chat/receive", {
     method: "POST",
     headers: {
       Authorization: "Bearer" + sessionStorage.getItem("token"),
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      id: parseInt(sessionStorage.getItem("rid")),
+      roomid: parseInt(sessionStorage.getItem("roomid")),
+      latest: parseInt(sessionStorage.getItem("latest"))
     })
-  }).then(res => res.json())
-  .then(res => {
-    if (res.code !== 213){
-      console.log(res)
-      alert("Bad")
-      return
-    }
-    callback(res)
-    ReceiveMsg(callback)
-  })
+  });
+  res = await res.json();
+  if (res.code !== 213) {
+    return;
+  }
+
+  let latest = parseInt(sessionStorage.getItem("latest"));
+  latest += 1;
+  sessionStorage.setItem("latest", String(latest));
+
+  ShowMessage(res);
+}
+
+function Polling() {
+  setInterval(ReceiveMsg, 1000);
 }
 
 window.addEventListener("load", async () => {
@@ -94,8 +101,10 @@ window.addEventListener("load", async () => {
     return;
   }
 
-  Form();
+  sessionStorage.setItem("latest", "-1");
+
+  SendMsg(res.data.id);
+  Polling();
   Leave();
   Next();
-  ReceiveMsg(ShowMessage)
 });
