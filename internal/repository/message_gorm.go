@@ -28,7 +28,7 @@ func (g *MessageRepoGorm) FetchAll(roomid int) ([]*models.Message, []error) {
 	return msgs, nil
 }
 
-func (g *MessageRepoGorm) FetchLatest(roomid, clientLatest int) (*models.Message, int, []error) {
+func (g *MessageRepoGorm) FetchLatest(roomid, latest int) (*models.Message, int, []error) {
 	var msgs []*models.Message
 	var count int
 
@@ -36,8 +36,13 @@ func (g *MessageRepoGorm) FetchLatest(roomid, clientLatest int) (*models.Message
 		return nil, 0, errs
 	}
 
+	// new room or any user leave
+	if count == 0 {
+		return nil, -1, nil
+	}
+
 	// if client already has latest msg
-	if clientLatest+1 == count {
+	if latest+1 >= count {
 		err := fmt.Errorf("no new message in room %d", roomid)
 		var errs []error
 		errs = append(errs, err)
@@ -49,8 +54,8 @@ func (g *MessageRepoGorm) FetchLatest(roomid, clientLatest int) (*models.Message
 		return nil, 0, errs
 	}
 
-	clientLatest += 1
-	return msgs[clientLatest], clientLatest, nil
+	latest += 1
+	return msgs[latest], latest, nil
 }
 
 func (g *MessageRepoGorm) Create(msg *models.Message) []error {

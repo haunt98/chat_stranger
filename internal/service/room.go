@@ -54,10 +54,19 @@ func (s *RoomService) Delete(id int) []error {
 func (s *RoomService) FindEmpty() (int, []error) {
 	id, errs := s.roomRepo.FindEmpty()
 	if len(errs) != 0 {
-		return id, errs
+		return 0, errs
 	}
 
-	return id, errs
+	return id, nil
+}
+
+func (s *RoomService) NextEmpty(userid, oldroomid int) (int, []error) {
+	id, errs := s.roomRepo.NextEmpty(userid, oldroomid)
+	if len(errs) != 0 {
+		return 0, errs
+	}
+
+	return id, nil
 }
 
 func (s *RoomService) Join(usedid, roomid int) []error {
@@ -74,11 +83,18 @@ func (s *RoomService) SendLatestMsg(userid, roomid, latest int) (*dtos.MessageRe
 		return nil, 0, errs
 	}
 
+	// get latest msg
 	msg, newLatest, errs := s.msgRepo.FetchLatest(roomid, latest)
 	if len(errs) != 0 {
 		return nil, 0, errs
 	}
 
+	// empty room or any user leave
+	if msg == nil && newLatest == -1 {
+		return nil, -1, nil
+	}
+
+	// get fromuser name
 	fromUser, errs := s.userRepo.Find(msg.FromUserID)
 	if len(errs) != 0 {
 		return nil, 0, errs
@@ -92,12 +108,12 @@ func (s *RoomService) SendLatestMsg(userid, roomid, latest int) (*dtos.MessageRe
 	return msgRes, newLatest, nil
 }
 
-func (s *RoomService) ReceiveMsg(msgReq *dtos.MessageRequest) []error {
+func (s *RoomService) ReceiveMsg(fromuserid int, msgReq *dtos.MessageRequest) []error {
 	// make sure user in room when send msg
-	if errs := s.roomRepo.Check(msgReq.FromUserID, msgReq.RoomID); len(errs) != 0 {
+	if errs := s.roomRepo.Check(fromuserid, msgReq.RoomID); len(errs) != 0 {
 		return errs
 	}
 
-	msg := (&models.Message{}).FromRequest(msgReq)
+	msg := (&models.Message{}).FromRequest(fromuserid, msgReq)
 	return s.msgRepo.Create(msg)
 }

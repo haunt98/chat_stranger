@@ -15,6 +15,7 @@ var Codes = map[int]string{
 	211: "Leave room OK",
 	212: "Receive message OK",
 	213: "Send message OK",
+	214: "Next empty room ok",
 	400: "JSON body is wrong",
 	401: "id param is wrong",
 	402: "Fetch all failed",
@@ -38,6 +39,7 @@ var Codes = map[int]string{
 	420: "Send message failed",
 	421: "User already in room",
 	422: "Token userid mismatch message from user id",
+	423: "Next empty room failed",
 	500: "Create token failed",
 	501: "Get id failed",
 }

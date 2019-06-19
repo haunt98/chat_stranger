@@ -1,9 +1,8 @@
 package dtos
 
 type MessageRequest struct {
-	RoomID     int    `json:"roomid"`
-	FromUserID int    `json:"fromuserid"`
-	Body       string `json:"body"`
+	RoomID int    `json:"roomid"`
+	Body   string `json:"body"`
 }
 
 type MessageResponse struct {

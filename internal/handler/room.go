@@ -50,7 +50,7 @@ func (h *RoomHandler) FindEmpty(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func (h *RoomHandler) Join(c *gin.Context) {
+func (h *RoomHandler) NextEmpty(c *gin.Context) {
 	userid, ok := c.Get("id")
 	if !ok {
 		c.JSON(http.StatusBadRequest, response.Make(501))
@@ -64,7 +64,33 @@ func (h *RoomHandler) Join(c *gin.Context) {
 		return
 	}
 
-	// TODO user leave all room
+	roomid, errs := h.service.NextEmpty(userid.(int), roomReq.ID)
+	if len(errs) != 0 {
+		for _, err := range errs {
+			log.Println(err)
+		}
+		c.JSON(http.StatusOK, response.Make(423))
+		return
+	}
+
+	res := response.Make(214)
+	res["data"] = roomid
+	c.JSON(http.StatusOK, res)
+}
+
+func (h *RoomHandler) Join(c *gin.Context) {
+	userid, ok := c.Get("id")
+	if !ok {
+		c.JSON(http.StatusBadRequest, response.Make(501))
+		return
+	}
+
+	var roomReq dtos.RoomRequest
+	if err := c.ShouldBindJSON(&roomReq); err != nil {
+		log.Println(err)
+		c.JSON(http.StatusBadRequest, response.Make(400))
+		return
+	}
 
 	if errs := h.service.Join(userid.(int), roomReq.ID); len(errs) != 0 {
 		for _, err := range errs {
@@ -123,6 +149,14 @@ func (h *RoomHandler) SendLatestMsg(c *gin.Context) {
 		return
 	}
 
+	// empty room or any user leave
+	if msgRes == nil && newLatest == -1 {
+		res := response.Make(213)
+		res["latest"] = newLatest
+		c.JSON(http.StatusOK, res)
+		return
+	}
+
 	res := response.Make(213)
 	res["data"] = msgRes
 	res["latest"] = newLatest
@@ -143,12 +177,7 @@ func (h *RoomHandler) ReceiveMsg(c *gin.Context) {
 		return
 	}
 
-	if userid != msgReq.FromUserID {
-		c.JSON(http.StatusOK, response.Make(422))
-		return
-	}
-
-	if errs := h.service.ReceiveMsg(&msgReq); len(errs) != 0 {
+	if errs := h.service.ReceiveMsg(userid.(int), &msgReq); len(errs) != 0 {
 		for _, err := range errs {
 			log.Println(err)
 		}

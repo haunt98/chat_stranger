@@ -15,9 +15,9 @@ type Message struct {
 	Body       string
 }
 
-func (msg *Message) FromRequest(req *dtos.MessageRequest) *Message {
+func (msg *Message) FromRequest(fromuserid int, req *dtos.MessageRequest) *Message {
 	msg.RoomID = req.RoomID
-	msg.FromUserID = req.FromUserID
+	msg.FromUserID = fromuserid
 	msg.Body = req.Body
 
 	return msg

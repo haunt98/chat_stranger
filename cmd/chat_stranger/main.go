@@ -94,6 +94,7 @@ func main() {
 		chat := userRoute.Group("/chat")
 		{
 			chat.GET("/empty", roomHandler.FindEmpty)
+			chat.POST("/next", roomHandler.NextEmpty)
 			chat.POST("/join", roomHandler.Join)
 			chat.POST("/leave", roomHandler.Leave)
 			chat.POST("/send", roomHandler.ReceiveMsg)

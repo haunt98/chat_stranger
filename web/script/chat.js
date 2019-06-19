@@ -24,11 +24,72 @@ function ShowMessage(res) {
   content.appendChild(divRow);
 }
 
-function Leave() {}
+function Leave() {
+  let btnLeave = document.getElementById("btnLeave");
+  btnLeave.addEventListener("click", async () => {
+    let res = await fetch("/chat_stranger/api/chat/leave", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer" + sessionStorage.getItem("token"),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: parseInt(sessionStorage.getItem("roomid"))
+      })
+    });
+    res = await res.json();
+    if (res.code !== 211) {
+      console.log(res);
+      return;
+    }
 
-function Next() {}
+    sessionStorage.removeItem("roomid");
+    location.href = "/chat_stranger/web/welcome";
+  });
+}
 
-function SendMsg(userid) {
+function Next() {
+  let btnNext = document.getElementById("btnNext");
+  btnNext.addEventListener("click", async () => {
+    let res_next = await fetch("/chat_stranger/api/chat/next", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer" + sessionStorage.getItem("token"),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: parseInt(sessionStorage.getItem("roomid"))
+      })
+    });
+    res_next = await res_next.json();
+    if (res_next.code !== 214) {
+      console.log(res_next);
+      return;
+    }
+
+    let res_join = await fetch("/chat_stranger/api/chat/join", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer" + sessionStorage.getItem("token"),
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id: res_next.data
+      })
+    });
+    res_join = await res_join.json();
+    if (res_join.code !== 210) {
+      console.log(res_join);
+      sessionStorage.removeItem("roomid");
+      return;
+    }
+
+    sessionStorage.setItem("roomid", res_next.data);
+    location.reload();
+  });
+}
+
+function SendMsg() {
   let formChat = document.getElementById("formChat");
   formChat.addEventListener("submit", async event => {
     event.preventDefault();
@@ -43,14 +104,12 @@ function SendMsg(userid) {
         },
         body: JSON.stringify({
           roomid: parseInt(sessionStorage.getItem("roomid")),
-          fromuserid: userid,
           body: inputMessage.value
         })
       });
       res = await res.json();
-      console.log(res);
-
       if (res.code !== 212) {
+        console.log(res);
         return;
       }
 
@@ -76,11 +135,10 @@ async function ReceiveMsg() {
     return;
   }
 
-  let latest = parseInt(sessionStorage.getItem("latest"));
-  latest += 1;
-  sessionStorage.setItem("latest", String(latest));
-
-  ShowMessage(res);
+  if (res.latest !== -1) {
+    ShowMessage(res);
+  }
+  sessionStorage.setItem("latest", res.latest);
 }
 
 function Polling() {
@@ -103,7 +161,7 @@ window.addEventListener("load", async () => {
 
   sessionStorage.setItem("latest", "-1");
 
-  SendMsg(res.data.id);
+  SendMsg();
   Polling();
   Leave();
   Next();

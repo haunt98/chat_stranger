@@ -34,8 +34,8 @@ function Chat() {
     });
     res_join = await res_join.json();
     if (res_join.code !== 210) {
+      console.log(res_join);
       sessionStorage.removeItem("roomid");
-      location.reload();
       return;
     }
 
