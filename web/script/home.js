@@ -47,7 +47,7 @@ function SignUp() {
       signOutErr.innerText = res.message;
       return;
     }
-    location.reload()
+    location.reload();
   });
 }
 

@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/mattn/go-colorable"
 	"github.com/spf13/viper"
 )
 
@@ -54,7 +55,12 @@ func main() {
 	roomHandler := handler.NewRoomHandler(roomService)
 
 	gin.SetMode(viper.GetString("gin.mode"))
-	gin.DisableConsoleColor()
+	if gin.Mode() == gin.DebugMode {
+		gin.DefaultWriter = colorable.NewColorableStdout()
+	} else {
+		gin.DisableConsoleColor()
+	}
+
 	router := gin.Default()
 	router.LoadHTMLGlob("./web/*.html")
 	router.Static("/chat_stranger/web/script", "./web/script")

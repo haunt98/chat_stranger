@@ -44,7 +44,12 @@ func (s *RoomService) Find(id int) (*dtos.RoomResponse, []error) {
 }
 
 func (s *RoomService) Create() (int, []error) {
-	return s.roomRepo.Create()
+	id, errs := s.roomRepo.Create()
+	if len(errs) != 0 {
+		return 0, nil
+	}
+
+	return id, nil
 }
 
 func (s *RoomService) Delete(id int) []error {
@@ -89,20 +94,20 @@ func (s *RoomService) SendLatestMsg(userid, roomid, latest int) (*dtos.MessageRe
 		return nil, 0, errs
 	}
 
-	// empty room or any user leave
-	if msg == nil && newLatest == -1 {
-		return nil, -1, nil
+	// already have latest msg or any user join or leave
+	if msg == nil {
+		return nil, newLatest, nil
 	}
 
 	// get fromuser name
 	fromUser, errs := s.userRepo.Find(msg.FromUserID)
 	if len(errs) != 0 {
-		return nil, 0, errs
+		return nil, -1, errs
 	}
 
 	msgRes, errs := msg.ToResponse(fromUser.FullName)
 	if len(errs) != 0 {
-		return nil, 0, errs
+		return nil, -1, errs
 	}
 
 	return msgRes, newLatest, nil
@@ -115,5 +120,6 @@ func (s *RoomService) ReceiveMsg(fromuserid int, msgReq *dtos.MessageRequest) []
 	}
 
 	msg := (&models.Message{}).FromRequest(fromuserid, msgReq)
+
 	return s.msgRepo.Create(msg)
 }

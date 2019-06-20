@@ -149,8 +149,8 @@ func (h *RoomHandler) SendLatestMsg(c *gin.Context) {
 		return
 	}
 
-	// empty room or any user leave
-	if msgRes == nil && newLatest == -1 {
+	// already have latest msg or any user join or leave
+	if msgRes == nil {
 		res := response.Make(213)
 		res["latest"] = newLatest
 		c.JSON(http.StatusOK, res)

@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	"github.com/1612180/chat_stranger/internal/models"
 	"github.com/jinzhu/gorm"
 )
@@ -33,25 +31,22 @@ func (g *MessageRepoGorm) FetchLatest(roomid, latest int) (*models.Message, int,
 	var count int
 
 	if errs := g.db.Where("room_id = ?", roomid).Find(&msgs).Count(&count).GetErrors(); len(errs) != 0 {
-		return nil, 0, errs
+		return nil, -1, errs
 	}
 
-	// new room or any user leave
-	if count == 0 {
+	// client already has latest msg
+	if latest+1 == count {
+		return nil, latest, nil
+	}
+
+	// any user join or leave
+	if latest+1 > count {
 		return nil, -1, nil
-	}
-
-	// if client already has latest msg
-	if latest+1 >= count {
-		err := fmt.Errorf("no new message in room %d", roomid)
-		var errs []error
-		errs = append(errs, err)
-		return nil, 0, errs
 	}
 
 	// sort by created time
 	if errs := g.db.Where("room_id = ?", roomid).Order("created_at").Find(&msgs).GetErrors(); len(errs) != 0 {
-		return nil, 0, errs
+		return nil, -1, errs
 	}
 
 	latest += 1

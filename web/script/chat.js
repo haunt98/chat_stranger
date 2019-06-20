@@ -27,17 +27,7 @@ function ShowMessage(res) {
 function Leave() {
   let btnLeave = document.getElementById("btnLeave");
   btnLeave.addEventListener("click", async () => {
-    let res = await fetch("/chat_stranger/api/chat/leave", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer" + sessionStorage.getItem("token"),
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: parseInt(sessionStorage.getItem("roomid"))
-      })
-    });
-    res = await res.json();
+    let res = await LeaveAPI(parseInt(sessionStorage.getItem("roomid")));
     if (res.code !== 211) {
       console.log(res);
       return;
@@ -51,33 +41,13 @@ function Leave() {
 function Next() {
   let btnNext = document.getElementById("btnNext");
   btnNext.addEventListener("click", async () => {
-    let res_next = await fetch("/chat_stranger/api/chat/next", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer" + sessionStorage.getItem("token"),
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: parseInt(sessionStorage.getItem("roomid"))
-      })
-    });
-    res_next = await res_next.json();
+    let res_next = await NextAPI(parseInt(sessionStorage.getItem("roomid")));
     if (res_next.code !== 214) {
       console.log(res_next);
       return;
     }
 
-    let res_join = await fetch("/chat_stranger/api/chat/join", {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer" + sessionStorage.getItem("token"),
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        id: res_next.data
-      })
-    });
-    res_join = await res_join.json();
+    let res_join = await JoinAPI(res_next.data);
     if (res_join.code !== 210) {
       console.log(res_join);
       sessionStorage.removeItem("roomid");
@@ -89,25 +59,17 @@ function Next() {
   });
 }
 
-function SendMsg() {
+function FormSend() {
   let formChat = document.getElementById("formChat");
   formChat.addEventListener("submit", async event => {
     event.preventDefault();
 
     let inputMessage = document.getElementById("inputMessage");
     if (inputMessage.value !== "") {
-      let res = await fetch("/chat_stranger/api/chat/send", {
-        method: "POST",
-        headers: {
-          Authorization: "Bearer" + sessionStorage.getItem("token"),
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          roomid: parseInt(sessionStorage.getItem("roomid")),
-          body: inputMessage.value
-        })
-      });
-      res = await res.json();
+      let res = await SendAPI(
+        parseInt(sessionStorage.getItem("roomid")),
+        inputMessage.value
+      );
       if (res.code !== 212) {
         console.log(res);
         return;
@@ -118,51 +80,52 @@ function SendMsg() {
   });
 }
 
-async function ReceiveMsg() {
-  let res = await fetch("/chat_stranger/api/chat/receive", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer" + sessionStorage.getItem("token"),
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      roomid: parseInt(sessionStorage.getItem("roomid")),
-      latest: parseInt(sessionStorage.getItem("latest"))
-    })
-  });
-  res = await res.json();
-  if (res.code !== 213) {
-    return;
+function Polling() {
+  if (!sessionStorage.getItem("latest")) {
+    sessionStorage.setItem("latest", "-1");
   }
 
-  if (res.latest !== -1) {
-    ShowMessage(res);
-  }
-  sessionStorage.setItem("latest", res.latest);
+  setInterval(async () => {
+    let res = await ReceiveAPI(
+      parseInt(sessionStorage.getItem("roomid")),
+      parseInt(sessionStorage.getItem("latest"))
+    );
+    if (res.code !== 213) {
+      console.log(res);
+    }
+    if (res.data) {
+      ShowMessage(res);
+    }
+
+    sessionStorage.setItem("latest", res.latest);
+  }, 1000);
 }
 
-function Polling() {
-  setInterval(ReceiveMsg, 1000);
+async function LongPolling() {
+  if (!sessionStorage.getItem("latest")) {
+    sessionStorage.setItem("latest", "-1");
+  }
+
+  let res = await ReceiveAPI(
+    parseInt(sessionStorage.getItem("roomid")),
+    parseInt(sessionStorage.getItem("latest"))
+  );
+
+  if (res.code !== 213) {
+    console.log(res);
+  }
+  if (res.data) {
+    ShowMessage(res);
+  }
+
+  sessionStorage.setItem("latest", res.latest);
+  LongPolling();
 }
 
 window.addEventListener("load", async () => {
-  let res = await fetch("/chat_stranger/api/me", {
-    headers: {
-      Authorization: "Bearer" + sessionStorage.getItem("token")
-    }
-  });
-  res = await res.json();
-  if (res.code !== 201) {
-    console.log(res);
-    sessionStorage.removeItem("token");
-    location.href = "/chat_stranger/web";
-    return;
-  }
-
-  sessionStorage.setItem("latest", "-1");
-
-  SendMsg();
+  FormSend();
   Polling();
+  // LongPolling();
   Leave();
   Next();
 });
