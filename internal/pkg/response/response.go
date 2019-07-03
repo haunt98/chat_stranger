@@ -44,9 +44,17 @@ var Codes = map[int]string{
 	501: "Get id failed",
 }
 
-func Make(code int) map[string]interface{} {
+func Create(code int) map[string]interface{} {
 	res := make(map[string]interface{})
 	res["code"] = code
 	res["message"] = Codes[code]
+	return res
+}
+
+func CreateWithData(code int, data interface{}) map[string]interface{} {
+	res := make(map[string]interface{})
+	res["code"] = code
+	res["message"] = Codes[code]
+	res["data"] = data
 	return res
 }

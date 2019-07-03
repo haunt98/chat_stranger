@@ -1,3 +1,14 @@
+const endpointAPI = "/chat_stranger/api";
+const endpointWEB = "/chat_stranger/web";
+
+/**
+ * @return {string}
+ */
+function BuildUrl(url, params) {
+  let searchParams = new URLSearchParams(params);
+  return url + "?" + searchParams;
+}
+
 async function EmptyAPI() {
   let res = await fetch("/chat_stranger/api/chat/empty", {
     headers: {
@@ -93,4 +104,18 @@ async function MeGETAPI() {
   });
   res = await res.json();
   return res;
+}
+
+async function infoAPI(roomid, status) {
+  return await fetch(
+    BuildUrl(endpointAPI + "/chat/info", {
+      roomid: roomid,
+      status: status
+    }),
+    {
+      headers: {
+        Authorization: "Bearer" + sessionStorage.getItem("token")
+      }
+    }
+  ).then(res => res.json());
 }

@@ -81,10 +81,6 @@ function FormSend() {
 }
 
 function Polling() {
-  if (!sessionStorage.getItem("latest")) {
-    sessionStorage.setItem("latest", "-1");
-  }
-
   setInterval(async () => {
     let res = await ReceiveAPI(
       parseInt(sessionStorage.getItem("roomid")),
@@ -98,34 +94,29 @@ function Polling() {
     }
 
     sessionStorage.setItem("latest", res.latest);
-  }, 1000);
+
+    let res_2 = await infoAPI(
+      sessionStorage.getItem("roomid"),
+      sessionStorage.getItem("roomstatus")
+    );
+
+    if (res_2.data) {
+      ShowMessage(res_2);
+      sessionStorage.setItem("roomstatus", res_2.data.room_status);
+    }
+  }, 500);
 }
 
-async function LongPolling() {
-  if (!sessionStorage.getItem("latest")) {
-    sessionStorage.setItem("latest", "-1");
-  }
-
-  let res = await ReceiveAPI(
-    parseInt(sessionStorage.getItem("roomid")),
-    parseInt(sessionStorage.getItem("latest"))
-  );
-
-  if (res.code !== 213) {
-    console.log(res);
-  }
-  if (res.data) {
-    ShowMessage(res);
-  }
-
-  sessionStorage.setItem("latest", res.latest);
-  LongPolling();
+function SetUp() {
+  sessionStorage.setItem("latest", "-1");
+  sessionStorage.setItem("roomstatus", "0");
+  document.getElementById("content").innerHTML = "";
 }
 
 window.addEventListener("load", async () => {
+  SetUp();
   FormSend();
   Polling();
-  // LongPolling();
   Leave();
   Next();
 });
