@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/1612180/chat_stranger/internal/storage"
+	"github.com/1612180/chat_stranger/internal/pkg/env"
+	"github.com/1612180/chat_stranger/pkg/ginrus"
 	"github.com/sirupsen/logrus"
 
 	"github.com/1612180/chat_stranger/pkg/configutils"
@@ -11,34 +12,21 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	DbDialect = "db.dialect"
-	DbUrl     = "db.url"
-	Port      = "port"
-	GinMode   = "gin.mode"
-)
-
 func main() {
 	// Load config
 	configutils.LoadConfiguration("chat_stranger", "config", "configs")
 
 	// Load database
-	db, err := gorm.Open(viper.GetString(DbDialect), viper.GetString(DbUrl))
+	db, err := gorm.Open(viper.GetString(env.DbDialect), viper.GetString(env.DbUrl))
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"event":   "database",
-			"dialect": viper.GetString(DbDialect),
-			"url":     viper.GetString(DbUrl),
+			"dialect": viper.GetString(env.DbDialect),
+			"url":     viper.GetString(env.DbUrl),
 		}).Error(err)
 		logrus.Error("Failed to connect to database")
 		return
 	}
-
-	logrus.WithFields(logrus.Fields{
-		"event":   "database",
-		"dialect": viper.GetString(DbDialect),
-		"url":     viper.GetString(DbUrl),
-	}).Info("Connect to database OK")
 
 	defer func() {
 		if err := db.Close(); err != nil {
@@ -48,26 +36,27 @@ func main() {
 			logrus.Error("Failed to disconnect to database")
 			return
 		}
-
-		logrus.WithFields(logrus.Fields{
-			"event": "database",
-		}).Info("Disconnect to database OK")
 	}()
 
 	// Migrate
-	storage.MigrateAll(db)
+	// repository.MigrateAll(db)
 
 	// Load gin config
-	gin.SetMode(viper.GetString(GinMode))
+	gin.SetMode(viper.GetString(env.GinMode))
 
 	// Create gin router
-	router := gin.Default()
+	router := gin.New()
+	router.Use(ginrus.Logger(), gin.Recovery())
+
+	router.GET("/", func(c *gin.Context) {
+		c.String(200, "Hello")
+	})
 
 	// Start gin router
-	if err := router.Run(":" + viper.GetString(Port)); err != nil {
+	if err := router.Run(":" + viper.GetString(env.Port)); err != nil {
 		logrus.WithFields(logrus.Fields{
 			"event": "gin",
-			"port":  viper.GetString(Port),
+			"port":  viper.GetString(env.Port),
 		}).Error(err)
 		logrus.Error("Failed to start gin router")
 	}

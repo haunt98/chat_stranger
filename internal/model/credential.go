@@ -1,7 +1,7 @@
 package model
 
 type Credential struct {
-	ID             int
-	Name           string `gorm:"unique"`
-	HashedPassword string
+	ID             int    `json:"-"`
+	RegisterName   string `json:"-" gorm:"unique"`
+	HashedPassword string `json:"-"`
 }

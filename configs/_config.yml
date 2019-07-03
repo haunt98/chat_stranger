@@ -1,0 +1,17 @@
+port: 8080
+
+db:
+  dialect: mysql
+  url: root:1234@tcp(localhost:33060)/db?charset=utf8mb4&parseTime=True&loc=Local
+  mode: debug
+
+admin:
+  name: admin
+  password: 1234
+  fullname: administrator
+
+jwt:
+  secret: secret
+
+gin:
+  mode: debug
