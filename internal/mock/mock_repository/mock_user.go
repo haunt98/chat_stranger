@@ -34,12 +34,13 @@ func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
 }
 
 // Find mocks base method
-func (m *MockUserRepository) Find(id int) (*model.User, bool) {
+func (m *MockUserRepository) Find(id int) (*model.User, *model.Credential, bool) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Find", id)
 	ret0, _ := ret[0].(*model.User)
-	ret1, _ := ret[1].(bool)
-	return ret0, ret1
+	ret1, _ := ret[1].(*model.Credential)
+	ret2, _ := ret[2].(bool)
+	return ret0, ret1, ret2
 }
 
 // Find indicates an expected call of Find
@@ -48,30 +49,32 @@ func (mr *MockUserRepositoryMockRecorder) Find(id interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockUserRepository)(nil).Find), id)
 }
 
-// Create mocks base method
-func (m *MockUserRepository) Create(user *model.User) bool {
+// FindByRegisterName mocks base method
+func (m *MockUserRepository) FindByRegisterName(n string) (*model.User, *model.Credential, bool) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", user)
+	ret := m.ctrl.Call(m, "FindByRegisterName", n)
+	ret0, _ := ret[0].(*model.User)
+	ret1, _ := ret[1].(*model.Credential)
+	ret2, _ := ret[2].(bool)
+	return ret0, ret1, ret2
+}
+
+// FindByRegisterName indicates an expected call of FindByRegisterName
+func (mr *MockUserRepositoryMockRecorder) FindByRegisterName(n interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByRegisterName", reflect.TypeOf((*MockUserRepository)(nil).FindByRegisterName), n)
+}
+
+// Create mocks base method
+func (m *MockUserRepository) Create(user *model.User, credential *model.Credential) bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", user, credential)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
 // Create indicates an expected call of Create
-func (mr *MockUserRepositoryMockRecorder) Create(user interface{}) *gomock.Call {
+func (mr *MockUserRepositoryMockRecorder) Create(user, credential interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUserRepository)(nil).Create), user)
-}
-
-// Delete mocks base method
-func (m *MockUserRepository) Delete(id int) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// Delete indicates an expected call of Delete
-func (mr *MockUserRepositoryMockRecorder) Delete(id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockUserRepository)(nil).Delete), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUserRepository)(nil).Create), user, credential)
 }

@@ -3,27 +3,51 @@ package service
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/1612180/chat_stranger/internal/mock/mock_repository"
 	"github.com/1612180/chat_stranger/internal/model"
 	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/assert"
 )
 
-func TestUserService_Find(t *testing.T) {
+func TestUserService_SignUp(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
 	m := mock_repository.NewMockUserRepository(ctrl)
 	m.
 		EXPECT().
-		Find(gomock.Eq(1)).
-		Return(&model.User{ID: 1}, true)
+		Create(gomock.Any(), gomock.Any()).
+		Return(true)
 
 	userService := UserService{
 		userRepo: m,
 	}
 
-	user, ok := userService.Find(1)
+	ok := userService.SignUp(&model.User{})
 	assert.Equal(t, true, ok)
-	assert.Equal(t, &model.User{ID: 1}, user)
+}
+
+// https://play.golang.org/p/vmQwsmhKc24
+
+func TestUserService_LogIn(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	m := mock_repository.NewMockUserRepository(ctrl)
+	m.
+		EXPECT().
+		FindByRegisterName(gomock.Any()).
+		Return(
+			&model.User{},
+			&model.Credential{HashedPassword: "$2a$10$d8Eaak/7DcJp06A2dBhql.NNWFnFNKBWyCOyiv/bVk/wl6tpwD/pO"},
+			true,
+		)
+
+	userService := UserService{
+		userRepo: m,
+	}
+
+	ok := userService.LogIn(&model.User{Password: "a"})
+	assert.Equal(t, true, ok)
 }
