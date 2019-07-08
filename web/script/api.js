@@ -5,117 +5,116 @@ const endpointWEB = "/chat_stranger/web";
  * @return {string}
  */
 function BuildUrl(url, params) {
+  if (jQuery.isEmptyObject(params)) {
+    return url;
+  }
   let searchParams = new URLSearchParams(params);
   return url + "?" + searchParams;
 }
 
-async function EmptyAPI() {
-  let res = await fetch("/chat_stranger/api/chat/empty", {
+function SingUpAPI(register_name, password, full_name) {
+  return fetch(BuildUrl(endpointAPI + "/auth/signup", {}), {
+    method: "POST",
+    body: JSON.stringify({
+      register_name: register_name,
+      password: password,
+      full_name: full_name
+    })
+  }).then(res => res.json());
+}
+
+function LogInAPI(register_name, password) {
+  return fetch(BuildUrl(endpointAPI + "/auth/login", {}), {
+    method: "POST",
+    body: JSON.stringify({
+      register_name: register_name,
+      password: password
+    })
+  }).then(res => res.json());
+}
+
+function InfoAPI(token) {
+  return fetch(BuildUrl(endpointAPI + "/me", {}), {
     headers: {
-      Authorization: "Bearer" + sessionStorage.getItem("token")
+      Authorization: `Bearer ${token}`
     }
-  });
-  res = await res.json();
-  return res;
+  }).then(res => res.json());
 }
 
-async function NextAPI(oldroomid) {
-  let res = await fetch("/chat_stranger/api/chat/next", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer" + sessionStorage.getItem("token"),
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      id: oldroomid
-    })
-  });
-  res = await res.json();
-  return res;
-}
-
-async function JoinAPI(roomid) {
-  let res = await fetch("/chat_stranger/api/chat/join", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer" + sessionStorage.getItem("token"),
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      id: roomid
-    })
-  });
-  res = await res.json();
-  return res;
-}
-
-async function LeaveAPI(roomid) {
-  let res = await fetch("/chat_stranger/api/chat/leave", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer" + sessionStorage.getItem("token"),
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      id: roomid
-    })
-  });
-  res = await res.json();
-  return res;
-}
-
-async function SendAPI(roomid, body) {
-  let res = await fetch("/chat_stranger/api/chat/send", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer" + sessionStorage.getItem("token"),
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      roomid: roomid,
-      body: body
-    })
-  });
-  res = await res.json();
-  return res;
-}
-
-async function ReceiveAPI(roomid, latest) {
-  let res = await fetch("/chat_stranger/api/chat/receive", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer" + sessionStorage.getItem("token"),
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      roomid: roomid,
-      latest: latest
-    })
-  });
-  res = await res.json();
-  return res;
-}
-
-async function MeGETAPI() {
-  let res = await fetch("/chat_stranger/api/me", {
-    headers: {
-      Authorization: "Bearer" + sessionStorage.getItem("token")
-    }
-  });
-  res = await res.json();
-  return res;
-}
-
-async function infoAPI(roomid, status) {
-  return await fetch(
-    BuildUrl(endpointAPI + "/chat/info", {
-      roomid: roomid,
+function ChatFindAPI(token, status) {
+  return fetch(
+    BuildUrl(endpointAPI + "/chat/find", {
       status: status
     }),
     {
       headers: {
-        Authorization: "Bearer" + sessionStorage.getItem("token")
+        Authorization: `Bearer ${token}`
       }
     }
   ).then(res => res.json());
+}
+
+function ChatJoinAPI(token, roomID) {
+  return fetch(
+    BuildUrl(endpointAPI + "/chat/join", {
+      roomID: roomID
+    }),
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  ).then(res => res.json());
+}
+
+function ChatLeaveAPI(token) {
+  return fetch(BuildUrl(endpointAPI + "/chat/leave", {}), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }).then(res => res.json());
+}
+
+function ChatSendAPI(token, body) {
+  return fetch(BuildUrl(endpointAPI + "/chat/send", {}), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      body: body
+    })
+  }).then(res => res.json());
+}
+
+function ChatReceiveAPI(token, fromTime) {
+  return fetch(
+    BuildUrl(endpointAPI + "/chat/receive", {
+      fromTime: fromTime
+    }),
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  ).then(res => res.json());
+}
+
+function ChatIsFreeAPI(token) {
+  return fetch(BuildUrl(endpointAPI + "/chat/is_free", {}), {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }).then(res => res.json());
+}
+
+function ChatCountMember(token) {
+  return fetch(BuildUrl(endpointAPI + "/chat/count_member", {}), {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }).then(res => res.json());
 }

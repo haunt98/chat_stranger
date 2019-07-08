@@ -7,7 +7,6 @@
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
 
-    <!-- Bootstrap -->
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -17,50 +16,36 @@
 
     <title>Chat stranger</title>
   </head>
-
   <body>
-    <div class="container my-3">
-      <h1>Chatting</h1>
+    <div class="container py-3">
+      <h1>Xin chào <span id="hello"></span></h1>
     </div>
 
-    <!-- Chat message -->
-    <div class="container my-3">
-      <div class="row">
-        <div class="col-md-2">
-          <p class="font-weight-bold">User</p>
-        </div>
-        <div class="col-md-10">
-          <p>Message</p>
-        </div>
-      </div>
-    </div>
     <div
-      class="container my-3"
-      id="content"
-      style="overflow-y: auto; height: 50vh;"
+      class="container py-3"
+      id="chat"
+      style="overflow-y: scroll;height: 50vh"
     ></div>
-
-    <div class="container my-3">
+    <div class="container py-3">
       <form id="formChat" autocomplete="off">
         <div class="form-group">
-          <label for="inputMessage">Write message</label>
           <input type="text" class="form-control" id="inputMessage" />
         </div>
-        <button type="submit" class="btn btn-primary">Send</button>
+        <button type="submit" class="btn btn-primary">Gửi tin nhắn</button>
       </form>
     </div>
-
-    <div class="container my-3">
+    <div class="container py-3">
       <button type="button" class="btn btn-primary mr-2" id="btnLeave">
-        Leave
+        Thoát
       </button>
-      <button type="button" class="btn btn-primary" id="btnNext">Next</button>
+      <button type="button" class="btn btn-primary" id="btnNext">
+        Tìm phòng khác
+      </button>
     </div>
 
-    <!-- Bootstrap -->
     <script
-      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+      integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
       crossorigin="anonymous"
     ></script>
     <script

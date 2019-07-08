@@ -45,15 +45,18 @@ func main() {
 
 	// Load repository
 	userRepo := repository.NewUserRepository(db)
+	roomRepo := repository.NewRoomRepository(db)
 
 	// Load service
 	userService := service.NewUserService(userRepo)
+	roomService := service.NewRoomService(roomRepo)
 
 	// Load handler
 	userHandler := handler.NewUserHandler(userService)
+	roomHandler := handler.NewRoomHandler(roomService)
 
 	// Create gin router
-	router := handler.NewRouter(userHandler)
+	router := handler.NewRouter(userHandler, roomHandler)
 
 	// Start gin router
 	if err := router.Run(":" + viper.GetString(env.Port)); err != nil {

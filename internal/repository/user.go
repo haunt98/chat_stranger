@@ -121,6 +121,7 @@ func (g *userGorm) Delete(id int) bool {
 		return false
 	}
 
+	// find user
 	var user model.User
 	if err := tx.Where("id = ?", id).First(&user).Error; err != nil {
 		logrus.Error(err)
@@ -133,6 +134,7 @@ func (g *userGorm) Delete(id int) bool {
 		return false
 	}
 
+	// delete credential
 	if err := tx.Where("id = ?", user.CredentialID).Delete(&model.Credential{}).Error; err != nil {
 		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
@@ -144,6 +146,7 @@ func (g *userGorm) Delete(id int) bool {
 		return false
 	}
 
+	// delete user
 	if err := tx.Delete(&user).Error; err != nil {
 		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{

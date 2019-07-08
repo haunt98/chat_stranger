@@ -41,7 +41,7 @@ func (s *UserService) SignUp(user *model.User) bool {
 }
 
 func (s *UserService) LogIn(user *model.User) bool {
-	_, credential, ok := s.userRepo.FindByRegisterName(user.RegisterName)
+	userInDB, credential, ok := s.userRepo.FindByRegisterName(user.RegisterName)
 	if !ok {
 		return false
 	}
@@ -55,5 +55,14 @@ func (s *UserService) LogIn(user *model.User) bool {
 		}).Error("Wrong password")
 		return false
 	}
+	user.ID = userInDB.ID
 	return true
+}
+
+func (s *UserService) Info(id int) (*model.User, bool) {
+	user, _, ok := s.userRepo.Find(id)
+	if !ok {
+		return nil, false
+	}
+	return user, true
 }
