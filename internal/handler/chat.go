@@ -15,8 +15,8 @@ type ChatHandler struct {
 	chatService *service.ChatService
 }
 
-func NewChatHandler(roomService *service.ChatService) *ChatHandler {
-	return &ChatHandler{chatService: roomService}
+func NewChatHandler(chatService *service.ChatService) *ChatHandler {
+	return &ChatHandler{chatService: chatService}
 }
 
 func (h *ChatHandler) Find(c *gin.Context) {

@@ -21,21 +21,31 @@ func TestUserHandler_SignUp(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	m := mock_repository.NewMockUserRepository(ctrl)
-	m.
+	mockUserRepo := mock_repository.NewMockUserRepository(ctrl)
+	mockRoomRepo := mock_repository.NewMockRoomRepository(ctrl)
+	mockMemberRepo := mock_repository.NewMockMemberRepo(ctrl)
+	mockMessageRepo := mock_repository.NewMockMessageRepo(ctrl)
+
+	mockUserRepo.
 		EXPECT().
 		Create(gomock.Any(), gomock.Any()).
 		Return(true)
 
-	userService := service.NewUserService(m)
+	userService := service.NewUserService(mockUserRepo)
+	chatService := service.NewChatService(mockRoomRepo, mockMemberRepo, mockMessageRepo)
 	userHandler := NewUserHandler(userService)
-	router := NewRouter(userHandler)
+	chatHandler := NewChatHandler(chatService)
+	router := NewRouter(userHandler, chatHandler, true)
 
 	w := httptest.NewRecorder()
-	jsonUser, err := json.Marshal(model.User{})
+
+	// mock user repo => id is not changed when create
+	jsonUser, err := json.Marshal(model.User{ID: 1})
 	if err != nil {
 		t.Error(err)
 	}
+
+	// send test request
 	req, err := http.NewRequest("POST", variable.APIPrefix+"/auth/signup", bytes.NewBuffer(jsonUser))
 	if err != nil {
 		t.Error(err)
@@ -43,5 +53,11 @@ func TestUserHandler_SignUp(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-	// TODO assert body
+
+	var wbody interface{}
+	if err := json.Unmarshal(w.Body.Bytes(), &wbody); err != nil {
+		t.Error(err)
+	}
+	res := wbody.(map[string]interface{})
+	assert.Equal(t, 100, int(res["code"].(float64)))
 }

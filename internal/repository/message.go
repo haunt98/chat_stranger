@@ -18,16 +18,16 @@ type MessageRepo interface {
 }
 
 func NewMessageRepo(db *gorm.DB) MessageRepo {
-	return &MessageGorm{db: db}
+	return &messageGorm{db: db}
 }
 
 // implement
 
-type MessageGorm struct {
+type messageGorm struct {
 	db *gorm.DB
 }
 
-func (g *MessageGorm) FetchByTime(roomID int, fromTime time.Time) ([]*model.Message, bool) {
+func (g *messageGorm) FetchByTime(roomID int, fromTime time.Time) ([]*model.Message, bool) {
 	var messages []*model.Message
 	if err := g.db.Where("room_id = ? AND created_at > ?", roomID, fromTime).
 		Find(&messages).Error; err != nil {
@@ -56,7 +56,7 @@ func (g *MessageGorm) FetchByTime(roomID int, fromTime time.Time) ([]*model.Mess
 	return messages, true
 }
 
-func (g *MessageGorm) Create(message *model.Message) bool {
+func (g *messageGorm) Create(message *model.Message) bool {
 	if err := g.db.Create(message).Error; err != nil {
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
@@ -68,7 +68,7 @@ func (g *MessageGorm) Create(message *model.Message) bool {
 	return true
 }
 
-func (g *MessageGorm) Delete(roomID int) bool {
+func (g *messageGorm) Delete(roomID int) bool {
 	if err := g.db.Where("room_id = ?", roomID).
 		Delete(model.Message{}).Error; err != nil {
 		logrus.WithFields(logrus.Fields{

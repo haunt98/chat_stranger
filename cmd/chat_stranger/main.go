@@ -56,7 +56,7 @@ func main() {
 	chatHandler := handler.NewChatHandler(chatService)
 
 	// Create gin router
-	router := handler.NewRouter(userHandler, chatHandler)
+	router := handler.NewRouter(userHandler, chatHandler, false)
 
 	// Start gin router
 	if err := router.Run(":" + viper.GetString(variable.Port)); err != nil {

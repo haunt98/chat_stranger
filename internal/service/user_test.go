@@ -28,7 +28,7 @@ func TestUserService_SignUp(t *testing.T) {
 	assert.Equal(t, true, ok)
 }
 
-// https://play.golang.org/p/vmQwsmhKc24
+// https://play.golang.org/p/p8GiKu1Ys75
 
 func TestUserService_LogIn(t *testing.T) {
 	ctrl := gomock.NewController(t)

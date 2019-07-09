@@ -16,16 +16,16 @@ type MemberRepo interface {
 }
 
 func NewMemberRepo(db *gorm.DB) MemberRepo {
-	return &MemberGorm{db: db}
+	return &memberGorm{db: db}
 }
 
 // implement
 
-type MemberGorm struct {
+type memberGorm struct {
 	db *gorm.DB
 }
 
-func (g *MemberGorm) Create(userID, roomID int) bool {
+func (g *memberGorm) Create(userID, roomID int) bool {
 	if err := g.db.Create(&model.Member{
 		UserID: userID,
 		RoomID: roomID,
@@ -40,7 +40,7 @@ func (g *MemberGorm) Create(userID, roomID int) bool {
 	return true
 }
 
-func (g *MemberGorm) Delete(userID int) bool {
+func (g *memberGorm) Delete(userID int) bool {
 	if err := g.db.Where("user_id = ?", userID).
 		Delete(&model.Member{}).Error; err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -66,7 +66,7 @@ func countByRoom(db *gorm.DB, roomID int) (int, bool) {
 	return count, true
 }
 
-func (g *MemberGorm) CountByRoom(roomID int) (int, bool) {
+func (g *memberGorm) CountByRoom(roomID int) (int, bool) {
 	return countByRoom(g.db, roomID)
 }
 
@@ -84,6 +84,6 @@ func countByUser(db *gorm.DB, userID int) (int, bool) {
 	return count, true
 }
 
-func (g *MemberGorm) CountByUser(userID int) (int, bool) {
+func (g *memberGorm) CountByUser(userID int) (int, bool) {
 	return countByUser(g.db, userID)
 }

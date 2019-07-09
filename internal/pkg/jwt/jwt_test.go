@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// https://play.golang.org/p/NOpXQYBGYpO
+
 func TestCreate(t *testing.T) {
 	s, ok := Create(SignClaims{
 		ID:             1,

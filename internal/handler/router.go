@@ -7,23 +7,27 @@ import (
 	"github.com/spf13/viper"
 )
 
-func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler) *gin.Engine {
+func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, testing bool) *gin.Engine {
 	// Load gin config
 	gin.SetMode(viper.GetString(variable.GinMode))
 
 	router := gin.New()
 	router.Use(ginrus.Logger(), gin.Recovery())
-	router.LoadHTMLGlob(variable.HTMLGlob)
-	router.Static(variable.StaticRelative, variable.StaticRoot)
 
-	web := router.Group(variable.WebPrefix)
-	{
-		web.GET("", func(c *gin.Context) {
-			c.HTML(200, "home.html", gin.H{})
-		})
-		web.GET("/chat", func(c *gin.Context) {
-			c.HTML(200, "chat.html", gin.H{})
-		})
+	// skip html when test
+	if testing != true {
+		router.LoadHTMLGlob(variable.HTMLGlob)
+		router.Static(variable.StaticRelative, variable.StaticRoot)
+
+		web := router.Group(variable.WebPrefix)
+		{
+			web.GET("", func(c *gin.Context) {
+				c.HTML(200, "home.html", gin.H{})
+			})
+			web.GET("/chat", func(c *gin.Context) {
+				c.HTML(200, "chat.html", gin.H{})
+			})
+		}
 	}
 
 	api := router.Group(variable.APIPrefix)
