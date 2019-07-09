@@ -1,15 +1,15 @@
 package response
 
 var Codes = map[int]string{
-	100: "Đăng ký OK",
+	100: "Sign up Ok",
 	101: "Tên đăng nhập đã tồn tại",
 	102: "Failed to bind json when sign up",
 	103: "Failed to create token when sign up",
-	200: "Đăng nhập OK",
+	200: "Log in OK",
 	201: "Tên đăng nhập hay mật khẩu sai",
 	202: "Failed to bind json when log in",
 	203: "Failed to create token when log in",
-	300: "Lấy thông tin cá nhân OK",
+	300: "Get info OK",
 	301: "Không tồn tại tài khoản này",
 	400: "Find room OK",
 	401: "Failed to find room",
@@ -28,6 +28,12 @@ var Codes = map[int]string{
 	901: "User is already joined",
 	110: "Count member OK",
 	111: "Failed to count member",
+	120: "Cập nhập thông tin OK",
+	121: "Thất bại khi cập nhập thông tin",
+	122: "Failed to bind json when update info",
+	130: "Update password OK",
+	131: "Failed to update password",
+	132: "Failed to bind json when update password",
 	999: "You are not allowed to do this",
 }
 

@@ -12,6 +12,8 @@ type UserRepository interface {
 	Find(id int) (*model.User, *model.Credential, bool)
 	FindByRegisterName(n string) (*model.User, *model.Credential, bool)
 	Create(user *model.User, credential *model.Credential) bool
+	UpdateInfo(id int, user *model.User) bool
+	UpdatePassword(credentialID int, credential *model.Credential) bool
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -156,6 +158,38 @@ func (g *userGorm) Delete(id int) bool {
 
 	if err := tx.Commit().Error; err != nil {
 		logrus.Error(err)
+		return false
+	}
+	return true
+}
+
+func (g *userGorm) UpdateInfo(id int, user *model.User) bool {
+	if err := g.db.Table("users").Where("id = ?", id).
+		Updates(map[string]interface{}{
+			"full_name":  user.FullName,
+			"gender":     user.Gender,
+			"birth_year": user.BirthYear,
+		}).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"event":  "repo",
+			"target": "user",
+			"action": "update info",
+		}).Error(err)
+		return false
+	}
+	return true
+}
+
+func (g *userGorm) UpdatePassword(credentialID int, credential *model.Credential) bool {
+	if err := g.db.Table("credentials").Where("id = ?", credentialID).
+		Updates(map[string]interface{}{
+			"hashed_password": credential.HashedPassword,
+		}).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"event":  "repo",
+			"target": "user",
+			"action": "update password",
+		}).Error(err)
 		return false
 	}
 	return true

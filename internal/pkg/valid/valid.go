@@ -1,25 +1,19 @@
 package valid
 
-func CheckRegName(regname string) int {
-	if regname == "" {
-		return 412
+func CheckRegisterName(name string) bool {
+	if name == "" {
+		return false
 	}
-
-	return 0
+	return true
 }
 
-func CheckPassword(password string) int {
+func CheckPassword(password string) bool {
 	if password == "" {
-		return 413
+		return false
 	}
-
-	return 0
+	return true
 }
 
-func CheckFullName(fullname string) int {
-	if fullname == "" {
-		return 414
-	}
-
-	return 0
+func CheckPassword2(password, password2 string) bool {
+	return password == password2
 }

@@ -9,8 +9,14 @@
 
     <link
       rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"
+      integrity="sha256-UzFD2WYH2U1dQpKDjjZK72VtPeWP50NoJjd26rnAdUI="
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY="
       crossorigin="anonymous"
     />
 
@@ -26,6 +32,7 @@
         data-target="#modalLogIn"
       >
         Đăng nhập
+        <i class="fas fa-sign-in-alt"></i>
       </button>
       <button
         type="button"
@@ -34,6 +41,7 @@
         data-target="#modalSignUp"
       >
         Đăng ký
+        <i class="fas fa-user-plus"></i>
       </button>
     </div>
 
@@ -49,7 +57,7 @@
             </div>
             <div class="modal-body">
               <div class="form-group">
-                <label>Tên đăng nhập</label>
+                <label for="inputRegisterNameSignUp">Tên đăng nhập</label>
                 <input
                   type="text"
                   class="form-control"
@@ -57,7 +65,7 @@
                 />
               </div>
               <div class="form-group">
-                <label>Mật khẩu</label>
+                <label for="inputPasswordSignUp">Mật khẩu</label>
                 <input
                   type="password"
                   class="form-control"
@@ -65,7 +73,7 @@
                 />
               </div>
               <div class="form-group">
-                <label>Tên hiển thị</label>
+                <label for="inputFullNameSignUp">Tên hiển thị</label>
                 <input
                   type="text"
                   class="form-control"
@@ -96,7 +104,7 @@
             </div>
             <div class="modal-body">
               <div class="form-group">
-                <label>Tên đăng nhập</label>
+                <label for="inputRegisterNameLogIn">Tên đăng nhập</label>
                 <input
                   type="text"
                   class="form-control"
@@ -104,7 +112,7 @@
                 />
               </div>
               <div class="form-group">
-                <label>Password</label>
+                <label for="inputPasswordLogIn">Password</label>
                 <input
                   type="password"
                   class="form-control"
@@ -129,13 +137,13 @@
       crossorigin="anonymous"
     ></script>
     <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"
+      integrity="sha256-fTuUgtT7O2rqoImwjrhDgbXTKUwyxxujIMRIK7TbuNU="
       crossorigin="anonymous"
     ></script>
     <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha256-CjSoeELFOcH0/uxWu6mC/Vlrc1AARqbm/jiiImDGV3s="
       crossorigin="anonymous"
     ></script>
     <script src="/chat_stranger/web/script/api.js"></script>

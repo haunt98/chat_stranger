@@ -21,7 +21,7 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 }
 
 func (h *UserHandler) SignUp(c *gin.Context) {
-	// get user
+	// bind json user
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -33,7 +33,6 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 		return
 	}
 
-	// try sign up
 	if ok := h.userService.SignUp(&user); !ok {
 		c.JSON(200, response.Create(101))
 		return
@@ -53,19 +52,18 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 }
 
 func (h *UserHandler) LogIn(c *gin.Context) {
-	// get user
+	// bind json user
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
 			"event":  "handler",
 			"target": "user",
-		}).Error("Failed to bind json when log in")
+			"action": "log in",
+		}).Error(err)
 		c.JSON(200, response.Create(202))
 		return
 	}
 
-	// try log in
 	if ok := h.userService.LogIn(&user); !ok {
 		c.JSON(200, response.Create(201))
 		return
@@ -85,6 +83,7 @@ func (h *UserHandler) LogIn(c *gin.Context) {
 }
 
 func (h *UserHandler) Info(c *gin.Context) {
+	// get user
 	id, ok := c.Get("userID")
 	if !ok {
 		c.JSON(403, response.Create(999))
@@ -97,4 +96,58 @@ func (h *UserHandler) Info(c *gin.Context) {
 		return
 	}
 	c.JSON(200, response.CreateWithData(300, user))
+}
+
+func (h *UserHandler) UpdateInfo(c *gin.Context) {
+	// get user
+	id, ok := c.Get("userID")
+	if !ok {
+		c.JSON(403, response.Create(999))
+		return
+	}
+
+	// bind json user
+	var user model.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"event":  "handler",
+			"target": "user",
+			"action": "update info",
+		}).Error(err)
+		c.JSON(200, response.Create(122))
+		return
+	}
+
+	if ok := h.userService.UpdateInfo(id.(int), &user); !ok {
+		c.JSON(200, response.Create(121))
+		return
+	}
+	c.JSON(200, response.Create(120))
+}
+
+func (h *UserHandler) UpdatePassword(c *gin.Context) {
+	// get user
+	id, ok := c.Get("userID")
+	if !ok {
+		c.JSON(403, response.Create(999))
+		return
+	}
+
+	// bind json user
+	var user model.User
+	if err := c.ShouldBindJSON(&user); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"event":  "handler",
+			"target": "user",
+			"action": "update info",
+		}).Error(err)
+		c.JSON(200, response.Create(132))
+		return
+	}
+
+	if ok := h.userService.UpdatePassword(id.(int), &user); !ok {
+		c.JSON(200, response.Create(131))
+		return
+	}
+	c.JSON(200, response.Create(130))
 }

@@ -9,6 +9,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+//go:generate mockgen -destination=../mock/mock_repository/mock_message.go -source=message.go
+
 type MessageRepo interface {
 	FetchByTime(roomID int, fromTime time.Time) ([]*model.Message, bool)
 	Create(message *model.Message) bool

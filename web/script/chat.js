@@ -13,12 +13,16 @@ async function hello() {
   $("#hello").text(res.data.full_name);
 }
 
-function resetTime() {
+function prepare() {
+  // time
   let fromTime = new Date(0).toISOString();
   sessionStorage.setItem("fromTime", fromTime);
+
+  // count member
+  sessionStorage.setItem("countMember", "0");
 }
 
-function showMessages(name, body) {
+function showMessage(name, body) {
   let row = document.createElement("div");
   row.className = "row";
 
@@ -58,7 +62,7 @@ async function receive() {
   }
 
   for (let i = 0; i < res_receive.data.length; i += 1) {
-    showMessages(res_receive.data[i].user_full_name, res_receive.data[i].body);
+    showMessage(res_receive.data[i].user_full_name, res_receive.data[i].body);
   }
 
   if (!res_receive.data || !res_receive.data.length) {
@@ -84,16 +88,16 @@ async function countMember() {
   let count = parseInt(res_count.data);
 
   if (sessionStorage.getItem("countMember") === "1" && count === 2) {
-    showMessages("Hệ thống", "Có ai đó vừa vào phòng");
+    showMessage("Hệ thống", "Có ai đó vừa vào phòng");
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "2" && count === 1) {
-    showMessages("Hệ thống", "Người nói chuyện với bạn vừa rời khỏi phòng");
+    showMessage("Hệ thống", "Người nói chuyện với bạn vừa rời khỏi phòng");
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 1) {
-    showMessages("Hệ thống", "Phòng đang trống, chờ ai đó vào phòng");
+    showMessage("Hệ thống", "Phòng đang trống, chờ ai đó vào phòng");
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 2) {
-    showMessages("Hệ thống", "Phòng đang có ai đó, hãy nhắn tin để chào");
+    showMessage("Hệ thống", "Phòng đang có ai đó, hãy nhắn tin để chào");
     scrollTop();
   }
 
@@ -109,9 +113,9 @@ function polling() {
 
 $(async () => {
   await hello();
-  resetTime();
-  scrollTop();
+  prepare();
 
+  // check user is free
   let res_is_free = await ChatIsFreeAPI(sessionStorage.getItem("token"));
   if (res_is_free.code === 900) {
     // find a new room for user to join

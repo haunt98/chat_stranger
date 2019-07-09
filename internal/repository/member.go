@@ -6,6 +6,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//go:generate mockgen -destination=../mock/mock_repository/mock_member.go -source=member.go
+
 type MemberRepo interface {
 	Create(userID, roomID int) bool
 	Delete(userID int) bool
