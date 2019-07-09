@@ -190,3 +190,7 @@ $(async () => {
     inputMessage.val("");
   });
 });
+
+$(window).on("beforeunload", () => {
+  ChatLeaveAPI(sessionStorage.getItem("token"));
+});
