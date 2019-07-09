@@ -5,7 +5,7 @@ async function hello() {
   }
 
   let res = await InfoAPI(sessionStorage.getItem("token"));
-  if (res.code !== 3) {
+  if (res.code !== 300) {
     location.href = endpointWEB;
     return;
   }
@@ -42,12 +42,17 @@ function showMessages(name, body) {
   $("#chat").append(row);
 }
 
+function scrollTop() {
+  let chat = $("#chat");
+  chat.scrollTop(chat.prop("scrollHeight"));
+}
+
 async function receive() {
   let res_receive = await ChatReceiveAPI(
     sessionStorage.getItem("token"),
     sessionStorage.getItem("fromTime")
   );
-  if (res_receive.code !== 8) {
+  if (res_receive.code !== 800) {
     console.log(res_receive);
     return;
   }
@@ -63,31 +68,33 @@ async function receive() {
     res_receive.data[res_receive.data.length - 1].created_at
   ).toISOString();
   sessionStorage.setItem("fromTime", fromTime);
-
-  // scroll to bottom
-  let chat = $("#chat");
-  chat.scrollTop(chat.prop("scrollHeight"));
+  scrollTop();
 }
 
 async function countMember() {
   let res_count = await ChatCountMember(sessionStorage.getItem("token"));
-  if (res_count.code !== 901) {
+  if (res_count.code !== 110) {
     console.log(res_count);
     return;
   }
   if (!sessionStorage.getItem("countMember")) {
     sessionStorage.setItem("countMember", "0");
   }
+
   let count = parseInt(res_count.data);
 
   if (sessionStorage.getItem("countMember") === "1" && count === 2) {
     showMessages("Hệ thống", "Có ai đó vừa vào phòng");
+    scrollTop();
   } else if (sessionStorage.getItem("countMember") === "2" && count === 1) {
     showMessages("Hệ thống", "Người nói chuyện với bạn vừa rời khỏi phòng");
+    scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 1) {
     showMessages("Hệ thống", "Phòng đang trống, chờ ai đó vào phòng");
+    scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 2) {
     showMessages("Hệ thống", "Phòng đang có ai đó, hãy nhắn tin để chào");
+    scrollTop();
   }
 
   sessionStorage.setItem("countMember", count.toString());
@@ -103,15 +110,13 @@ function polling() {
 $(async () => {
   await hello();
   resetTime();
+  scrollTop();
 
-  // scroll to bottom
-  let chat = $("#chat");
-  chat.scrollTop(chat.prop("scrollHeight"));
-
-  let res_is_joined = await ChatIsFreeAPI(sessionStorage.getItem("token"));
-  if (res_is_joined.code === 9) {
+  let res_is_free = await ChatIsFreeAPI(sessionStorage.getItem("token"));
+  if (res_is_free.code === 900) {
+    // find a new room for user to join
     let res_find = await ChatFindAPI(sessionStorage.getItem("token"), "empty");
-    if (res_find.code !== 4) {
+    if (res_find.code !== 400) {
       console.log(res_find);
       return;
     }
@@ -120,7 +125,7 @@ $(async () => {
       sessionStorage.getItem("token"),
       res_find.data.id
     );
-    if (res_join.code !== 5) {
+    if (res_join.code !== 500) {
       console.log(res_join);
       return;
     }
@@ -130,7 +135,7 @@ $(async () => {
 
   $("#btnLeave").on("click", async () => {
     let res_leave = await ChatLeaveAPI(sessionStorage.getItem("token"));
-    if (res_leave.code !== 6) {
+    if (res_leave.code !== 600) {
       console.log(res_leave);
       return;
     }
@@ -141,14 +146,14 @@ $(async () => {
   $("#btnNext").on("click", async () => {
     // next
     let res_next = await ChatFindAPI(sessionStorage.getItem("token"), "next");
-    if (res_next.code !== 4) {
+    if (res_next.code !== 400) {
       console.log(res_next);
       return;
     }
 
     // leave
     let res_leave = await ChatLeaveAPI(sessionStorage.getItem("token"));
-    if (res_leave.code !== 6) {
+    if (res_leave.code !== 600) {
       console.log(res_leave);
       return;
     }
@@ -158,7 +163,7 @@ $(async () => {
       sessionStorage.getItem("token"),
       res_next.data.id
     );
-    if (res_join.code !== 5) {
+    if (res_join.code !== 500) {
       console.log(res_join);
       return;
     }
@@ -174,11 +179,12 @@ $(async () => {
     if (inputMessage.val() === "") {
       return;
     }
+
     let res_send = await ChatSendAPI(
       sessionStorage.getItem("token"),
       inputMessage.val()
     );
-    if (res_send.code !== 7) {
+    if (res_send.code !== 700) {
       console.log(res_send);
     }
     inputMessage.val("");

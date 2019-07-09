@@ -10,7 +10,7 @@ $(() => {
       $("#inputFullNameSignUp").val()
     );
 
-    if (res.code !== 1) {
+    if (res.code !== 100) {
       $("#errSignUp").text(res.message);
       return;
     }
@@ -28,7 +28,7 @@ $(() => {
       $("#inputPasswordLogIn").val()
     );
 
-    if (res.code !== 2) {
+    if (res.code !== 200) {
       $("#errLogIn").text(res.message);
       return;
     }

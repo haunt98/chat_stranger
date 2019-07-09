@@ -19,12 +19,11 @@ func (s *UserService) SignUp(user *model.User) bool {
 	// hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
 			"event":  "service",
 			"target": "user",
 			"action": "sign up",
-		}).Error("Failed to hash password")
+		}).Error(err)
 		return false
 	}
 
@@ -46,13 +45,13 @@ func (s *UserService) LogIn(user *model.User) bool {
 		return false
 	}
 
+	// hash password
 	if err := bcrypt.CompareHashAndPassword([]byte(credential.HashedPassword), []byte(user.Password)); err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
 			"event":  "service",
 			"target": "user",
 			"action": "log in",
-		}).Error("Wrong password")
+		}).Error(err)
 		return false
 	}
 	user.ID = userInDB.ID

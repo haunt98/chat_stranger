@@ -25,53 +25,52 @@ type userGorm struct {
 }
 
 func (g *userGorm) Find(id int) (*model.User, *model.Credential, bool) {
+	// find user
 	var user model.User
 	if err := g.db.Where("id = ?", id).First(&user).Error; err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
 			"target": "user",
-			"id":     id,
-		}).Error("Not found user")
+			"action": "find",
+		}).Error(err)
 		return nil, nil, false
 	}
 
+	// find credential
 	var credential model.Credential
 	if err := g.db.Where("id = ?", user.CredentialID).First(&credential).Error; err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
-			"target": "credential",
-			"id":     user.CredentialID,
-		}).Error("Not found credential")
+			"target": "user",
+			"action": "find",
+		}).Error(err)
 		return nil, nil, false
 	}
 	return &user, &credential, true
 }
 
 func (g *userGorm) FindByRegisterName(n string) (*model.User, *model.Credential, bool) {
+	// find credential
 	var credential model.Credential
 	if err := g.db.Where("register_name = ?", n).First(&credential).Error; err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
-			"event":         "repo",
-			"target":        "credential",
-			"register_name": n,
-		}).Error("Not found credential")
+			"event":  "repo",
+			"target": "user",
+			"action": "find",
+		}).Error(err)
 		return nil, nil, false
 	}
 
+	// find user
 	var user model.User
 	if err := g.db.Where("credential_id = ?", credential.ID).First(&user).Error; err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
-			"event":         "repo",
-			"target":        "user",
-			"credential_id": credential.ID,
-		}).Error("Not found user")
+			"event":  "repo",
+			"target": "user",
+			"action": "find",
+		}).Error(err)
 		return nil, nil, false
 	}
-
 	return &user, &credential, true
 }
 
@@ -83,25 +82,25 @@ func (g *userGorm) Create(user *model.User, credential *model.Credential) bool {
 		return false
 	}
 
+	// create credential
 	if err := tx.Create(credential).Error; err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
-			"event":      "repo",
-			"target":     "credential",
-			"credential": credential,
-		}).Error("Failed to create credential")
+			"event":  "repo",
+			"target": "user",
+			"action": "create",
+		}).Error(err)
 		tx.Rollback()
 		return false
 	}
 
+	// create user
 	user.CredentialID = credential.ID
 	if err := tx.Create(user).Error; err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
 			"target": "user",
-			"user":   user,
-		}).Error("Failed to create user")
+			"action": "create",
+		}).Error(err)
 		tx.Rollback()
 		return false
 	}
@@ -124,36 +123,33 @@ func (g *userGorm) Delete(id int) bool {
 	// find user
 	var user model.User
 	if err := tx.Where("id = ?", id).First(&user).Error; err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
 			"target": "user",
-			"id":     id,
-		}).Error("Not found user")
+			"action": "delete",
+		}).Error(err)
 		tx.Rollback()
 		return false
 	}
 
 	// delete credential
 	if err := tx.Where("id = ?", user.CredentialID).Delete(&model.Credential{}).Error; err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
-			"target": "credential",
-			"id":     user.CredentialID,
-		}).Error("Failed to delete credential")
+			"target": "user",
+			"action": "delete",
+		}).Error(err)
 		tx.Rollback()
 		return false
 	}
 
 	// delete user
 	if err := tx.Delete(&user).Error; err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
 			"target": "user",
-			"user":   user,
-		}).Error("Failed to delete user")
+			"action": "delete",
+		}).Error(err)
 		tx.Rollback()
 		return false
 	}

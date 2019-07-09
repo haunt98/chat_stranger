@@ -9,7 +9,7 @@ import (
 
 	"github.com/1612180/chat_stranger/internal/model"
 
-	"github.com/1612180/chat_stranger/internal/pkg/env"
+	"github.com/1612180/chat_stranger/internal/pkg/variable"
 
 	"github.com/1612180/chat_stranger/internal/mock/mock_repository"
 	"github.com/1612180/chat_stranger/internal/service"
@@ -36,7 +36,7 @@ func TestUserHandler_SignUp(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	req, err := http.NewRequest("POST", env.APIPrefix+"/auth/signup", bytes.NewBuffer(jsonUser))
+	req, err := http.NewRequest("POST", variable.APIPrefix+"/auth/signup", bytes.NewBuffer(jsonUser))
 	if err != nil {
 		t.Error(err)
 	}

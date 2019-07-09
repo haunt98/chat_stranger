@@ -1,14 +1,14 @@
 package model
 
 import (
-	"github.com/1612180/chat_stranger/internal/pkg/env"
+	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func Migrate(db *gorm.DB) {
-	if viper.GetString(env.DbMode) == "debug" {
+	if viper.GetString(variable.DbMode) == "debug" {
 		if err := db.DropTableIfExists(
 			&Credential{},
 			&User{},

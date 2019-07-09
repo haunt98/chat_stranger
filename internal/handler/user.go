@@ -2,9 +2,9 @@ package handler
 
 import (
 	"github.com/1612180/chat_stranger/internal/model"
-	"github.com/1612180/chat_stranger/internal/pkg/env"
 	"github.com/1612180/chat_stranger/internal/pkg/jwt"
 	"github.com/1612180/chat_stranger/internal/pkg/response"
+	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/1612180/chat_stranger/internal/service"
 	jwt2 "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -21,7 +21,7 @@ func NewUserHandler(userService *service.UserService) *UserHandler {
 }
 
 func (h *UserHandler) SignUp(c *gin.Context) {
-	// bind json
+	// get user
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -29,13 +29,13 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 			"target": "user",
 			"action": "sign up",
 		}).Error(err)
-		c.JSON(200, response.Create(11))
+		c.JSON(200, response.Create(102))
 		return
 	}
 
 	// try sign up
 	if ok := h.userService.SignUp(&user); !ok {
-		c.JSON(200, response.Create(10))
+		c.JSON(200, response.Create(101))
 		return
 	}
 
@@ -44,16 +44,16 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 		ID:             user.ID,
 		Role:           "user",
 		StandardClaims: jwt2.StandardClaims{},
-	}, viper.GetString(env.JWTSecret))
+	}, viper.GetString(variable.JWTSecret))
 	if !ok {
-		c.JSON(200, response.Create(12))
+		c.JSON(200, response.Create(103))
 		return
 	}
-	c.JSON(200, response.CreateWithData(1, s))
+	c.JSON(200, response.CreateWithData(100, s))
 }
 
 func (h *UserHandler) LogIn(c *gin.Context) {
-	// bind json
+	// get user
 	var user model.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		logrus.Error(err)
@@ -61,13 +61,13 @@ func (h *UserHandler) LogIn(c *gin.Context) {
 			"event":  "handler",
 			"target": "user",
 		}).Error("Failed to bind json when log in")
-		c.JSON(200, response.Create(21))
+		c.JSON(200, response.Create(202))
 		return
 	}
 
 	// try log in
 	if ok := h.userService.LogIn(&user); !ok {
-		c.JSON(200, response.Create(20))
+		c.JSON(200, response.Create(201))
 		return
 	}
 
@@ -76,12 +76,12 @@ func (h *UserHandler) LogIn(c *gin.Context) {
 		ID:             user.ID,
 		Role:           "user",
 		StandardClaims: jwt2.StandardClaims{},
-	}, viper.GetString(env.JWTSecret))
+	}, viper.GetString(variable.JWTSecret))
 	if !ok {
-		c.JSON(200, response.Create(22))
+		c.JSON(200, response.Create(203))
 		return
 	}
-	c.JSON(200, response.CreateWithData(2, s))
+	c.JSON(200, response.CreateWithData(200, s))
 }
 
 func (h *UserHandler) Info(c *gin.Context) {
@@ -93,8 +93,8 @@ func (h *UserHandler) Info(c *gin.Context) {
 
 	user, ok := h.userService.Info(id.(int))
 	if !ok {
-		c.JSON(200, response.Create(30))
+		c.JSON(200, response.Create(301))
 		return
 	}
-	c.JSON(200, response.CreateWithData(3, user))
+	c.JSON(200, response.CreateWithData(300, user))
 }

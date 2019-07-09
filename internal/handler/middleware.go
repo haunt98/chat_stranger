@@ -3,9 +3,9 @@ package handler
 import (
 	"strings"
 
-	"github.com/1612180/chat_stranger/internal/pkg/env"
 	"github.com/1612180/chat_stranger/internal/pkg/jwt"
 	"github.com/1612180/chat_stranger/internal/pkg/response"
+	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -48,7 +48,7 @@ func VerifyRole(role string) gin.HandlerFunc {
 			return
 		}
 
-		signClaims, ok := jwt.Verify(s, viper.GetString(env.JWTSecret))
+		signClaims, ok := jwt.Verify(s, viper.GetString(variable.JWTSecret))
 		if !ok {
 			c.JSON(403, response.Create(9))
 			c.Abort()
