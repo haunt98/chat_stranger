@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//go:generate mockgen -destination=../mock/mock_repository/mock_user.go -source=user.go
+//go:generate $GOPATH/bin/mockgen -destination=../mock/mock_repository/mock_user.go -source=user.go
 
 type UserRepository interface {
 	Find(id int) (*model.User, *model.Credential, bool)

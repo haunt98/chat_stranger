@@ -9,7 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//go:generate mockgen -destination=../mock/mock_repository/mock_message.go -source=message.go
+//go:generate $GOPATH/bin/mockgen -destination=../mock/mock_repository/mock_message.go -source=message.go
 
 type MessageRepo interface {
 	FetchByTime(roomID int, fromTime time.Time) ([]*model.Message, bool)

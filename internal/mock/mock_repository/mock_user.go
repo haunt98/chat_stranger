@@ -80,29 +80,29 @@ func (mr *MockUserRepositoryMockRecorder) Create(user, credential interface{}) *
 }
 
 // UpdateInfo mocks base method
-func (m *MockUserRepository) UpdateInfo(id int, user *model.User) bool {
+func (m *MockUserRepository) UpdateInfo(id int, new *model.User) bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateInfo", id, user)
+	ret := m.ctrl.Call(m, "UpdateInfo", id, new)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
 // UpdateInfo indicates an expected call of UpdateInfo
-func (mr *MockUserRepositoryMockRecorder) UpdateInfo(id, user interface{}) *gomock.Call {
+func (mr *MockUserRepositoryMockRecorder) UpdateInfo(id, new interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateInfo", reflect.TypeOf((*MockUserRepository)(nil).UpdateInfo), id, user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateInfo", reflect.TypeOf((*MockUserRepository)(nil).UpdateInfo), id, new)
 }
 
 // UpdatePassword mocks base method
-func (m *MockUserRepository) UpdatePassword(credentialID int, credential *model.Credential) bool {
+func (m *MockUserRepository) UpdatePassword(id int, new *model.Credential) bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdatePassword", credentialID, credential)
+	ret := m.ctrl.Call(m, "UpdatePassword", id, new)
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
 // UpdatePassword indicates an expected call of UpdatePassword
-func (mr *MockUserRepositoryMockRecorder) UpdatePassword(credentialID, credential interface{}) *gomock.Call {
+func (mr *MockUserRepositoryMockRecorder) UpdatePassword(id, new interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePassword", reflect.TypeOf((*MockUserRepository)(nil).UpdatePassword), credentialID, credential)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePassword", reflect.TypeOf((*MockUserRepository)(nil).UpdatePassword), id, new)
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/1612180/chat_stranger/internal/model"
 	"github.com/1612180/chat_stranger/internal/repository"
+
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )

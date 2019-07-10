@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-//go:generate mockgen -destination=../mock/mock_repository/mock_room.go -source=room.go
+//go:generate $GOPATH/bin/mockgen -destination=../mock/mock_repository/mock_room.go -source=room.go
 
 type RoomRepository interface {
 	Exist(id int) bool
