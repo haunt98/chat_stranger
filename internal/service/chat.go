@@ -3,12 +3,11 @@ package service
 import (
 	"time"
 
+	"github.com/1612180/chat_stranger/internal/model"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
+	"github.com/1612180/chat_stranger/internal/repository"
 
 	"github.com/sirupsen/logrus"
-
-	"github.com/1612180/chat_stranger/internal/model"
-	"github.com/1612180/chat_stranger/internal/repository"
 )
 
 type ChatService struct {
@@ -17,9 +16,11 @@ type ChatService struct {
 	messageRepo repository.MessageRepo
 }
 
-func NewChatService(roomRepo repository.RoomRepository,
+func NewChatService(
+	roomRepo repository.RoomRepository,
 	memberRepo repository.MemberRepo,
-	messageRepo repository.MessageRepo) *ChatService {
+	messageRepo repository.MessageRepo,
+) *ChatService {
 	return &ChatService{roomRepo: roomRepo, memberRepo: memberRepo, messageRepo: messageRepo}
 }
 

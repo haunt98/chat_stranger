@@ -79,9 +79,6 @@ func TestUserService_UpdateInfo(t *testing.T) {
 		m.EXPECT().
 			Find(gomock.Any()).
 			Return(&model.User{}, &model.Credential{}, false)
-		m.EXPECT().
-			UpdateInfo(gomock.Any(), gomock.Any()).
-			Return(false).AnyTimes()
 
 		userService := UserService{
 			userRepo: m,
@@ -98,7 +95,7 @@ func TestUserService_UpdateInfo(t *testing.T) {
 			Return(&model.User{}, &model.Credential{}, true)
 		m.EXPECT().
 			UpdateInfo(gomock.Any(), gomock.Any()).
-			Return(false).AnyTimes()
+			Return(false)
 
 		userService := UserService{
 			userRepo: m,
@@ -115,7 +112,7 @@ func TestUserService_UpdateInfo(t *testing.T) {
 			Return(&model.User{}, &model.Credential{}, true)
 		m.EXPECT().
 			UpdateInfo(gomock.Any(), gomock.Any()).
-			Return(true).AnyTimes()
+			Return(true)
 
 		userService := UserService{
 			userRepo: m,
