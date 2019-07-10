@@ -66,22 +66,17 @@ func (s *UserService) Info(id int) (*model.User, bool) {
 	return user, true
 }
 
-func (s *UserService) UpdateInfo(id int, user *model.User) bool {
+func (s *UserService) UpdateInfo(id int, new *model.User) bool {
 	_, _, ok := s.userRepo.Find(id)
 	if !ok {
 		return false
 	}
-	return s.userRepo.UpdateInfo(id, user)
+	return s.userRepo.UpdateInfo(id, new)
 }
 
-func (s *UserService) UpdatePassword(userID int, user *model.User) bool {
-	_, credential, ok := s.userRepo.Find(userID)
-	if !ok {
-		return false
-	}
-
+func (s *UserService) UpdatePassword(id int, new *model.User) bool {
 	// hash password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(new.Password), bcrypt.DefaultCost)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"event":  "service",
@@ -91,7 +86,7 @@ func (s *UserService) UpdatePassword(userID int, user *model.User) bool {
 		return false
 	}
 
-	if ok := s.userRepo.UpdatePassword(credential.ID, &model.Credential{
+	if ok := s.userRepo.UpdatePassword(id, &model.Credential{
 		HashedPassword: string(hashedPassword),
 	}); !ok {
 		return false

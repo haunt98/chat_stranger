@@ -2,6 +2,7 @@ package repository
 
 import (
 	"github.com/1612180/chat_stranger/internal/model"
+
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 )
@@ -12,8 +13,8 @@ type UserRepository interface {
 	Find(id int) (*model.User, *model.Credential, bool)
 	FindByRegisterName(n string) (*model.User, *model.Credential, bool)
 	Create(user *model.User, credential *model.Credential) bool
-	UpdateInfo(id int, user *model.User) bool
-	UpdatePassword(credentialID int, credential *model.Credential) bool
+	UpdateInfo(id int, new *model.User) bool
+	UpdatePassword(id int, new *model.Credential) bool
 }
 
 func NewUserRepository(db *gorm.DB) UserRepository {
@@ -163,16 +164,25 @@ func (g *userGorm) Delete(id int) bool {
 	return true
 }
 
-func (g *userGorm) UpdateInfo(id int, user *model.User) bool {
-	if err := g.db.Table("users").Where("id = ?", id).
-		Updates(map[string]interface{}{
-			"full_name":  user.FullName,
-			"gender":     user.Gender,
-			"birth_year": user.BirthYear,
-		}).Error; err != nil {
+func (g *userGorm) UpdateInfo(id int, new *model.User) bool {
+	var old model.User
+	if err := g.db.Where(&model.User{ID: id}).First(&old).Error; err != nil {
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
-			"target": "user",
+			"target": "new",
+			"action": "update info",
+		}).Error(err)
+		return false
+	}
+
+	old.FullName = new.FullName
+	old.Gender = new.Gender
+	old.BirthYear = new.BirthYear
+
+	if err := g.db.Save(&old).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"event":  "repo",
+			"target": "new",
 			"action": "update info",
 		}).Error(err)
 		return false
@@ -180,15 +190,34 @@ func (g *userGorm) UpdateInfo(id int, user *model.User) bool {
 	return true
 }
 
-func (g *userGorm) UpdatePassword(credentialID int, credential *model.Credential) bool {
-	if err := g.db.Table("credentials").Where("id = ?", credentialID).
-		Updates(map[string]interface{}{
-			"hashed_password": credential.HashedPassword,
-		}).Error; err != nil {
+func (g *userGorm) UpdatePassword(id int, new *model.Credential) bool {
+	var user model.User
+	if err := g.db.Where(&model.User{ID: id}).First(&user).Error; err != nil {
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
-			"target": "user",
-			"action": "update password",
+			"target": "new",
+			"action": "update info",
+		}).Error(err)
+		return false
+	}
+
+	var old model.Credential
+	if err := g.db.Where(&model.Credential{ID: user.CredentialID}).First(&old).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"event":  "repo",
+			"target": "new",
+			"action": "update info",
+		}).Error(err)
+		return false
+	}
+
+	old.HashedPassword = new.HashedPassword
+
+	if err := g.db.Save(&old).Error; err != nil {
+		logrus.WithFields(logrus.Fields{
+			"event":  "repo",
+			"target": "new",
+			"action": "update info",
 		}).Error(err)
 		return false
 	}

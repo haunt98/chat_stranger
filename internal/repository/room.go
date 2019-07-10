@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/1612180/chat_stranger/internal/model"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
+
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 )

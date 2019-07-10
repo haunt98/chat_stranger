@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/1612180/chat_stranger/internal/model"
+
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 )
@@ -35,9 +36,33 @@ func TestMessageGorm_FetchByTime(t *testing.T) {
 
 	messageGorm := messageGorm{db: db}
 
-	messages, ok := messageGorm.FetchByTime(1, time.Time{})
-	assert.Equal(t, true, ok)
-	assert.Equal(t, 0, len(messages))
+	t.Run("message 0", func(t *testing.T) {
+		messages, ok := messageGorm.FetchByTime(1, time.Time{})
+		assert.Equal(t, true, ok)
+		assert.Equal(t, 0, len(messages))
+	})
+
+	t.Run("message 1", func(t *testing.T) {
+		if err := db.Create(&model.User{
+			FullName: "a",
+		}).Error; err != nil {
+			t.Error(err)
+		}
+
+		if err := db.Create(&model.Message{
+			Body:   "b",
+			RoomID: 1,
+			UserID: 1,
+		}).Error; err != nil {
+			t.Error(err)
+		}
+
+		messages, ok := messageGorm.FetchByTime(1, time.Time{})
+		assert.Equal(t, true, ok)
+		assert.Equal(t, 1, len(messages))
+		assert.Equal(t, "a", messages[0].UserFullName)
+		assert.Equal(t, "b", messages[0].Body)
+	})
 }
 
 func TestMessageGorm_Create(t *testing.T) {
@@ -51,16 +76,7 @@ func TestMessageGorm_Create(t *testing.T) {
 		}
 	}()
 
-	if err := db.DropTableIfExists(
-		&model.Message{},
-	).Error; err != nil {
-		t.Error(err)
-	}
-	if err := db.AutoMigrate(
-		&model.Message{},
-	).Error; err != nil {
-		t.Error(err)
-	}
+	migrate(db, t)
 
 	messageGorm := messageGorm{db: db}
 
@@ -79,16 +95,7 @@ func TestMessageGorm_Delete(t *testing.T) {
 		}
 	}()
 
-	if err := db.DropTableIfExists(
-		&model.Message{},
-	).Error; err != nil {
-		t.Error(err)
-	}
-	if err := db.AutoMigrate(
-		&model.Message{},
-	).Error; err != nil {
-		t.Error(err)
-	}
+	migrate(db, t)
 
 	messageGorm := messageGorm{db: db}
 

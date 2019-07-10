@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
+
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"

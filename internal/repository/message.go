@@ -3,10 +3,10 @@ package repository
 import (
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/1612180/chat_stranger/internal/model"
+
 	"github.com/jinzhu/gorm"
+	"github.com/sirupsen/logrus"
 )
 
 //go:generate mockgen -destination=../mock/mock_repository/mock_message.go -source=message.go
