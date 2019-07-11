@@ -19,12 +19,12 @@ func TestUserService_SignUp(t *testing.T) {
 		Create(gomock.Any(), gomock.Any()).
 		Return(true)
 
-	userService := UserService{
+	userService := userService{
 		userRepo: m,
 	}
 
 	ok := userService.SignUp(&model.User{})
-	assert.Equal(t, true, ok)
+	assert.True(t, ok)
 }
 
 // https://play.golang.org/p/p8GiKu1Ys75
@@ -43,12 +43,12 @@ func TestUserService_LogIn(t *testing.T) {
 				true,
 			)
 
-		userService := UserService{
+		userService := userService{
 			userRepo: m,
 		}
 
 		ok := userService.LogIn(&model.User{})
-		assert.Equal(t, false, ok)
+		assert.False(t, ok)
 	})
 
 	t.Run("true", func(t *testing.T) {
@@ -61,12 +61,12 @@ func TestUserService_LogIn(t *testing.T) {
 				true,
 			)
 
-		userService := UserService{
+		userService := userService{
 			userRepo: m,
 		}
 
 		ok := userService.LogIn(&model.User{Password: "a"})
-		assert.Equal(t, true, ok)
+		assert.True(t, ok)
 	})
 }
 
@@ -80,12 +80,12 @@ func TestUserService_UpdateInfo(t *testing.T) {
 			Find(gomock.Any()).
 			Return(&model.User{}, &model.Credential{}, false)
 
-		userService := UserService{
+		userService := userService{
 			userRepo: m,
 		}
 
 		ok := userService.UpdateInfo(1, &model.User{})
-		assert.Equal(t, false, ok)
+		assert.False(t, ok)
 	})
 
 	t.Run("false", func(t *testing.T) {
@@ -97,12 +97,12 @@ func TestUserService_UpdateInfo(t *testing.T) {
 			UpdateInfo(gomock.Any(), gomock.Any()).
 			Return(false)
 
-		userService := UserService{
+		userService := userService{
 			userRepo: m,
 		}
 
 		ok := userService.UpdateInfo(1, &model.User{})
-		assert.Equal(t, false, ok)
+		assert.False(t, ok)
 	})
 
 	t.Run("true", func(t *testing.T) {
@@ -114,12 +114,12 @@ func TestUserService_UpdateInfo(t *testing.T) {
 			UpdateInfo(gomock.Any(), gomock.Any()).
 			Return(true)
 
-		userService := UserService{
+		userService := userService{
 			userRepo: m,
 		}
 
 		ok := userService.UpdateInfo(1, &model.User{})
-		assert.Equal(t, true, ok)
+		assert.True(t, ok)
 	})
 }
 
@@ -133,12 +133,12 @@ func TestUserService_UpdatePassword(t *testing.T) {
 			UpdatePassword(gomock.Any(), gomock.Any()).
 			Return(false)
 
-		userService := UserService{
+		userService := userService{
 			userRepo: m,
 		}
 
 		ok := userService.UpdatePassword(1, &model.User{})
-		assert.Equal(t, false, ok)
+		assert.False(t, ok)
 	})
 
 	t.Run("true", func(t *testing.T) {
@@ -147,11 +147,11 @@ func TestUserService_UpdatePassword(t *testing.T) {
 			UpdatePassword(gomock.Any(), gomock.Any()).
 			Return(true)
 
-		userService := UserService{
+		userService := userService{
 			userRepo: m,
 		}
 
 		ok := userService.UpdatePassword(1, &model.User{})
-		assert.Equal(t, true, ok)
+		assert.True(t, ok)
 	})
 }

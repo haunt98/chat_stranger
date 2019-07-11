@@ -25,14 +25,15 @@ func TestChatService_Find(t *testing.T) {
 			Create().
 			Return(nil, false)
 
-		chatService := ChatService{
+		chatService := chatService{
 			roomRepo:    roomMock,
 			memberRepo:  memberMock,
 			messageRepo: messageMock,
 		}
 
-		_, ok := chatService.Find(1, "empty")
-		assert.Equal(t, false, ok)
+		room, ok := chatService.Find(1, "empty")
+		assert.False(t, ok)
+		assert.Nil(t, room)
 	})
 
 	t.Run("empty true", func(t *testing.T) {
@@ -44,14 +45,15 @@ func TestChatService_Find(t *testing.T) {
 			FindEmpty().
 			Return(&model.Room{}, true)
 
-		chatService := ChatService{
+		chatService := chatService{
 			roomRepo:    roomMock,
 			memberRepo:  memberMock,
 			messageRepo: messageMock,
 		}
 
-		_, ok := chatService.Find(1, "empty")
-		assert.Equal(t, true, ok)
+		room, ok := chatService.Find(1, "empty")
+		assert.True(t, ok)
+		assert.Equal(t, model.Room{}, *room)
 	})
 
 	t.Run("empty true", func(t *testing.T) {
@@ -66,12 +68,14 @@ func TestChatService_Find(t *testing.T) {
 			Create().
 			Return(&model.Room{}, true)
 
-		chatService := ChatService{
+		chatService := chatService{
 			roomRepo:    roomMock,
 			memberRepo:  memberMock,
 			messageRepo: messageMock,
 		}
-		_, ok := chatService.Find(1, "empty")
-		assert.Equal(t, true, ok)
+
+		room, ok := chatService.Find(1, "empty")
+		assert.True(t, ok)
+		assert.Equal(t, model.Room{}, *room)
 	})
 }

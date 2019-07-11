@@ -12,11 +12,11 @@ import (
 )
 
 type ChatHandler struct {
-	chatService *service.ChatService
+	chatService service.ChatService
 }
 
-func NewChatHandler(chatService *service.ChatService) *ChatHandler {
-	return &ChatHandler{chatService: chatService}
+func NewChatHandler(chatServiceI service.ChatService) *ChatHandler {
+	return &ChatHandler{chatService: chatServiceI}
 }
 
 func (h *ChatHandler) Find(c *gin.Context) {

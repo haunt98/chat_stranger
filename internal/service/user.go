@@ -8,15 +8,27 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService struct {
+//go:generate $GOPATH/bin/mockgen -destination=../mock/mock_service/mock_user.go -source=user.go
+
+type UserService interface {
+	SignUp(user *model.User) bool
+	LogIn(user *model.User) bool
+	Info(id int) (*model.User, bool)
+	UpdateInfo(id int, new *model.User) bool
+	UpdatePassword(id int, new *model.User) bool
+}
+
+func NewUserService(userRepo repository.UserRepository) UserService {
+	return &userService{userRepo: userRepo}
+}
+
+// implement
+
+type userService struct {
 	userRepo repository.UserRepository
 }
 
-func NewUserService(userRepo repository.UserRepository) *UserService {
-	return &UserService{userRepo: userRepo}
-}
-
-func (s *UserService) SignUp(user *model.User) bool {
+func (s *userService) SignUp(user *model.User) bool {
 	// hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -40,7 +52,7 @@ func (s *UserService) SignUp(user *model.User) bool {
 	return true
 }
 
-func (s *UserService) LogIn(user *model.User) bool {
+func (s *userService) LogIn(user *model.User) bool {
 	userInDB, credential, ok := s.userRepo.FindByRegisterName(user.RegisterName)
 	if !ok {
 		return false
@@ -59,7 +71,7 @@ func (s *UserService) LogIn(user *model.User) bool {
 	return true
 }
 
-func (s *UserService) Info(id int) (*model.User, bool) {
+func (s *userService) Info(id int) (*model.User, bool) {
 	user, _, ok := s.userRepo.Find(id)
 	if !ok {
 		return nil, false
@@ -67,7 +79,7 @@ func (s *UserService) Info(id int) (*model.User, bool) {
 	return user, true
 }
 
-func (s *UserService) UpdateInfo(id int, new *model.User) bool {
+func (s *userService) UpdateInfo(id int, new *model.User) bool {
 	_, _, ok := s.userRepo.Find(id)
 	if !ok {
 		return false
@@ -75,7 +87,7 @@ func (s *UserService) UpdateInfo(id int, new *model.User) bool {
 	return s.userRepo.UpdateInfo(id, new)
 }
 
-func (s *UserService) UpdatePassword(id int, new *model.User) bool {
+func (s *userService) UpdatePassword(id int, new *model.User) bool {
 	// hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(new.Password), bcrypt.DefaultCost)
 	if err != nil {

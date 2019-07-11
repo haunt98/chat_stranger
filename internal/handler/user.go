@@ -6,6 +6,7 @@ import (
 	"github.com/1612180/chat_stranger/internal/pkg/response"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/1612180/chat_stranger/internal/service"
+
 	jwt2 "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -13,10 +14,10 @@ import (
 )
 
 type UserHandler struct {
-	userService *service.UserService
+	userService service.UserService
 }
 
-func NewUserHandler(userService *service.UserService) *UserHandler {
+func NewUserHandler(userService service.UserService) *UserHandler {
 	return &UserHandler{userService: userService}
 }
 

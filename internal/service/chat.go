@@ -10,21 +10,35 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type ChatService struct {
-	roomRepo    repository.RoomRepository
-	memberRepo  repository.MemberRepo
-	messageRepo repository.MessageRepo
+//go:generate $GOPATH/bin/mockgen -destination=../mock/mock_service/mock_chat.go -source=chat.go
+
+type ChatService interface {
+	Find(userID int, status string) (*model.Room, bool)
+	Join(userID, roomID int) bool
+	Leave(userID int) bool
+	SendMessage(message *model.Message) bool
+	ReceiveMessage(userID int, fromTime time.Time) ([]*model.Message, bool)
+	IsUserFree(userID int) bool
+	CountMember(userID int) (int, bool)
 }
 
 func NewChatService(
 	roomRepo repository.RoomRepository,
 	memberRepo repository.MemberRepo,
 	messageRepo repository.MessageRepo,
-) *ChatService {
-	return &ChatService{roomRepo: roomRepo, memberRepo: memberRepo, messageRepo: messageRepo}
+) ChatService {
+	return &chatService{roomRepo: roomRepo, memberRepo: memberRepo, messageRepo: messageRepo}
 }
 
-func (s *ChatService) Find(userID int, status string) (*model.Room, bool) {
+// implement
+
+type chatService struct {
+	roomRepo    repository.RoomRepository
+	memberRepo  repository.MemberRepo
+	messageRepo repository.MessageRepo
+}
+
+func (s *chatService) Find(userID int, status string) (*model.Room, bool) {
 	if status == "empty" {
 		room, ok := s.roomRepo.FindEmpty()
 		if !ok {
@@ -48,7 +62,7 @@ func (s *ChatService) Find(userID int, status string) (*model.Room, bool) {
 	return nil, false
 }
 
-func (s *ChatService) Join(userID, roomID int) bool {
+func (s *chatService) Join(userID, roomID int) bool {
 	// check user
 	count, ok := s.memberRepo.CountByUser(userID)
 	if !ok {
@@ -92,7 +106,7 @@ func (s *ChatService) Join(userID, roomID int) bool {
 	return s.memberRepo.Create(userID, roomID)
 }
 
-func (s *ChatService) Leave(userID int) bool {
+func (s *chatService) Leave(userID int) bool {
 	// find room
 	room, ok := s.roomRepo.FindByUser(userID)
 	if !ok {
@@ -106,7 +120,7 @@ func (s *ChatService) Leave(userID int) bool {
 	return s.memberRepo.Delete(userID)
 }
 
-func (s *ChatService) SendMessage(message *model.Message) bool {
+func (s *chatService) SendMessage(message *model.Message) bool {
 	// find room
 	room, ok := s.roomRepo.FindByUser(message.UserID)
 	if !ok {
@@ -121,7 +135,7 @@ func (s *ChatService) SendMessage(message *model.Message) bool {
 	return true
 }
 
-func (s *ChatService) ReceiveMessage(userID int, fromTime time.Time) ([]*model.Message, bool) {
+func (s *chatService) ReceiveMessage(userID int, fromTime time.Time) ([]*model.Message, bool) {
 	// find room
 	room, ok := s.roomRepo.FindByUser(userID)
 	if !ok {
@@ -136,7 +150,7 @@ func (s *ChatService) ReceiveMessage(userID int, fromTime time.Time) ([]*model.M
 	return messages, true
 }
 
-func (s *ChatService) IsUserFree(userID int) bool {
+func (s *chatService) IsUserFree(userID int) bool {
 	count, ok := s.memberRepo.CountByUser(userID)
 	if !ok {
 		return false
@@ -152,7 +166,7 @@ func (s *ChatService) IsUserFree(userID int) bool {
 	return true
 }
 
-func (s *ChatService) CountMember(userID int) (int, bool) {
+func (s *chatService) CountMember(userID int) (int, bool) {
 	// find room
 	room, ok := s.roomRepo.FindByUser(userID)
 	if !ok {
