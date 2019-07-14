@@ -15,5 +15,8 @@ func CheckPassword(password string) bool {
 }
 
 func CheckPassword2(password, password2 string) bool {
+	if password == "" {
+		return false
+	}
 	return password == password2
 }
