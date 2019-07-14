@@ -1,4 +1,4 @@
-package jwt
+package token
 
 import (
 	"github.com/dgrijalva/jwt-go"

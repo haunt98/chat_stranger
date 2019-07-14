@@ -2,23 +2,27 @@ package handler
 
 import (
 	"github.com/1612180/chat_stranger/internal/model"
-	"github.com/1612180/chat_stranger/internal/pkg/jwt"
+	"github.com/1612180/chat_stranger/internal/pkg/configwrap"
 	"github.com/1612180/chat_stranger/internal/pkg/response"
+	"github.com/1612180/chat_stranger/internal/pkg/token"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/1612180/chat_stranger/internal/service"
 
-	jwt2 "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 type UserHandler struct {
 	userService service.UserService
+	config      configwrap.Config
 }
 
-func NewUserHandler(userService service.UserService) *UserHandler {
-	return &UserHandler{userService: userService}
+func NewUserHandler(userService service.UserService, config configwrap.Config) *UserHandler {
+	return &UserHandler{
+		userService: userService,
+		config:      config,
+	}
 }
 
 func (h *UserHandler) SignUp(c *gin.Context) {
@@ -40,11 +44,11 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 	}
 
 	// token
-	s, ok := jwt.Create(jwt.SignClaims{
+	s, ok := token.Create(token.SignClaims{
 		ID:             user.ID,
 		Role:           "user",
-		StandardClaims: jwt2.StandardClaims{},
-	}, viper.GetString(variable.JWTSecret))
+		StandardClaims: jwt.StandardClaims{},
+	}, h.config.Get(variable.JWTSecret))
 	if !ok {
 		c.JSON(200, response.Create(103))
 		return
@@ -71,11 +75,11 @@ func (h *UserHandler) LogIn(c *gin.Context) {
 	}
 
 	// token
-	s, ok := jwt.Create(jwt.SignClaims{
+	s, ok := token.Create(token.SignClaims{
 		ID:             user.ID,
 		Role:           "user",
-		StandardClaims: jwt2.StandardClaims{},
-	}, viper.GetString(variable.JWTSecret))
+		StandardClaims: jwt.StandardClaims{},
+	}, h.config.Get(variable.JWTSecret))
 	if !ok {
 		c.JSON(200, response.Create(203))
 		return

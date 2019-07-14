@@ -9,7 +9,7 @@ import (
 
 	"github.com/1612180/chat_stranger/internal/mock/mock_service"
 	"github.com/1612180/chat_stranger/internal/model"
-	"github.com/1612180/chat_stranger/internal/pkg/jwt"
+	"github.com/1612180/chat_stranger/internal/pkg/token"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/spf13/viper"
 
@@ -293,7 +293,7 @@ func TestUserHandler_UpdateInfo(t *testing.T) {
 		w := httptest.NewRecorder()
 
 		// create token
-		s, ok := jwt.Create(jwt.SignClaims{}, viper.GetString(variable.JWTSecret))
+		s, ok := token.Create(token.SignClaims{}, viper.GetString(variable.JWTSecret))
 		t.Log("Bla bla", viper.GetString(variable.JWTSecret))
 
 		assert.True(t, ok)

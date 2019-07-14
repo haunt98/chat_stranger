@@ -1,13 +1,22 @@
 package variable
 
 const (
-	DbDialect      = "db.dialect"
-	DbUrl          = "db.url"
-	DbMode         = "db.mode"
-	Port           = "port"
-	GinMode        = "gin.mode"
-	JWTSecret      = "jwt.secret"
-	LimitRoom      = 2
+	Port      = "port"
+	DbDialect = "db.dialect"
+	DbUrl     = "db.url"
+	DbMode    = "db.mode"
+	JWTSecret = "token.secret"
+	GinMode   = "gin.mode"
+
+	Mode      = "mode"
+	ViperMode = "viper"
+	TestMode  = "test"
+
+	UserRole  = "user"
+	AdminRole = "admin"
+
+	LimitRoom = 2
+
 	WebPrefix      = "/chat_stranger/web"
 	APIPrefix      = "/chat_stranger/api"
 	HTMLGlob       = "./web/*.html"

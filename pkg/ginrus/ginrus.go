@@ -15,17 +15,13 @@ func Logger() gin.HandlerFunc {
 		c.Next()
 
 		end := time.Now()
-		entry := logrus.WithFields(logrus.Fields{
-			"status":  c.Writer.Status(),
-			"method":  c.Request.Method,
-			"path":    path,
-			"latency": end.Sub(start),
-		})
 
 		if len(c.Errors) != 0 {
-			entry.Error(c.Errors.String())
-		} else {
-			entry.Info()
+			logrus.WithFields(logrus.Fields{
+				"module": "gin",
+			}).Errorf("error=%s", c.Errors.String())
 		}
+		logrus.Infof("latency=%s method=%s path=%s status=%d",
+			end.Sub(start), c.Request.Method, path, c.Writer.Status())
 	}
 }

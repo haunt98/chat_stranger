@@ -1,21 +1,23 @@
 package handler
 
 import (
+	"github.com/1612180/chat_stranger/internal/pkg/configwrap"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/1612180/chat_stranger/pkg/ginrus"
+
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 )
 
-func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, testing bool) *gin.Engine {
+func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, config configwrap.Config) *gin.Engine {
 	// Load gin config
 	gin.SetMode(viper.GetString(variable.GinMode))
 
 	router := gin.New()
 	router.Use(ginrus.Logger(), gin.Recovery())
 
-	// skip html when test
-	if testing != true {
+	// add html when not test
+	if config.Get(variable.Mode) != variable.TestMode {
 		router.LoadHTMLGlob(variable.HTMLGlob)
 		router.Static(variable.StaticRelative, variable.StaticRoot)
 
@@ -36,7 +38,8 @@ func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, testing bool)
 		api.POST("/auth/login", userHandler.LogIn)
 	}
 
-	roleUser := router.Group(variable.APIPrefix, VerifyRole("user"))
+	role := Role{config: config}
+	roleUser := router.Group(variable.APIPrefix, role.Verify(variable.UserRole))
 	{
 		roleUser.GET("/me", userHandler.Info)
 		roleUser.PUT("/me", userHandler.UpdateInfo)

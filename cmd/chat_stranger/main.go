@@ -3,31 +3,33 @@ package main
 import (
 	"github.com/1612180/chat_stranger/internal/handler"
 	"github.com/1612180/chat_stranger/internal/model"
+	"github.com/1612180/chat_stranger/internal/pkg/configwrap"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
+	"github.com/1612180/chat_stranger/internal/pkg/viperwrap"
 	"github.com/1612180/chat_stranger/internal/repository"
 	"github.com/1612180/chat_stranger/internal/service"
-	"github.com/1612180/chat_stranger/pkg/viperwrap"
+	"github.com/1612180/chat_stranger/pkg/gormrus"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func main() {
 	// Load config
 	viperwrap.Load("chat_stranger", "config", "configs")
+	config := configwrap.NewConfig("viper")
 
 	// Load database
-	db, err := gorm.Open(viper.GetString(variable.DbDialect), viper.GetString(variable.DbUrl))
+	db, err := gorm.Open(config.Get(variable.DbDialect), config.Get(variable.DbUrl))
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
-			"event":   "database",
-			"dialect": viper.GetString(variable.DbDialect),
-			"url":     viper.GetString(variable.DbUrl),
+			"event": "database",
 		}).Error(err)
 		return
 	}
+	db.LogMode(true)
+	db.SetLogger(&gormrus.Logger{})
 
 	defer func() {
 		if err := db.Close(); err != nil {
@@ -52,17 +54,17 @@ func main() {
 	chatService := service.NewChatService(roomRepo, memberRepo, messageRepo)
 
 	// Load handler
-	userHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(userService, config)
 	chatHandler := handler.NewChatHandler(chatService)
 
 	// Create gin router
-	router := handler.NewRouter(userHandler, chatHandler, false)
+	router := handler.NewRouter(userHandler, chatHandler, config)
 
 	// Start gin router
-	if err := router.Run(":" + viper.GetString(variable.Port)); err != nil {
+	if err := router.Run(":" + config.Get(variable.Port)); err != nil {
 		logrus.WithFields(logrus.Fields{
 			"event": "gin",
-			"port":  viper.GetString(variable.Port),
+			"port":  config.Get(variable.Port),
 		}).Error(err)
 	}
 }
