@@ -43,20 +43,20 @@ func VerifyRole(role string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		s, ok := getToken(c)
 		if !ok {
-			c.JSON(403, response.Create(9))
+			c.JSON(403, response.Create(999))
 			c.Abort()
 			return
 		}
 
 		signClaims, ok := jwt.Verify(s, viper.GetString(variable.JWTSecret))
 		if !ok {
-			c.JSON(403, response.Create(9))
+			c.JSON(403, response.Create(999))
 			c.Abort()
 			return
 		}
 
 		if signClaims.Role != role {
-			c.JSON(403, response.Create(9))
+			c.JSON(403, response.Create(999))
 			c.Abort()
 			return
 		}

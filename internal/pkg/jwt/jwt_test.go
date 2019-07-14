@@ -7,24 +7,24 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// https://play.golang.org/p/NOpXQYBGYpO
-
 func TestCreate(t *testing.T) {
-	s, ok := Create(SignClaims{
-		ID:             1,
-		Role:           "user",
-		StandardClaims: jwt.StandardClaims{},
-	}, "secret")
+	_, ok := Create(SignClaims{}, "")
 
-	assert.Equal(t, true, ok)
-	assert.NotEqual(t, "", s)
+	assert.True(t, ok)
 }
 
 func TestVerify(t *testing.T) {
-	s := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6MSwiUm9sZSI6InVzZXIifQ.viQGhwxNYw6HjXmyVygxlgGj5Ue1_SYvcO8ApOU7hII"
+	s, ok := Create(SignClaims{
+		ID:             1,
+		Role:           "a",
+		StandardClaims: jwt.StandardClaims{},
+	}, "b")
 
-	signClaims, ok := Verify(s, "secret")
-	assert.Equal(t, true, ok)
+	assert.True(t, ok)
+
+	signClaims, ok := Verify(s, "b")
+
+	assert.True(t, ok)
 	assert.Equal(t, 1, signClaims.ID)
-	assert.Equal(t, "user", signClaims.Role)
+	assert.Equal(t, "a", signClaims.Role)
 }

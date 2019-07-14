@@ -39,6 +39,8 @@ func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, testing bool)
 	roleUser := router.Group(variable.APIPrefix, VerifyRole("user"))
 	{
 		roleUser.GET("/me", userHandler.Info)
+		roleUser.PUT("/me", userHandler.UpdateInfo)
+
 		roleUser.GET("/chat/find", chatHandler.Find)
 		roleUser.POST("/chat/join", chatHandler.Join)
 		roleUser.POST("/chat/leave", chatHandler.Leave)

@@ -6,17 +6,17 @@ import (
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/1612180/chat_stranger/internal/repository"
 	"github.com/1612180/chat_stranger/internal/service"
-	"github.com/sirupsen/logrus"
+	"github.com/1612180/chat_stranger/pkg/viperwrap"
 
-	"github.com/1612180/chat_stranger/pkg/configutils"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func main() {
 	// Load config
-	configutils.LoadConfiguration("chat_stranger", "config", "configs")
+	viperwrap.Load("chat_stranger", "config", "configs")
 
 	// Load database
 	db, err := gorm.Open(viper.GetString(variable.DbDialect), viper.GetString(variable.DbUrl))

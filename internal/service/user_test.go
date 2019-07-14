@@ -5,6 +5,7 @@ import (
 
 	"github.com/1612180/chat_stranger/internal/mock/mock_repository"
 	"github.com/1612180/chat_stranger/internal/model"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -26,8 +27,6 @@ func TestUserService_SignUp(t *testing.T) {
 	ok := userService.SignUp(&model.User{})
 	assert.True(t, ok)
 }
-
-// https://play.golang.org/p/p8GiKu1Ys75
 
 func TestUserService_LogIn(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -52,12 +51,17 @@ func TestUserService_LogIn(t *testing.T) {
 	})
 
 	t.Run("true", func(t *testing.T) {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte("b"), bcrypt.DefaultCost)
+		if err != nil {
+			t.Error(err)
+		}
+
 		m := mock_repository.NewMockUserRepository(ctrl)
 		m.EXPECT().
-			FindByRegisterName(gomock.Any()).
+			FindByRegisterName("a").
 			Return(
 				&model.User{},
-				&model.Credential{HashedPassword: "$2a$10$d8Eaak/7DcJp06A2dBhql.NNWFnFNKBWyCOyiv/bVk/wl6tpwD/pO"},
+				&model.Credential{HashedPassword: string(hashedPassword)},
 				true,
 			)
 
@@ -65,7 +69,7 @@ func TestUserService_LogIn(t *testing.T) {
 			userRepo: m,
 		}
 
-		ok := userService.LogIn(&model.User{Password: "a"})
+		ok := userService.LogIn(&model.User{RegisterName: "a", Password: "b"})
 		assert.True(t, ok)
 	})
 }
