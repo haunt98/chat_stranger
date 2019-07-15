@@ -46,7 +46,7 @@ func TestVerify(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		if tc.wantOK == true {
+		if tc.wantOK {
 			s, ok := Create(tc.wantClaims, tc.secret)
 			assert.True(t, ok)
 			tc.s = s
