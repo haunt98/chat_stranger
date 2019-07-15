@@ -1,17 +1,22 @@
 package repository
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/1612180/chat_stranger/internal/model"
+	"github.com/1612180/chat_stranger/internal/pkg/configwrap"
+	"github.com/1612180/chat_stranger/internal/pkg/variable"
 
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMessageGorm_FetchByTime(t *testing.T) {
-	db, err := gorm.Open("sqlite3", ":memory:")
+	config := configwrap.NewConfig(variable.TestMode)
+
+	db, err := gorm.Open(config.Get(variable.DbDialect), config.Get(variable.DbUrl))
 	if err != nil {
 		t.Error(err)
 	}
@@ -21,52 +26,49 @@ func TestMessageGorm_FetchByTime(t *testing.T) {
 		}
 	}()
 
-	if err := db.DropTableIfExists(
-		&model.User{},
-		&model.Message{},
-	).Error; err != nil {
-		t.Error(err)
-	}
-	if err := db.AutoMigrate(
-		&model.User{},
-		&model.Message{},
-	).Error; err != nil {
-		t.Error(err)
-	}
-
 	messageGorm := messageGorm{db: db}
 
-	t.Run("message 0", func(t *testing.T) {
-		messages, ok := messageGorm.FetchByTime(1, time.Time{})
-		assert.Equal(t, true, ok)
-		assert.Equal(t, 0, len(messages))
-	})
+	// create data
+	migrate(db, t)
 
-	t.Run("message 1", func(t *testing.T) {
-		if err := db.Create(&model.User{
-			FullName: "a",
-		}).Error; err != nil {
-			t.Error(err)
-		}
+	if err := db.Create(&model.User{}).Error; err != nil {
+		t.Error(err)
+	}
 
-		if err := db.Create(&model.Message{
-			Body:   "b",
-			RoomID: 1,
-			UserID: 1,
-		}).Error; err != nil {
-			t.Error(err)
-		}
+	if err := db.Create(&model.Message{
+		RoomID: 1,
+		UserID: 1,
+	}).Error; err != nil {
+		t.Error(err)
+	}
 
-		messages, ok := messageGorm.FetchByTime(1, time.Time{})
-		assert.Equal(t, true, ok)
-		assert.Equal(t, 1, len(messages))
-		assert.Equal(t, "a", messages[0].UserFullName)
-		assert.Equal(t, "b", messages[0].Body)
-	})
+	testCases := []struct {
+		roomID       int
+		fromTime     time.Time
+		wantMessages []*model.Message
+		wantOK       bool
+	}{
+		{
+			roomID:       0,
+			fromTime:     time.Time{},
+			wantMessages: []*model.Message{},
+			wantOK:       true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("roomID=%d", tc.roomID), func(t *testing.T) {
+			messages, ok := messageGorm.FetchByTime(tc.roomID, tc.fromTime)
+			assert.Equal(t, tc.wantOK, ok)
+			assert.Equal(t, tc.wantMessages, messages)
+		})
+	}
 }
 
 func TestMessageGorm_Create(t *testing.T) {
-	db, err := gorm.Open("sqlite3", ":memory:")
+	config := configwrap.NewConfig(variable.TestMode)
+
+	db, err := gorm.Open(config.Get(variable.DbDialect), config.Get(variable.DbUrl))
 	if err != nil {
 		t.Error(err)
 	}
@@ -76,16 +78,37 @@ func TestMessageGorm_Create(t *testing.T) {
 		}
 	}()
 
-	migrate(db, t)
-
 	messageGorm := messageGorm{db: db}
 
-	ok := messageGorm.Create(&model.Message{})
-	assert.Equal(t, true, ok)
+	// create data
+	migrate(db, t)
+
+	testCases := []struct {
+		message *model.Message
+		wantOK  bool
+	}{
+		{
+			message: nil,
+			wantOK:  false,
+		},
+		{
+			message: &model.Message{},
+			wantOK:  true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("message=%v", tc.message), func(t *testing.T) {
+			ok := messageGorm.Create(tc.message)
+			assert.Equal(t, tc.wantOK, ok)
+		})
+	}
 }
 
 func TestMessageGorm_Delete(t *testing.T) {
-	db, err := gorm.Open("sqlite3", ":memory:")
+	config := configwrap.NewConfig(variable.TestMode)
+
+	db, err := gorm.Open(config.Get(variable.DbDialect), config.Get(variable.DbUrl))
 	if err != nil {
 		t.Error(err)
 	}
@@ -95,10 +118,31 @@ func TestMessageGorm_Delete(t *testing.T) {
 		}
 	}()
 
-	migrate(db, t)
-
 	messageGorm := messageGorm{db: db}
 
-	ok := messageGorm.Delete(1)
-	assert.Equal(t, true, ok)
+	// create data
+	migrate(db, t)
+
+	if err := db.Create(&model.Message{
+		RoomID: 1,
+	}).Error; err != nil {
+		t.Error(err)
+	}
+
+	testCases := []struct {
+		roomID int
+		wantOK bool
+	}{
+		{
+			roomID: 1,
+			wantOK: true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("roomID=%d", tc.roomID), func(t *testing.T) {
+			ok := messageGorm.Delete(tc.roomID)
+			assert.Equal(t, tc.wantOK, ok)
+		})
+	}
 }

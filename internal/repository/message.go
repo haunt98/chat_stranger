@@ -57,6 +57,10 @@ func (g *messageGorm) FetchByTime(roomID int, fromTime time.Time) ([]*model.Mess
 }
 
 func (g *messageGorm) Create(message *model.Message) bool {
+	if message == nil {
+		return false
+	}
+
 	if err := g.db.Create(message).Error; err != nil {
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
