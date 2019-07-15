@@ -78,6 +78,10 @@ func (g *userGorm) FindByRegisterName(n string) (*model.User, *model.Credential,
 }
 
 func (g *userGorm) Create(user *model.User, credential *model.Credential) bool {
+	if user == nil || credential == nil {
+		return false
+	}
+
 	tx := g.db.Begin()
 	if err := tx.Error; err != nil {
 		logrus.Error(err)
@@ -165,6 +169,10 @@ func (g *userGorm) Delete(id int) bool {
 }
 
 func (g *userGorm) UpdateInfo(id int, new *model.User) bool {
+	if new == nil {
+		return false
+	}
+
 	var old model.User
 	if err := g.db.Where(&model.User{ID: id}).First(&old).Error; err != nil {
 		logrus.WithFields(logrus.Fields{
@@ -191,6 +199,10 @@ func (g *userGorm) UpdateInfo(id int, new *model.User) bool {
 }
 
 func (g *userGorm) UpdatePassword(id int, new *model.Credential) bool {
+	if new == nil {
+		return false
+	}
+
 	var user model.User
 	if err := g.db.Where(&model.User{ID: id}).First(&user).Error; err != nil {
 		logrus.WithFields(logrus.Fields{

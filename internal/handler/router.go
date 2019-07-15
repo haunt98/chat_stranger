@@ -17,7 +17,7 @@ func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, config config
 	router.Use(ginrus.Logger(), gin.Recovery())
 
 	// add html when not test
-	if config.Get(variable.Mode) != variable.TestMode {
+	if config.Get(variable.ConfigMode) != variable.TestMode {
 		router.LoadHTMLGlob(variable.HTMLGlob)
 		router.Static(variable.StaticRelative, variable.StaticRoot)
 

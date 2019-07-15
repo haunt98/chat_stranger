@@ -12,14 +12,20 @@ type SignClaims struct {
 }
 
 func Create(claims jwt.Claims, secret string) (string, bool) {
+	if err := claims.Valid(); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"module": "jwt",
+		}).Error(err)
+		return "", false
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	s, err := token.SignedString([]byte(secret))
 	if err != nil {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
-			"event": "jwt",
-		}).Error("Failed to create token string")
+			"module": "jwt",
+		}).Error(err)
 		return "", false
 	}
 	return s, true
@@ -31,17 +37,16 @@ func Verify(s, secret string) (*SignClaims, bool) {
 	})
 
 	if token == nil || !token.Valid {
-		logrus.Error(err)
 		logrus.WithFields(logrus.Fields{
-			"event": "jwt",
-		}).Error("Failed to verify token string")
+			"module": "jwt",
+		}).Error(err)
 		return nil, false
 	}
 
 	claims, ok := token.Claims.(*SignClaims)
 	if !ok {
 		logrus.WithFields(logrus.Fields{
-			"event": "jwt",
+			"module": "jwt",
 		}).Error("Failed to convert to claims")
 		return nil, false
 	}

@@ -1,30 +1,61 @@
 package token
 
 import (
+	"fmt"
 	"testing"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreate(t *testing.T) {
-	_, ok := Create(SignClaims{}, "")
+	testCases := []struct {
+		claims interface{}
+		secret string
+		wantOK bool
+	}{
+		{
+			claims: SignClaims{},
+			secret: "",
+			wantOK: true,
+		},
+	}
 
-	assert.True(t, ok)
+	for _, tc := range testCases {
+		t.Run(fmt.Sprintf("SignClaims=%v secret=%s", tc.claims, tc.secret), func(t *testing.T) {
+			_, ok := Create(tc.claims.(SignClaims), tc.secret)
+			assert.Equal(t, tc.wantOK, ok)
+		})
+	}
 }
 
 func TestVerify(t *testing.T) {
-	s, ok := Create(SignClaims{
-		ID:             1,
-		Role:           "a",
-		StandardClaims: jwt.StandardClaims{},
-	}, "b")
+	testCases := []struct {
+		s          string
+		secret     string
+		wantClaims *SignClaims
+		wantOK     bool
+	}{
+		{
+			wantClaims: nil,
+			wantOK:     false,
+		},
+		{
+			wantClaims: &SignClaims{},
+			wantOK:     true,
+		},
+	}
 
-	assert.True(t, ok)
+	for _, tc := range testCases {
+		if tc.wantOK == true {
+			s, ok := Create(tc.wantClaims, tc.secret)
+			assert.True(t, ok)
+			tc.s = s
+		}
 
-	signClaims, ok := Verify(s, "b")
-
-	assert.True(t, ok)
-	assert.Equal(t, 1, signClaims.ID)
-	assert.Equal(t, "a", signClaims.Role)
+		t.Run(fmt.Sprintf("s=%s secret=%s", tc.s, tc.secret), func(t *testing.T) {
+			claims, ok := Verify(tc.s, tc.secret)
+			assert.Equal(t, tc.wantOK, ok)
+			assert.Equal(t, tc.wantClaims, claims)
+		})
+	}
 }

@@ -2,6 +2,7 @@ package configwrap
 
 import (
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
+
 	"github.com/spf13/viper"
 )
 
@@ -15,21 +16,22 @@ func NewConfig(mode string) Config {
 		m: make(map[string]string),
 	}
 
-	if mode == "viper" {
+	if mode == variable.ViperMode {
 		c.m[variable.Port] = viper.GetString(variable.Port)
 		c.m[variable.DbDialect] = viper.GetString(variable.DbDialect)
 		c.m[variable.DbUrl] = viper.GetString(variable.DbUrl)
 		c.m[variable.DbMode] = viper.GetString(variable.DbMode)
 		c.m[variable.JWTSecret] = viper.GetString(variable.JWTSecret)
 		c.m[variable.GinMode] = viper.GetString(variable.GinMode)
-	} else if mode == "test" {
+		c.m[variable.ConfigMode] = mode
+	} else if mode == variable.TestMode {
 		c.m[variable.DbDialect] = "sqlite3"
 		c.m[variable.DbUrl] = ":memory:"
 		c.m[variable.DbMode] = "debug"
 		c.m[variable.JWTSecret] = "secret"
 		c.m[variable.GinMode] = "debug"
+		c.m[variable.ConfigMode] = mode
 	}
-
 	return &c
 }
 

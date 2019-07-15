@@ -17,8 +17,8 @@ import (
 
 func main() {
 	// Load config
-	viperwrap.Load("chat_stranger", "config", "configs")
-	config := configwrap.NewConfig("viper")
+	viperwrap.Load(variable.ServiceName, variable.ConfigFile, variable.ConfigPath)
+	config := configwrap.NewConfig(variable.ViperMode)
 
 	// Load database
 	db, err := gorm.Open(config.Get(variable.DbDialect), config.Get(variable.DbUrl))
@@ -28,7 +28,9 @@ func main() {
 		}).Error(err)
 		return
 	}
-	db.LogMode(true)
+	if config.Get(variable.DbMode) == variable.DebugMode {
+		db.LogMode(true)
+	}
 	db.SetLogger(&gormrus.Logger{})
 
 	defer func() {

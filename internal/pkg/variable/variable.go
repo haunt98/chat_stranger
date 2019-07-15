@@ -1,16 +1,22 @@
 package variable
 
 const (
-	Port      = "port"
-	DbDialect = "db.dialect"
-	DbUrl     = "db.url"
-	DbMode    = "db.mode"
-	JWTSecret = "token.secret"
-	GinMode   = "gin.mode"
+	ServiceName = "chat_stranger"
+	ConfigFile  = "config"
+	ConfigPath  = "configs"
 
-	Mode      = "mode"
-	ViperMode = "viper"
-	TestMode  = "test"
+	Port       = "port"
+	DbDialect  = "db.dialect"
+	DbUrl      = "db.url"
+	DbMode     = "db.mode"
+	JWTSecret  = "token.secret"
+	GinMode    = "gin.mode"
+	ConfigMode = "config.mode"
+
+	ViperMode   = "viper"
+	TestMode    = "test"
+	DebugMode   = "debug"
+	ReleaseMode = "release"
 
 	UserRole  = "user"
 	AdminRole = "admin"

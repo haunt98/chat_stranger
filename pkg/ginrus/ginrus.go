@@ -21,7 +21,9 @@ func Logger() gin.HandlerFunc {
 				"module": "gin",
 			}).Errorf("error=%s", c.Errors.String())
 		}
-		logrus.Infof("latency=%s method=%s path=%s status=%d",
+		logrus.WithFields(logrus.Fields{
+			"module": "gin",
+		}).Infof("latency=%s method=%s path=%s status=%d",
 			end.Sub(start), c.Request.Method, path, c.Writer.Status())
 	}
 }
