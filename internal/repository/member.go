@@ -34,7 +34,7 @@ func (g *memberGorm) Create(userID, roomID int) bool {
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
 			"target": "member",
-			"action": "save",
+			"action": "create",
 		}).Error(err)
 		return false
 	}
@@ -77,7 +77,6 @@ func countByUser(db *gorm.DB, userID int) (int, bool) {
 		Count(&count).Error; err != nil {
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
-			"target": "member",
 			"action": "count by user",
 		}).Error(err)
 		return 0, false
