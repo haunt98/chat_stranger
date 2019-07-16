@@ -41,6 +41,20 @@ function InfoAPI(token) {
   }).then(res => res.json());
 }
 
+function EditInfoAPI(token, full_name, gender, birth_year) {
+  return fetch(BuildUrl(endpointAPI + "/me", {}), {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      full_name: full_name,
+      gender: gender,
+      birth_year: birth_year
+    })
+  }).then(res => res.json());
+}
+
 function ChatFindAPI(token, status) {
   return fetch(
     BuildUrl(endpointAPI + "/chat/find", {

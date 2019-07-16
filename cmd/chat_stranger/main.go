@@ -28,9 +28,6 @@ func main() {
 		}).Error(err)
 		return
 	}
-	if config.Get(variable.DbMode) == variable.DebugMode {
-		db.LogMode(true)
-	}
 	db.SetLogger(&gormrus.Logger{})
 
 	defer func() {

@@ -1,18 +1,3 @@
-async function hello() {
-  if (!sessionStorage.getItem("token")) {
-    location.href = endpointWEB;
-    return;
-  }
-
-  let res = await InfoAPI(sessionStorage.getItem("token"));
-  if (res.code !== 300) {
-    location.href = endpointWEB;
-    return;
-  }
-
-  $("#hello").text(res.data.full_name);
-}
-
 function prepare() {
   // time
   let fromTime = new Date(0).toISOString();
@@ -75,7 +60,22 @@ async function receive() {
   scrollTop();
 }
 
-async function countMember() {
+async function hello() {
+  if (!sessionStorage.getItem("token")) {
+    location.href = endpointWEB;
+    return;
+  }
+
+  let res = await InfoAPI(sessionStorage.getItem("token"));
+  if (res.code !== 300) {
+    location.href = endpointWEB;
+    return;
+  }
+
+  $("#hello").text(res.data.full_name);
+}
+
+async function helloRoom() {
   let res_count = await ChatCountMember(sessionStorage.getItem("token"));
   if (res_count.code !== 110) {
     console.log(res_count);
@@ -107,7 +107,7 @@ async function countMember() {
 function polling() {
   setInterval(async () => {
     await receive();
-    await countMember();
+    await helloRoom();
   }, 500);
 }
 
@@ -192,6 +192,46 @@ $(async () => {
       console.log(res_send);
     }
     inputMessage.val("");
+  });
+
+  $("#btnEditInfo").on("click", async () => {
+    let res = await InfoAPI(sessionStorage.getItem("token"));
+    if (res.code !== 300) {
+      location.href = endpointWEB;
+      return;
+    }
+
+    $("#inputFullNameEditInfo").val(res.data.full_name);
+    $("#inputGenderEditInfo").val(res.data.gender);
+    $("#inputBirthYearEditInfo").val(res.data.birth_year);
+
+    $("#modalEditInfo").modal("show");
+  });
+
+  $("#btnEditSearch").on("click", () => {
+    $("#modalEditSearch").modal("show");
+  });
+
+  $("#formEditInfo").on("submit", async event => {
+    event.preventDefault();
+
+    let res = await EditInfoAPI(
+      sessionStorage.getItem("token"),
+      $("#inputFullNameEditInfo").val(),
+      $("#inputGenderEditInfo").val(),
+      parseInt($("#inputBirthYearEditInfo").val())
+    );
+
+    if (res.code !== 120) {
+      $("#errEditInfo").text(res.message);
+      return;
+    }
+
+    location.reload();
+  });
+
+  $("#formEditSearch").on("submit", event => {
+    event.preventDefault();
   });
 });
 
