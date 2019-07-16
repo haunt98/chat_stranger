@@ -56,14 +56,6 @@ function showMessageRight(body, color, backgroundColor) {
   $("#chat").append(row);
 }
 
-function showMessage(id, name, body, color, backgroundColor) {
-  if (id === parseInt(sessionStorage.getItem("userID"))) {
-    showMessageRight(body, color, backgroundColor);
-  } else {
-    showMessageLeft(name, body, color, backgroundColor);
-  }
-}
-
 function scrollTop() {
   let chat = $("#chat");
   chat.scrollTop(chat.prop("scrollHeight"));
@@ -144,7 +136,7 @@ async function helloRoom() {
       "Hệ thống",
       "Người nói chuyện với bạn vừa rời khỏi phòng",
       window.elementaryColor["Silver"][100],
-      window.elementaryColor["Orange"][500],
+      window.elementaryColor["Orange"][500]
     );
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 1) {
@@ -152,7 +144,7 @@ async function helloRoom() {
       "Hệ thống",
       "Phòng đang trống, chờ ai đó vào phòng",
       window.elementaryColor["Silver"][100],
-      window.elementaryColor["Orange"][500],
+      window.elementaryColor["Orange"][500]
     );
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 2) {
@@ -160,7 +152,7 @@ async function helloRoom() {
       "Hệ thống",
       "Phòng đang có ai đó, hãy nhắn tin để chào",
       window.elementaryColor["Silver"][100],
-      window.elementaryColor["Orange"][500],
+      window.elementaryColor["Orange"][500]
     );
     scrollTop();
   }
@@ -258,7 +250,7 @@ $(async () => {
     inputMessage.val("");
   });
 
-  $("#btnEditInfo").on("click", async () => {
+  $(".btnEditInfo").on("click", async () => {
     let res = await InfoAPI(sessionStorage.getItem("token"));
     if (res.code !== 300) {
       location.href = endpointWEB;
@@ -272,7 +264,7 @@ $(async () => {
     $("#modalEditInfo").modal("show");
   });
 
-  $("#btnEditSearch").on("click", () => {
+  $(".btnEditSearch").on("click", () => {
     $("#modalEditSearch").modal("show");
   });
 
