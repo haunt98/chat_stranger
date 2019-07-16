@@ -36,22 +36,64 @@
     </div>
 
     <div
-      class="container py-3"
+      class="container py-3 border"
       id="chat"
-      style="overflow-y: scroll;height: 50vh"
-    ></div>
+      style="overflow: auto; overflow-wrap: break-word; height: 50vh"
+    >
+      <!-- <div class="row">
+        <div class="col-sm-4"></div>
+        <div
+          class="col-sm-8 text-right"
+          style="display:flex;justify-content: flex-end"
+        >
+          <span
+            class="rounded p-2"
+            style="color: rgb(250, 250, 250); background-color: rgb(54, 137, 230);text-align: justify"
+          >
+            It is a long established fact that a reader will be distracted by
+            the readable content of a page when looking at its layout. The point
+            of using Lorem Ipsum is that it has a more-or-less normal
+            distribution of letters, as opposed to using 'Content here, content
+            here', making it look like readable English. Many desktop publishing
+            packages and web page editors now use Lorem Ipsum as their default
+            model text, and a search for 'lorem ipsum' will uncover many web
+            sites still in their infancy. Various versions have evolved over the
+            years, sometimes by accident, sometimes on purpose (injected humour
+            and the like).
+          </span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4"></div>
+        <div
+          class="col-sm-8 text-right"
+          style="display:flex;justify-content: flex-end"
+        >
+          <div
+            class="rounded p-2"
+            style="color: rgb(250, 250, 250); background-color: rgb(54, 137, 230);text-align: justify"
+          >
+            ffaw
+          </div>
+        </div>
+      </div> -->
+    </div>
     <div class="container py-3">
       <form id="formChat" autocomplete="off">
         <div class="form-group">
-          <input type="text" class="form-control" id="inputMessage" />
+          <div class="input-group">
+            <input type="text" class="form-control" id="inputMessage" />
+            <div class="input-group-append">
+              <button type="submit" class="btn btn-primary">
+                Gửi
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary">
-          Gửi tin nhắn
-          <i class="fas fa-paper-plane"></i>
-        </button>
       </form>
     </div>
-    <div class="container py-3">
+    <div class="container">
       <button type="button" class="btn btn-primary mr-2" id="btnLeave">
         Thoát
         <i class="fas fa-sign-out-alt"></i>
@@ -188,6 +230,7 @@
       integrity="sha256-CjSoeELFOcH0/uxWu6mC/Vlrc1AARqbm/jiiImDGV3s="
       crossorigin="anonymous"
     ></script>
+    <script src="/chat_stranger/web/script/color.js"></script>
     <script src="/chat_stranger/web/script/api.js"></script>
     <script src="/chat_stranger/web/script/chat.js"></script>
     <script></script>

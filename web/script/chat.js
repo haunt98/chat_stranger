@@ -7,28 +7,61 @@ function prepare() {
   sessionStorage.setItem("countMember", "0");
 }
 
-function showMessage(name, body) {
+function showMessageLeft(name, body, color, backgroundColor) {
   let row = document.createElement("div");
-  row.className = "row";
+  row.className = "row my-1";
 
   let div_name = document.createElement("div");
-  div_name.className = "col-sm-3";
+  div_name.className = "col-sm-2 d-flex justify-content-start";
   row.appendChild(div_name);
 
-  let p_name = document.createElement("p");
-  p_name.className = "font-weight-bold";
-  p_name.innerText = name;
-  div_name.appendChild(p_name);
+  let span_name = document.createElement("span");
+  span_name.className = "font-weight-bold p-2";
+  span_name.innerText = name;
+  div_name.appendChild(span_name);
 
   let div_body = document.createElement("div");
-  div_body.className = "col-sm-9";
+  div_body.className = "col-sm-8 d-flex justify-content-start";
   row.appendChild(div_body);
 
-  let p_body = document.createElement("p");
-  p_body.innerText = body;
-  div_body.appendChild(p_body);
+  let span_body = document.createElement("span");
+  span_body.className = "rounded p-2 text-break";
+  span_body.style.color = color;
+  span_body.style.backgroundColor = backgroundColor;
+  span_body.innerText = body;
+  div_body.appendChild(span_body);
 
   $("#chat").append(row);
+}
+
+function showMessageRight(body, color, backgroundColor) {
+  let row = document.createElement("div");
+  row.className = "row my-1";
+
+  let div_empty = document.createElement("div");
+  div_empty.className = "col-sm-4";
+  row.appendChild(div_empty);
+
+  let div_body = document.createElement("div");
+  div_body.className = "col-sm-8 d-flex justify-content-end";
+  row.appendChild(div_body);
+
+  let span_body = document.createElement("span");
+  span_body.className = "rounded p-2 text-break";
+  span_body.style.color = color;
+  span_body.style.backgroundColor = backgroundColor;
+  span_body.innerText = body;
+  div_body.appendChild(span_body);
+
+  $("#chat").append(row);
+}
+
+function showMessage(id, name, body, color, backgroundColor) {
+  if (id === parseInt(sessionStorage.getItem("userID"))) {
+    showMessageRight(body, color, backgroundColor);
+  } else {
+    showMessageLeft(name, body, color, backgroundColor);
+  }
 }
 
 function scrollTop() {
@@ -45,14 +78,29 @@ async function receive() {
     console.log(res_receive);
     return;
   }
-
-  for (let i = 0; i < res_receive.data.length; i += 1) {
-    showMessage(res_receive.data[i].user_full_name, res_receive.data[i].body);
-  }
-
   if (!res_receive.data || !res_receive.data.length) {
     return;
   }
+
+  for (let i = 0; i < res_receive.data.length; i += 1) {
+    if (
+      res_receive.data[i].user_id === parseInt(sessionStorage.getItem("userID"))
+    ) {
+      showMessageRight(
+        res_receive.data[i].body,
+        window.elementaryColor["Silver"][100],
+        window.elementaryColor["Blueberry"][500]
+      );
+    } else {
+      showMessageLeft(
+        res_receive.data[i].user_full_name,
+        res_receive.data[i].body,
+        window.elementaryColor["Black"][700],
+        window.elementaryColor["Silver"][300]
+      );
+    }
+  }
+
   let fromTime = new Date(
     res_receive.data[res_receive.data.length - 1].created_at
   ).toISOString();
@@ -72,6 +120,7 @@ async function hello() {
     return;
   }
 
+  sessionStorage.setItem("userID", res.data.id);
   $("#hello").text(res.data.full_name);
 }
 
@@ -88,16 +137,31 @@ async function helloRoom() {
   let count = parseInt(res_count.data);
 
   if (sessionStorage.getItem("countMember") === "1" && count === 2) {
-    showMessage("Hệ thống", "Có ai đó vừa vào phòng");
+    showMessageLeft("Hệ thống", "Có ai đó vừa vào phòng", "#fafafa", "#f37329");
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "2" && count === 1) {
-    showMessage("Hệ thống", "Người nói chuyện với bạn vừa rời khỏi phòng");
+    showMessageLeft(
+      "Hệ thống",
+      "Người nói chuyện với bạn vừa rời khỏi phòng",
+      window.elementaryColor["Silver"][100],
+      window.elementaryColor["Orange"][500],
+    );
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 1) {
-    showMessage("Hệ thống", "Phòng đang trống, chờ ai đó vào phòng");
+    showMessageLeft(
+      "Hệ thống",
+      "Phòng đang trống, chờ ai đó vào phòng",
+      window.elementaryColor["Silver"][100],
+      window.elementaryColor["Orange"][500],
+    );
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 2) {
-    showMessage("Hệ thống", "Phòng đang có ai đó, hãy nhắn tin để chào");
+    showMessageLeft(
+      "Hệ thống",
+      "Phòng đang có ai đó, hãy nhắn tin để chào",
+      window.elementaryColor["Silver"][100],
+      window.elementaryColor["Orange"][500],
+    );
     scrollTop();
   }
 
@@ -108,7 +172,7 @@ function polling() {
   setInterval(async () => {
     await receive();
     await helloRoom();
-  }, 500);
+  }, 250);
 }
 
 $(async () => {
