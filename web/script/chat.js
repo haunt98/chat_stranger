@@ -5,6 +5,9 @@ function prepare() {
 
   // count member
   sessionStorage.setItem("countMember", "0");
+
+  // color drop down
+  $(".dropdown i").css("color", window.elementaryColor["Blueberry"][500])
 }
 
 function showMessageLeft(name, body, color, backgroundColor) {
@@ -113,7 +116,7 @@ async function hello() {
   }
 
   sessionStorage.setItem("userID", res.data.id);
-  $("#hello").text(res.data.full_name);
+  $(".hello span").text(res.data.full_name);
 }
 
 async function helloRoom() {
@@ -193,7 +196,7 @@ $(async () => {
 
   polling();
 
-  $("#btnLeave").on("click", async () => {
+  $(".leave").on("click", async () => {
     let res_leave = await ChatLeaveAPI(sessionStorage.getItem("token"));
     if (res_leave.code !== 600) {
       console.log(res_leave);
@@ -250,7 +253,7 @@ $(async () => {
     inputMessage.val("");
   });
 
-  $(".btnEditInfo").on("click", async () => {
+  $(".editInfo").on("click", async () => {
     let res = await InfoAPI(sessionStorage.getItem("token"));
     if (res.code !== 300) {
       location.href = endpointWEB;
@@ -264,7 +267,7 @@ $(async () => {
     $("#modalEditInfo").modal("show");
   });
 
-  $(".btnEditSearch").on("click", () => {
+  $(".editSearch").on("click", () => {
     $("#modalEditSearch").modal("show");
   });
 

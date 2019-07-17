@@ -19,7 +19,9 @@ func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, config config
 	// add html when not test
 	if config.Get(variable.ConfigMode) != variable.TestMode {
 		router.LoadHTMLGlob(variable.HTMLGlob)
-		router.Static(variable.StaticRelative, variable.StaticRoot)
+		router.Static(variable.StaticRelativeScript, variable.StaticScript)
+		router.Static(variable.StaticRelativeStyle, variable.StaticStyle)
+		router.Static(variable.StaticRelativeImg, variable.StaticImg)
 
 		web := router.Group(variable.WebPrefix)
 		{

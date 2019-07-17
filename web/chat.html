@@ -9,75 +9,89 @@
 
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css"
-      integrity="sha256-UzFD2WYH2U1dQpKDjjZK72VtPeWP50NoJjd26rnAdUI="
+      href="https://unpkg.com/@fortawesome/fontawesome-free@5.9.0/css/all.min.css"
+      integrity="sha384-i1LQnF23gykqWXg6jxC2ZbCbUMxyw5gLZY6UiUS98LYV5unm8GWmfkIS6jqJfb4E"
       crossorigin="anonymous"
     />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha256-YLGeXaapI0/5IgZopewRJcFXomhRMlYYjugPLSyNjTY="
+      href="https://www.unpkg.com/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     />
+    <link rel="shortcut icon" href="/chat_stranger/web/img/favicon.ico">
 
     <title>Chat stranger</title>
   </head>
-  <body class="vh-100">
-    <div class="container mb-2">
-      <h2 class="d-inline d-sm-block text-break">
-        Xin chào
-        <span id="hello"></span>
-      </h2>
-      <button
-        type="button"
-        class="btn btn-primary d-inine d-sm-none mr-1 mb-1 btnEditInfo"
-      >
-        <i class="fas fa-user-edit"></i>
-      </button>
-      <button type="button" class="btn btn-primary d-inline d-sm-none mb-1 btnEditSearch">
-        <i class="fas fa-dizzy"></i>
-      </button>
-      <button
-        type="button"
-        class="btn btn-primary d-none d-sm-inline mr-1 mb-1 btnEditInfo"
-      >
-        Thay đổi thông tin
-        <i class="fas fa-user-edit"></i>
-      </button>
-      <button
-        type="button"
-        class="btn btn-primary d-none d-sm-inline mb-1 btnEditSearch"
-      >
-        Thay đổi cách tìm kiếm
-        <i class="fas fa-dizzy"></i>
-      </button>
-    </div>
+  <body>
+    <div class="d-flex flex-column vh-100 my-2">
+      <div class="container d-flex justify-content-between align-items-center">
+        <h2>
+          Chat stranger
+        </h2>
 
-    <div class="container border overflow-auto h-50 mb-2" id="chat"></div>
-    <div class="container mb-1">
-      <form id="formChat" autocomplete="off">
-        <div class="form-group">
-          <div class="input-group">
-            <input type="text" class="form-control" id="inputMessage" />
-            <div class="input-group-append">
-              <button type="submit" class="btn btn-primary">
-                Gửi
-                <i class="fas fa-paper-plane"></i>
-              </button>
-            </div>
+        <div class="dropdown">
+          <button
+            type="button"
+            class="btn btn-primary dropdown-toggle hello"
+            data-toggle="dropdown"
+          >
+            Xin chào
+            <span></span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right">
+            <a
+              class="dropdown-item d-flex justify-content-between editInfo"
+              href="#"
+            >
+              <span>Thông tin</span>
+              <i class="fas fa-user-edit ml-2"></i>
+            </a>
+            <a
+              class="dropdown-item d-flex justify-content-between editSearch"
+              href="#"
+            >
+              <span>Cài đặt tìm kiếm</span>
+              <i class="fas fa-dizzy ml-2"></i>
+            </a>
+            <a
+              class="dropdown-item d-flex justify-content-between leave"
+              href="#"
+              id="btnLeave"
+            >
+              <span>Thoát</span>
+              <i class="fas fa-sign-out-alt ml-2"></i>
+            </a>
           </div>
         </div>
-      </form>
-    </div>
-    <div class="container">
-      <button type="button" class="btn btn-primary mr-2 mb-1" id="btnLeave">
-        Thoát
-        <i class="fas fa-sign-out-alt"></i>
-      </button>
-      <button type="button" class="btn btn-primary mb-1" id="btnNext">
-        Tìm phòng khác
-        <i class="fas fa-chevron-circle-right"></i>
-      </button>
+      </div>
+
+      <!-- output -->
+      <div
+        class="container border overflow-auto flex-grow-1 my-2"
+        id="chat"
+      ></div>
+
+      <!-- input -->
+      <div class="container mb-1">
+        <form id="formChat" autocomplete="off">
+          <div class="form-group">
+            <div class="input-group">
+              <input type="text" class="form-control" id="inputMessage" />
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-primary">
+                  Gửi
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+        <button type="button" class="btn btn-primary mb-1" id="btnNext">
+          Tìm phòng khác
+          <i class="fas fa-chevron-circle-right"></i>
+        </button>
+      </div>
     </div>
 
     <div class="modal fade" id="modalEditInfo">
@@ -192,23 +206,22 @@
     </div>
 
     <script
-      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-      integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+      src="https://unpkg.com/jquery@3.4.1/dist/jquery.slim.min.js"
+      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
       crossorigin="anonymous"
     ></script>
     <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.15.0/umd/popper.min.js"
-      integrity="sha256-fTuUgtT7O2rqoImwjrhDgbXTKUwyxxujIMRIK7TbuNU="
+      src="https://unpkg.com/popper.js@1.15.0/dist/umd/popper.min.js"
+      integrity="sha384-L2pyEeut/H3mtgCBaUNw7KWzp5n9+4pDQiExs933/5QfaTh8YStYFFkOzSoXjlTb"
       crossorigin="anonymous"
     ></script>
     <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"
-      integrity="sha256-CjSoeELFOcH0/uxWu6mC/Vlrc1AARqbm/jiiImDGV3s="
+      src="https://www.unpkg.com/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
       crossorigin="anonymous"
     ></script>
     <script src="/chat_stranger/web/script/color.js"></script>
     <script src="/chat_stranger/web/script/api.js"></script>
     <script src="/chat_stranger/web/script/chat.js"></script>
-    <script></script>
   </body>
 </html>

@@ -23,9 +23,13 @@ const (
 
 	LimitRoom = 2
 
-	WebPrefix      = "/chat_stranger/web"
-	APIPrefix      = "/chat_stranger/api"
-	HTMLGlob       = "./web/*.html"
-	StaticRelative = "/chat_stranger/web/script"
-	StaticRoot     = "./web/script"
+	WebPrefix            = "/chat_stranger/web"
+	APIPrefix            = "/chat_stranger/api"
+	HTMLGlob             = "./web/*.html"
+	StaticRelativeScript = "/chat_stranger/web/script"
+	StaticScript         = "./web/script"
+	StaticRelativeStyle  = "/chat_stranger/web/style"
+	StaticStyle          = "./web/style"
+	StaticRelativeImg    = "/chat_stranger/web/img"
+	StaticImg            = "./web/img"
 )
