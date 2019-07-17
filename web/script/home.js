@@ -1,7 +1,21 @@
 $(() => {
   sessionStorage.clear();
 
-  $("#formSignUp").on("submit", async event => {
+  // only show log in
+  $("#cardSignUp").addClass("d-none");
+  $("#cardLogIn").removeClass("d-none");
+
+  $("#cardSignUp a").on("click", () => {
+    $("#cardSignUp").addClass("d-none");
+    $("#cardLogIn").removeClass("d-none");
+  });
+
+  $("#cardLogIn a").on("click", () => {
+    $("#cardSignUp").removeClass("d-none");
+    $("#cardLogIn").addClass("d-none");
+  });
+
+  $("#cardSignUp form").on("submit", async event => {
     event.preventDefault();
 
     let res = await SingUpAPI(
@@ -20,7 +34,7 @@ $(() => {
     location.href = endpointWEB + "/chat";
   });
 
-  $("#formLogIn").on("submit", async event => {
+  $("#cardLogIn form").on("submit", async event => {
     event.preventDefault();
 
     let res = await LogInAPI(

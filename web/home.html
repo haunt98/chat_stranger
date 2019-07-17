@@ -19,44 +19,31 @@
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     />
-    <link rel="shortcut icon" href="/chat_stranger/web/img/favicon.ico">
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap&subset=vietnamese"
+      rel="stylesheet"
+    />
+    <link rel="shortcut icon" href="/chat_stranger/web/img/favicon.ico" />
 
     <title>Chat stranger</title>
   </head>
   <body>
-    <div class="container py-3">
-      <h1>Chat với người lạ</h1>
-      <button
-        type="button"
-        class="btn btn-primary mr-2"
-        data-toggle="modal"
-        data-target="#modalLogIn"
-      >
-        Đăng nhập
-        <i class="fas fa-sign-in-alt"></i>
-      </button>
-      <button
-        type="button"
-        class="btn btn-primary"
-        data-toggle="modal"
-        data-target="#modalSignUp"
-      >
-        Đăng ký
-        <i class="fas fa-user-plus"></i>
-      </button>
-    </div>
+    <div
+      class="container-fluid d-flex flex-column justify-content-center align-items-center vh-100"
+    >
+      <div>
+        <h1 class="font-weight-bold title text-center">
+          Chat stranger
+        </h1>
 
-    <div class="modal fade" id="modalSignUp">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form id="formSignUp" autocomplete="off">
-            <div class="modal-header">
-              <h3 class="modal-title">Đăng ký</h3>
-              <button type="button" class="close" data-dismiss="modal">
-                <span>&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
+        <div class="card d-none" id="cardSignUp">
+          <div class="card-body">
+            <h3 class="card-title">Đăng ký</h3>
+            <h6 class="card-subtitle">
+              hoặc
+              <a href="#">đăng nhập</a>
+            </h6>
+            <form autocomplete="off">
               <div class="form-group">
                 <label for="inputRegisterNameSignUp">Tên đăng nhập</label>
                 <input
@@ -84,33 +71,24 @@
               <div>
                 <p class="text-danger" id="errSignUp"></p>
               </div>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Quay lại
-              </button>
-              <button type="submit" class="btn btn-primary">Đăng ký</button>
-            </div>
-          </form>
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                  Đăng ký
+                  <i class="fas fa-user-plus"></i>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <div class="modal fade" id="modalLogIn">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form id="formLogIn" autocomplete="off">
-            <div class="modal-header">
-              <h3 class="modal-title">Đăng nhập</h3>
-              <button type="button" class="close" data-dismiss="modal">
-                <span>&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
+        <div class="card d-none" id="cardLogIn">
+          <div class="card-body">
+            <h3 class="card-title">Đăng nhập</h3>
+            <h6 class="card-subtitle">
+              hoặc
+              <a href="#">đăng ký</a>
+            </h6>
+            <form autocomplete="off">
               <div class="form-group">
                 <label for="inputRegisterNameLogIn">Tên đăng nhập</label>
                 <input
@@ -130,18 +108,14 @@
               <div>
                 <p class="text-danger" id="errLogIn"></p>
               </div>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-secondary"
-                data-dismiss="modal"
-              >
-                Quay lại
-              </button>
-              <button type="submit" class="btn btn-primary">Đăng nhập</button>
-            </div>
-          </form>
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary mr-2">
+                  Đăng nhập
+                  <i class="fas fa-sign-in-alt"></i>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
