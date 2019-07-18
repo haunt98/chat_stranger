@@ -1,22 +1,22 @@
 package valid
 
-func CheckRegisterName(name string) bool {
+func CheckRegisterName(name string) (bool, string) {
 	if name == "" {
-		return false
+		return false, "Tên đăng nhập bị thiếu"
 	}
-	return true
+	return true, ""
 }
 
-func CheckPassword(password string) bool {
+func CheckPassword(password string) (bool, string) {
 	if password == "" {
-		return false
+		return false, "Mật khẩu bị thiếu"
 	}
-	return true
+	return true, ""
 }
 
-func CheckPassword2(password, password2 string) bool {
-	if password == "" {
-		return false
+func CheckFullName(name string) (bool, string) {
+	if name == "" {
+		return false, "Tên hiển thị bị thiếu"
 	}
-	return password == password2
+	return true, ""
 }

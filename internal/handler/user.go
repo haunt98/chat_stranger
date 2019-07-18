@@ -5,6 +5,7 @@ import (
 	"github.com/1612180/chat_stranger/internal/pkg/configwrap"
 	"github.com/1612180/chat_stranger/internal/pkg/response"
 	"github.com/1612180/chat_stranger/internal/pkg/token"
+	"github.com/1612180/chat_stranger/internal/pkg/valid"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/1612180/chat_stranger/internal/service"
 
@@ -38,6 +39,21 @@ func (h *UserHandler) SignUp(c *gin.Context) {
 		return
 	}
 
+	if ok, checkMsg := valid.CheckRegisterName(user.RegisterName); !ok {
+		c.JSON(200, response.CreateWithMessage(141, checkMsg))
+		return
+	}
+
+	if ok, checkMsg := valid.CheckPassword(user.Password); !ok {
+		c.JSON(200, response.CreateWithMessage(141, checkMsg))
+		return
+	}
+
+	if ok, checkMsg := valid.CheckFullName(user.FullName); !ok {
+		c.JSON(200, response.CreateWithMessage(141, checkMsg))
+		return
+	}
+
 	if ok := h.userService.SignUp(&user); !ok {
 		c.JSON(200, response.Create(101))
 		return
@@ -66,6 +82,16 @@ func (h *UserHandler) LogIn(c *gin.Context) {
 			"action": "log in",
 		}).Error(err)
 		c.JSON(200, response.Create(202))
+		return
+	}
+
+	if ok, checkMsg := valid.CheckRegisterName(user.RegisterName); !ok {
+		c.JSON(200, response.CreateWithMessage(141, checkMsg))
+		return
+	}
+
+	if ok, checkMsg := valid.CheckPassword(user.Password); !ok {
+		c.JSON(200, response.CreateWithMessage(141, checkMsg))
 		return
 	}
 

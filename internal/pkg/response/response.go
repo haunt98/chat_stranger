@@ -34,6 +34,7 @@ var Codes = map[int]string{
 	130: "Update password OK",
 	131: "Failed to update password",
 	132: "Failed to bind json when update password",
+	141: "Valid check failed",
 	999: "You are not allowed to do this",
 }
 
@@ -49,5 +50,12 @@ func CreateWithData(code int, data interface{}) map[string]interface{} {
 	res["code"] = code
 	res["message"] = Codes[code]
 	res["data"] = data
+	return res
+}
+
+func CreateWithMessage(code int, message string) map[string]interface{} {
+	res := make(map[string]interface{})
+	res["code"] = code
+	res["message"] = message
 	return res
 }
