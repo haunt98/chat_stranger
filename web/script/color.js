@@ -1,7 +1,8 @@
 // https://elementary.io/docs/human-interface-guidelines#color
 window.elementaryColor = {
   Orange: {
-    500: "#f37329"
+    500: "#f37329",
+    700: "#cc3b02"
   },
   Blueberry: {
     100: "#8cd5ff",
@@ -35,4 +36,9 @@ $(() => {
   $("form a").css("color", window.elementaryColor["Blueberry"][500]);
 
   $(".title").css("color", window.elementaryColor["Blueberry"][500]);
+
+  let btn_next = $("#btnNext");
+  btn_next.css("color", window.elementaryColor["Silver"][100]);
+  btn_next.css("background-color", window.elementaryColor["Orange"][700]);
+  btn_next.css("border-color", window.elementaryColor["Orange"][700]);
 });

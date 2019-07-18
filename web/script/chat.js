@@ -7,7 +7,7 @@ function prepare() {
   sessionStorage.setItem("countMember", "0");
 
   // color drop down
-  $(".dropdown i").css("color", window.elementaryColor["Blueberry"][500])
+  $(".dropdown i").css("color", window.elementaryColor["Blueberry"][500]);
 }
 
 function showMessageLeft(name, body, color, backgroundColor) {
@@ -132,14 +132,19 @@ async function helloRoom() {
   let count = parseInt(res_count.data);
 
   if (sessionStorage.getItem("countMember") === "1" && count === 2) {
-    showMessageLeft("Hệ thống", "Có ai đó vừa vào phòng", "#fafafa", "#f37329");
+    showMessageLeft(
+      "Hệ thống",
+      "Có ai đó vừa vào phòng",
+      window.elementaryColor["Silver"][100],
+      window.elementaryColor["Orange"][700]
+    );
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "2" && count === 1) {
     showMessageLeft(
       "Hệ thống",
       "Người nói chuyện với bạn vừa rời khỏi phòng",
       window.elementaryColor["Silver"][100],
-      window.elementaryColor["Orange"][500]
+      window.elementaryColor["Orange"][700]
     );
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 1) {
@@ -147,7 +152,7 @@ async function helloRoom() {
       "Hệ thống",
       "Phòng đang trống, chờ ai đó vào phòng",
       window.elementaryColor["Silver"][100],
-      window.elementaryColor["Orange"][500]
+      window.elementaryColor["Orange"][700]
     );
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 2) {
@@ -155,7 +160,7 @@ async function helloRoom() {
       "Hệ thống",
       "Phòng đang có ai đó, hãy nhắn tin để chào",
       window.elementaryColor["Silver"][100],
-      window.elementaryColor["Orange"][500]
+      window.elementaryColor["Orange"][700]
     );
     scrollTop();
   }
@@ -239,18 +244,16 @@ $(async () => {
     event.preventDefault();
 
     let inputMessage = $("#inputMessage");
-    if (inputMessage.val() === "") {
+    let msg = inputMessage.val();
+    if (msg === "") {
       return;
     }
+    inputMessage.val("")
 
-    let res_send = await ChatSendAPI(
-      sessionStorage.getItem("token"),
-      inputMessage.val()
-    );
+    let res_send = await ChatSendAPI(sessionStorage.getItem("token"), msg);
     if (res_send.code !== 700) {
       console.log(res_send);
     }
-    inputMessage.val("");
   });
 
   $(".editInfo").on("click", async () => {
