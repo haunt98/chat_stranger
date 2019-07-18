@@ -23,16 +23,18 @@ type ChatService interface {
 }
 
 func NewChatService(
+	userRepo repository.UserRepository,
 	roomRepo repository.RoomRepository,
 	memberRepo repository.MemberRepo,
 	messageRepo repository.MessageRepo,
 ) ChatService {
-	return &chatService{roomRepo: roomRepo, memberRepo: memberRepo, messageRepo: messageRepo}
+	return &chatService{userRepo: userRepo, roomRepo: roomRepo, memberRepo: memberRepo, messageRepo: messageRepo}
 }
 
 // implement
 
 type chatService struct {
+	userRepo    repository.UserRepository
 	roomRepo    repository.RoomRepository
 	memberRepo  repository.MemberRepo
 	messageRepo repository.MessageRepo
@@ -47,13 +49,47 @@ func (s *chatService) Find(userID int, status string) (*model.Room, bool) {
 		return room, true
 	} else if status == "next" {
 		// old room
-		room, ok := s.roomRepo.FindByUser(userID)
+		old, ok := s.roomRepo.FindByUser(userID)
 		if !ok {
 			return nil, false
 		}
 
 		// next
-		room, ok = s.roomRepo.FindNext(room.ID)
+		room, ok := s.roomRepo.FindNext(old.ID)
+		if !ok {
+			return s.roomRepo.Create()
+		}
+		return room, true
+	} else if status == "gender" {
+		// old room
+		old, ok := s.roomRepo.FindByUser(userID)
+		if !ok {
+			return nil, false
+		}
+
+		user, _, ok := s.userRepo.Find(userID)
+		if !ok {
+			return nil, false
+		}
+
+		room, ok := s.roomRepo.FindSameGender(old.ID, user.Gender)
+		if !ok {
+			return s.roomRepo.Create()
+		}
+		return room, true
+	} else if status == "birth" {
+		// old room
+		old, ok := s.roomRepo.FindByUser(userID)
+		if !ok {
+			return nil, false
+		}
+
+		user, _, ok := s.userRepo.Find(userID)
+		if !ok {
+			return nil, false
+		}
+
+		room, ok := s.roomRepo.FindSameBirthYear(old.ID, user.BirthYear)
 		if !ok {
 			return s.roomRepo.Create()
 		}

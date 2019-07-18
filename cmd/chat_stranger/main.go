@@ -50,7 +50,7 @@ func main() {
 
 	// Load service
 	userService := service.NewUserService(userRepo)
-	chatService := service.NewChatService(roomRepo, memberRepo, messageRepo)
+	chatService := service.NewChatService(userRepo, roomRepo, memberRepo, messageRepo)
 
 	// Load handler
 	userHandler := handler.NewUserHandler(userService, config)

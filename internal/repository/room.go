@@ -14,6 +14,8 @@ type RoomRepository interface {
 	Exist(id int) bool
 	FindEmpty() (*model.Room, bool)
 	FindNext(old int) (*model.Room, bool)
+	FindSameGender(old int, gender string) (*model.Room, bool)
+	FindSameBirthYear(old int, year int) (*model.Room, bool)
 	FindByUser(userID int) (*model.Room, bool)
 	Create() (*model.Room, bool)
 }
@@ -40,15 +42,22 @@ func (g *roomGorm) Exist(id int) bool {
 	return true
 }
 
-func (g *roomGorm) FindEmpty() (*model.Room, bool) {
-	// find rooms
+func (g *roomGorm) fetchAll() ([]*model.Room, bool) {
 	var rooms []*model.Room
 	if err := g.db.Find(&rooms).Error; err != nil {
 		logrus.WithFields(logrus.Fields{
 			"event":  "repo",
 			"target": "room",
-			"action": "find empty",
+			"action": "fetch all",
 		}).Error(err)
+		return nil, false
+	}
+	return rooms, true
+}
+
+func (g *roomGorm) FindEmpty() (*model.Room, bool) {
+	rooms, ok := g.fetchAll()
+	if !ok {
 		return nil, false
 	}
 
@@ -66,14 +75,8 @@ func (g *roomGorm) FindEmpty() (*model.Room, bool) {
 }
 
 func (g *roomGorm) FindNext(old int) (*model.Room, bool) {
-	// find rooms
-	var rooms []*model.Room
-	if err := g.db.Find(&rooms).Error; err != nil {
-		logrus.WithFields(logrus.Fields{
-			"event":  "repo",
-			"target": "room",
-			"action": "find empty",
-		}).Error(err)
+	rooms, ok := g.fetchAll()
+	if !ok {
 		return nil, false
 	}
 
@@ -85,6 +88,110 @@ func (g *roomGorm) FindNext(old int) (*model.Room, bool) {
 		}
 		if count < variable.LimitRoom && room.ID != old {
 			return room, true
+		}
+	}
+	return nil, false
+}
+
+func (g *roomGorm) FindSameGender(old int, gender string) (*model.Room, bool) {
+	rooms, ok := g.fetchAll()
+	if !ok {
+		return nil, false
+	}
+
+	// find empty room and same gender
+	for _, room := range rooms {
+		count, ok := countByRoom(g.db, room.ID)
+		if !ok {
+			return nil, false
+		}
+
+		if count >= variable.LimitRoom {
+			return nil, false
+		}
+
+		if room.ID == old {
+			return nil, false
+		}
+
+		// members of room
+		var members []*model.Member
+		if err := g.db.Where("room_id = ?", room.ID).Find(&members).Error; err != nil {
+			logrus.WithFields(logrus.Fields{
+				"event":  "repo",
+				"target": "room",
+				"action": "find same gender",
+			}).Error(err)
+			return nil, false
+		}
+
+		// check gender of mebers
+		for _, member := range members {
+			var user model.User
+			if err := g.db.Where(&model.User{ID: member.UserID}).Error; err != nil {
+				logrus.WithFields(logrus.Fields{
+					"event":  "repo",
+					"target": "room",
+					"action": "find same gender",
+				}).Error(err)
+				return nil, false
+			}
+
+			if user.Gender == gender {
+				return room, true
+			}
+		}
+	}
+	return nil, false
+}
+
+func (g *roomGorm) FindSameBirthYear(old int, year int) (*model.Room, bool) {
+	rooms, ok := g.fetchAll()
+	if !ok {
+		return nil, false
+	}
+
+	// find empty room and same birth year
+	for _, room := range rooms {
+		count, ok := countByRoom(g.db, room.ID)
+		if !ok {
+			return nil, false
+		}
+
+		if count >= variable.LimitRoom {
+			return nil, false
+		}
+
+		if room.ID == old {
+			return nil, false
+		}
+
+		// members of room
+		var members []*model.Member
+		if err := g.db.Where("room_id = ?", room.ID).Find(&members).Error; err != nil {
+			logrus.WithFields(logrus.Fields{
+				"event":  "repo",
+				"target": "room",
+				"action": "find same birth year",
+			}).Error(err)
+			return nil, false
+		}
+
+		// check gender of mebers
+		for _, member := range members {
+			var user model.User
+			if err := g.db.Where(&model.User{ID: member.UserID}).Error; err != nil {
+				logrus.WithFields(logrus.Fields{
+					"event":  "repo",
+					"target": "room",
+					"action": "find same birth year",
+				}).Error(err)
+				return nil, false
+			}
+
+			if user.BirthYear == year {
+				return room, true
+			}
 		}
 	}
 	return nil, false

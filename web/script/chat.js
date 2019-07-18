@@ -213,7 +213,13 @@ $(async () => {
 
   $("#btnNext").on("click", async () => {
     // next
-    let res_next = await ChatFindAPI(sessionStorage.getItem("token"), "next");
+    let status = "next";
+    if (sessionStorage.getItem("search") === "1") {
+      status = "gender";
+    } else if (sessionStorage.getItem("search") === "2") {
+      status = "birth";
+    }
+    let res_next = await ChatFindAPI(sessionStorage.getItem("token"), status);
     if (res_next.code !== 400) {
       console.log(res_next);
       return;
@@ -248,7 +254,7 @@ $(async () => {
     if (msg === "") {
       return;
     }
-    inputMessage.val("")
+    inputMessage.val("");
 
     let res_send = await ChatSendAPI(sessionStorage.getItem("token"), msg);
     if (res_send.code !== 700) {
@@ -288,12 +294,21 @@ $(async () => {
       $("#errEditInfo").text(res.message);
       return;
     }
-
     location.reload();
   });
 
   $("#formEditSearch").on("submit", event => {
     event.preventDefault();
+
+    let search = $("input[name=editSearchRadio]:checked").val();
+    sessionStorage.setItem("search", search);
+    location.reload();
+  });
+
+  $("#resetEditSearch").on("click", () => {
+    $("#checkGenderEditSearch").prop("checked", false);
+    $("#checkBirthYearEditSearch").prop("checked", false);
+    sessionStorage.removeItem("search");
   });
 });
 
