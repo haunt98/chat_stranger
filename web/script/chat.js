@@ -10,6 +10,22 @@ function prepare() {
   $(".dropdown i").css("color", window.elementaryColor["Blueberry"][500]);
 }
 
+function notify(bodyNoti) {
+  if (!("Notification" in window)) {
+    return;
+  }
+
+  Notification.requestPermission().then(permission => {
+    if (permission === "granted") {
+      new Notification("Incoming notification!", {
+        body: bodyNoti,
+        icon:
+          "https://raw.githubusercontent.com/1612180/chat_stranger/master/web/img/favicon.ico"
+      });
+    }
+  });
+}
+
 function showMessageLeft(name, body, color, backgroundColor) {
   let row = document.createElement("div");
   row.className = "row my-1";
@@ -96,6 +112,8 @@ async function receive() {
     }
   }
 
+  notify("Có tin nhắn mới");
+
   let fromTime = new Date(
     res_receive.data[res_receive.data.length - 1].created_at
   ).toISOString();
@@ -125,6 +143,7 @@ async function helloRoom() {
     console.log(res_count);
     return;
   }
+
   if (!sessionStorage.getItem("countMember")) {
     sessionStorage.setItem("countMember", "0");
   }
@@ -138,6 +157,7 @@ async function helloRoom() {
       window.elementaryColor["Silver"][100],
       window.elementaryColor["Orange"][700]
     );
+    notify("Có ai đó vừa vào phòng");
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "2" && count === 1) {
     showMessageLeft(
@@ -146,6 +166,7 @@ async function helloRoom() {
       window.elementaryColor["Silver"][100],
       window.elementaryColor["Orange"][700]
     );
+    notify("Người nói chuyện với bạn vừa rời khỏi phòng");
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 1) {
     showMessageLeft(
@@ -154,6 +175,7 @@ async function helloRoom() {
       window.elementaryColor["Silver"][100],
       window.elementaryColor["Orange"][700]
     );
+    notify("Phòng đang trống, chờ ai đó vào phòng");
     scrollTop();
   } else if (sessionStorage.getItem("countMember") === "0" && count === 2) {
     showMessageLeft(
@@ -162,6 +184,7 @@ async function helloRoom() {
       window.elementaryColor["Silver"][100],
       window.elementaryColor["Orange"][700]
     );
+    notify("Phòng đang có ai đó, hãy nhắn tin để chào");
     scrollTop();
   }
 
