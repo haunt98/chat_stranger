@@ -77,6 +77,36 @@ func (mr *MockRoomRepositoryMockRecorder) FindNext(old interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindNext", reflect.TypeOf((*MockRoomRepository)(nil).FindNext), old)
 }
 
+// FindSameGender mocks base method
+func (m *MockRoomRepository) FindSameGender(old int, gender string) (*model.Room, bool) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindSameGender", old, gender)
+	ret0, _ := ret[0].(*model.Room)
+	ret1, _ := ret[1].(bool)
+	return ret0, ret1
+}
+
+// FindSameGender indicates an expected call of FindSameGender
+func (mr *MockRoomRepositoryMockRecorder) FindSameGender(old, gender interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindSameGender", reflect.TypeOf((*MockRoomRepository)(nil).FindSameGender), old, gender)
+}
+
+// FindSameBirthYear mocks base method
+func (m *MockRoomRepository) FindSameBirthYear(old, year int) (*model.Room, bool) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindSameBirthYear", old, year)
+	ret0, _ := ret[0].(*model.Room)
+	ret1, _ := ret[1].(bool)
+	return ret0, ret1
+}
+
+// FindSameBirthYear indicates an expected call of FindSameBirthYear
+func (mr *MockRoomRepositoryMockRecorder) FindSameBirthYear(old, year interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindSameBirthYear", reflect.TypeOf((*MockRoomRepository)(nil).FindSameBirthYear), old, year)
+}
+
 // FindByUser mocks base method
 func (m *MockRoomRepository) FindByUser(userID int) (*model.Room, bool) {
 	m.ctrl.T.Helper()
