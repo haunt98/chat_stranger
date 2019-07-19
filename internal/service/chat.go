@@ -74,7 +74,11 @@ func (s *chatService) Find(userID int, status string) (*model.Room, bool) {
 
 		room, ok := s.roomRepo.FindSameGender(old.ID, user.Gender)
 		if !ok {
-			return s.roomRepo.Create()
+			room, ok := s.roomRepo.FindNext(old.ID)
+			if !ok {
+				return s.roomRepo.Create()
+			}
+			return room, true
 		}
 		return room, true
 	} else if status == "birth" {
@@ -91,7 +95,11 @@ func (s *chatService) Find(userID int, status string) (*model.Room, bool) {
 
 		room, ok := s.roomRepo.FindSameBirthYear(old.ID, user.BirthYear)
 		if !ok {
-			return s.roomRepo.Create()
+			room, ok := s.roomRepo.FindNext(old.ID)
+			if !ok {
+				return s.roomRepo.Create()
+			}
+			return room, true
 		}
 		return room, true
 	}
