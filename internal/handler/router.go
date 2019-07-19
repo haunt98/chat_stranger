@@ -32,6 +32,11 @@ func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, config config
 				c.HTML(200, "chat.html", gin.H{})
 			})
 		}
+
+		// redirect to homepage when 404 not found
+		router.NoRoute(func(c *gin.Context) {
+			c.Redirect(301, variable.WebPrefix)
+		})
 	}
 
 	api := router.Group(variable.APIPrefix)
