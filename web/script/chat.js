@@ -277,6 +277,16 @@ $(async () => {
   });
 
   $(".editSearch").on("click", () => {
+    if (sessionStorage.getItem("search") === "1") {
+      $("#checkGenderEditSearch").prop("checked", true);
+      $("#checkBirthYearEditSearch").prop("checked", false);
+    } else if (sessionStorage.getItem("search") === "2") {
+      $("#checkGenderEditSearch").prop("checked", false);
+      $("#checkBirthYearEditSearch").prop("checked", true);
+    } else {
+      $("#checkGenderEditSearch").prop("checked", false);
+      $("#checkBirthYearEditSearch").prop("checked", false);
+    }
     $("#modalEditSearch").modal("show");
   });
 
@@ -302,7 +312,7 @@ $(async () => {
 
     let search = $("input[name=editSearchRadio]:checked").val();
     sessionStorage.setItem("search", search);
-    location.reload();
+    $("#modalEditSearch").modal("hide");
   });
 
   $("#resetEditSearch").on("click", () => {
