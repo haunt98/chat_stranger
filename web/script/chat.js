@@ -109,10 +109,10 @@ async function receive() {
         window.elementaryColor["Black"][700],
         window.elementaryColor["Silver"][300]
       );
+      console.log("left");
+      notify("Có tin nhắn mới");
     }
   }
-
-  notify("Có tin nhắn mới");
 
   let fromTime = new Date(
     res_receive.data[res_receive.data.length - 1].created_at

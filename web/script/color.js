@@ -1,6 +1,7 @@
 // https://elementary.io/docs/human-interface-guidelines#color
 window.elementaryColor = {
   Orange: {
+    100: "#ffc27d",
     500: "#f37329",
     700: "#cc3b02"
   },
@@ -12,7 +13,8 @@ window.elementaryColor = {
     900: "#002e99"
   },
   Grape: {
-    100: "#e4c6fa"
+    100: "#e4c6fa",
+    900: "#452981"
   },
   Silver: {
     100: "#fafafa",
@@ -30,15 +32,22 @@ window.elementaryColor = {
 $(() => {
   let btn_primary = $(".btn_primary");
   btn_primary.css("color", window.elementaryColor["Silver"][100]);
-  btn_primary.css("background-color", window.elementaryColor["Blueberry"][500]);
-  btn_primary.css("border-color", window.elementaryColor["Blueberry"][500]);
+  btn_primary.css("backgroundColor", window.elementaryColor["Blueberry"][500]);
+  btn_primary.css("borderColor", window.elementaryColor["Blueberry"][500]);
 
-  $("form a").css("color", window.elementaryColor["Blueberry"][500]);
+  // link in log in
+  $(".card a").css("color", window.elementaryColor["Blueberry"][700]);
 
-  $(".title").css("color", window.elementaryColor["Blueberry"][500]);
+  // title chat stranger
+  $(".title").css("color", window.elementaryColor["Orange"][500]);
 
   let btn_next = $("#btnNext");
   btn_next.css("color", window.elementaryColor["Silver"][100]);
-  btn_next.css("background-color", window.elementaryColor["Orange"][700]);
-  btn_next.css("border-color", window.elementaryColor["Orange"][700]);
+  btn_next.css("backgroundColor", window.elementaryColor["Orange"][700]);
+  btn_next.css("borderColor", window.elementaryColor["Orange"][700]);
+
+  // background
+  $("body").css("backgroundColor", window.elementaryColor["Slate"][700]);
+  $(".card").css("backgroundColor", window.elementaryColor["Silver"][100]);
+  $("#chat").css("backgroundColor", window.elementaryColor["Silver"][100]);
 });
