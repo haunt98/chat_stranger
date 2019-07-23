@@ -12,22 +12,22 @@ function BuildUrl(url, params) {
   return url + "?" + searchParams;
 }
 
-function SingUpAPI(register_name, password, full_name) {
+function SingUpAPI(registername, password, showname) {
   return fetch(BuildUrl(endpointAPI + "/auth/signup", {}), {
     method: "POST",
     body: JSON.stringify({
-      register_name: register_name,
+      registername: registername,
       password: password,
-      full_name: full_name
+      showname: showname
     })
   }).then(res => res.json());
 }
 
-function LogInAPI(register_name, password) {
+function LogInAPI(registername, password) {
   return fetch(BuildUrl(endpointAPI + "/auth/login", {}), {
     method: "POST",
     body: JSON.stringify({
-      register_name: register_name,
+      registername: registername,
       password: password
     })
   }).then(res => res.json());
@@ -41,16 +41,16 @@ function InfoAPI(token) {
   }).then(res => res.json());
 }
 
-function EditInfoAPI(token, full_name, gender, birth_year) {
+function EditInfoAPI(token, showname, gender, birthyear) {
   return fetch(BuildUrl(endpointAPI + "/me", {}), {
     method: "PUT",
     headers: {
       Authorization: `Bearer ${token}`
     },
     body: JSON.stringify({
-      full_name: full_name,
+      showname: showname,
       gender: gender,
-      birth_year: birth_year
+      birthyear: birthyear
     })
   }).then(res => res.json());
 }
@@ -104,10 +104,10 @@ function ChatSendAPI(token, body) {
   }).then(res => res.json());
 }
 
-function ChatReceiveAPI(token, fromTime) {
+function ChatReceiveAPI(token, from) {
   return fetch(
     BuildUrl(endpointAPI + "/chat/receive", {
-      fromTime: fromTime
+      from: from
     }),
     {
       headers: {

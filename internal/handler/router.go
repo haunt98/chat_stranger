@@ -1,23 +1,19 @@
 package handler
 
 import (
-	"github.com/1612180/chat_stranger/internal/pkg/configwrap"
+	"github.com/1612180/chat_stranger/internal/pkg/config"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
-	"github.com/1612180/chat_stranger/pkg/ginrus"
-
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
 )
 
-func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, config configwrap.Config) *gin.Engine {
-	// Load gin config
-	gin.SetMode(viper.GetString(variable.GinMode))
-
+func NewRouter(accountHandler *AccountHandler, chatHandler *ChatHandler, cfg config.Config) *gin.Engine {
+	gin.SetMode(cfg.Get(variable.GinMode))
 	router := gin.New()
-	router.Use(ginrus.Logger(), gin.Recovery())
 
-	// add html when not test
-	if config.Get(variable.ConfigMode) != variable.TestMode {
+	// production
+	if cfg.Get(variable.Config) != variable.Test {
+		router.Use(gin.Logger(), gin.Recovery())
+
 		router.LoadHTMLGlob(variable.HTMLGlob)
 		router.Static(variable.StaticRelativeScript, variable.StaticScript)
 		router.Static(variable.StaticRelativeStyle, variable.StaticStyle)
@@ -33,7 +29,7 @@ func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, config config
 			})
 		}
 
-		// redirect to homepage when 404 not found
+		// redirect
 		router.NoRoute(func(c *gin.Context) {
 			c.Redirect(301, variable.WebPrefix)
 		})
@@ -41,17 +37,17 @@ func NewRouter(userHandler *UserHandler, chatHandler *ChatHandler, config config
 
 	api := router.Group(variable.APIPrefix)
 	{
-		api.POST("/auth/signup", userHandler.SignUp)
-		api.POST("/auth/login", userHandler.LogIn)
+		api.POST("/auth/signup", accountHandler.SignUp)
+		api.POST("/auth/login", accountHandler.LogIn)
 	}
 
-	role := Role{config: config}
+	role := Role{config: cfg}
 	roleUser := router.Group(variable.APIPrefix, role.Verify(variable.UserRole))
 	{
-		roleUser.GET("/me", userHandler.Info)
-		roleUser.PUT("/me", userHandler.UpdateInfo)
+		roleUser.GET("/me", accountHandler.Info)
+		roleUser.PUT("/me", accountHandler.UpdateInfo)
 
-		roleUser.GET("/chat/find", chatHandler.Find)
+		roleUser.GET("/chat/find", chatHandler.FindRoom)
 		roleUser.POST("/chat/join", chatHandler.Join)
 		roleUser.POST("/chat/leave", chatHandler.Leave)
 		roleUser.POST("/chat/send", chatHandler.SendMessage)

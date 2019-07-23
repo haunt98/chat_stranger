@@ -5,23 +5,29 @@ const (
 	ConfigFile  = "config"
 	ConfigPath  = "configs"
 
-	Port       = "port"
-	DbDialect  = "db.dialect"
-	DbUrl      = "db.url"
-	DbMode     = "db.mode"
-	JWTSecret  = "token.secret"
-	GinMode    = "gin.mode"
-	ConfigMode = "config.mode"
+	Port      = "port"
+	DbDialect = "db.dialect"
+	DbUrl     = "db.url"
+	DbMode    = "db.mode"
+	JWTSecret = "jwt.secret"
+	GinMode   = "gin.mode"
 
-	ViperMode   = "viper"
-	TestMode    = "test"
-	DebugMode   = "debug"
-	ReleaseMode = "release"
+	Config = "config"
+	Viper  = "viper"
+	Test   = "test"
 
-	UserRole  = "user"
-	AdminRole = "admin"
+	Debug = "debug"
 
-	LimitRoom = 2
+	UserRole = "user"
+
+	LimitRoom         = 2
+	StatusRoom        = "status"
+	AnyRoom           = "any"
+	NextRoom          = "next"
+	SameGenderRoom    = "gender"
+	SameBirthYearRoom = "birth"
+
+	FromTime = "from"
 
 	WebPrefix            = "/chat_stranger/web"
 	APIPrefix            = "/chat_stranger/api"

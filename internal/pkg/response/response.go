@@ -3,59 +3,68 @@ package response
 var Codes = map[int]string{
 	100: "Sign up Ok",
 	101: "Tên đăng nhập đã tồn tại",
-	102: "Failed to bind json when sign up",
-	103: "Failed to create token when sign up",
+	102: "Sign up submit failed to parse json",
+	103: "Sign up submit is invalid",
 	200: "Log in OK",
 	201: "Tên đăng nhập hay mật khẩu sai",
-	202: "Failed to bind json when log in",
-	203: "Failed to create token when log in",
+	202: "Log in submit failed to parse json",
+	203: "Log in submit invalid",
 	300: "Get info OK",
-	301: "Không tồn tại tài khoản này",
+	301: "Get info failed",
 	400: "Find room OK",
-	401: "Failed to find room",
+	401: "Find any room failed",
+	402: "Find next room failed",
+	403: "Find same gender room failed",
+	404: "Find same birth year room failed",
+	405: "Query status room is invalid",
 	500: "Join room OK",
-	501: "Failed to join room",
+	501: "Join room failed",
 	502: "Failed to convert roomID to int",
 	600: "Leave room OK",
 	601: "Failed to leave room",
 	700: "Send message OK",
-	701: "Failed to send message",
-	702: "Failed to bind json when send message",
+	701: "Send message failed",
+	702: "Send message failed to parse json",
 	800: "Receive message OK",
-	801: "Failed to receive message",
-	802: "Failed to query from time",
+	801: "Receive message failed",
+	802: "Receive message failed to query from time",
 	900: "User is free",
 	901: "User is already joined",
+	902: "Check user is free failed",
 	110: "Count member OK",
-	111: "Failed to count member",
-	120: "Cập nhập thông tin OK",
-	121: "Thất bại khi cập nhập thông tin",
-	122: "Failed to bind json when update info",
-	130: "Update password OK",
-	131: "Failed to update password",
-	132: "Failed to bind json when update password",
-	141: "Valid check failed",
+	111: "Count member failed",
+	120: "Update info OK",
+	121: "Update info failed",
+	122: "Update info submit failed to parse json",
+	123: "Update info submit is invalid",
+	141: "Check valid failed",
 	999: "You are not allowed to do this",
 }
 
-func Create(code int) map[string]interface{} {
-	res := make(map[string]interface{})
-	res["code"] = code
-	res["message"] = Codes[code]
-	return res
+type Response struct {
+	Code    int         `json:"code,omitempty"`
+	Message string      `json:"message,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
-func CreateWithData(code int, data interface{}) map[string]interface{} {
-	res := make(map[string]interface{})
-	res["code"] = code
-	res["message"] = Codes[code]
-	res["data"] = data
-	return res
+func Create(code int) Response {
+	return Response{
+		Code:    code,
+		Message: Codes[code],
+	}
 }
 
-func CreateWithMessage(code int, message string) map[string]interface{} {
-	res := make(map[string]interface{})
-	res["code"] = code
-	res["message"] = message
-	return res
+func CreateWithData(code int, data interface{}) Response {
+	return Response{
+		Code:    code,
+		Message: Codes[code],
+		Data:    data,
+	}
+}
+
+func CreateWithMessage(code int, message string) Response {
+	return Response{
+		Code:    code,
+		Message: message,
+	}
 }

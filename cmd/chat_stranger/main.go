@@ -3,67 +3,56 @@ package main
 import (
 	"github.com/1612180/chat_stranger/internal/handler"
 	"github.com/1612180/chat_stranger/internal/model"
-	"github.com/1612180/chat_stranger/internal/pkg/configwrap"
+	"github.com/1612180/chat_stranger/internal/pkg/config"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/1612180/chat_stranger/internal/pkg/viperwrap"
 	"github.com/1612180/chat_stranger/internal/repository"
 	"github.com/1612180/chat_stranger/internal/service"
-	"github.com/1612180/chat_stranger/pkg/gormrus"
-
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	// Load config
+	// Load cfg
 	viperwrap.Load(variable.ServiceName, variable.ConfigFile, variable.ConfigPath)
-	config := configwrap.NewConfig(variable.ViperMode)
+	cfg := config.NewConfig(variable.Viper)
 
 	// Load database
-	db, err := gorm.Open(config.Get(variable.DbDialect), config.Get(variable.DbUrl))
+	db, err := gorm.Open(cfg.Get(variable.DbDialect), cfg.Get(variable.DbUrl))
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"event": "database",
-		}).Error(err)
+		logrus.Error(errors.Wrap(err, "database open failed"))
 		return
 	}
-	db.SetLogger(&gormrus.Logger{})
-
 	defer func() {
 		if err := db.Close(); err != nil {
-			logrus.WithFields(logrus.Fields{
-				"event": "database",
-			}).Error(err)
+			logrus.Error(errors.Wrap(err, "database close failed"))
 			return
 		}
 	}()
 
-	// Migrate
-	model.Migrate(db)
+	if err := model.Migrate(db); err != nil {
+		logrus.Error(errors.Wrap(err, "database failed"))
+	}
 
 	// Load repository
-	userRepo := repository.NewUserRepository(db)
-	roomRepo := repository.NewRoomRepository(db)
-	memberRepo := repository.NewMemberRepo(db)
-	messageRepo := repository.NewMessageRepo(db)
+	accountRepo := repository.NewAccountRepo(db)
+	chatRepo := repository.NewChatRepo(db)
 
 	// Load service
-	userService := service.NewUserService(userRepo)
-	chatService := service.NewChatService(userRepo, roomRepo, memberRepo, messageRepo)
+	accountService := service.NewAccountService(accountRepo, cfg)
+	chatService := service.NewChatService(accountRepo, chatRepo)
 
 	// Load handler
-	userHandler := handler.NewUserHandler(userService, config)
+	accountHandler := handler.NewAccountHandler(accountService)
 	chatHandler := handler.NewChatHandler(chatService)
 
-	// Create gin router
-	router := handler.NewRouter(userHandler, chatHandler, config)
+	// CreateRoom gin router
+	router := handler.NewRouter(accountHandler, chatHandler, cfg)
 
 	// Start gin router
-	if err := router.Run(":" + config.Get(variable.Port)); err != nil {
-		logrus.WithFields(logrus.Fields{
-			"event": "gin",
-			"port":  config.Get(variable.Port),
-		}).Error(err)
+	if err := router.Run(":" + cfg.Get(variable.Port)); err != nil {
+		logrus.Error(errors.Wrapf(err, "gin run port=%s failed", cfg.Get(variable.Port)))
 	}
 }

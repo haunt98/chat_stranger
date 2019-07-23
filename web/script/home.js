@@ -21,7 +21,7 @@ $(() => {
     let res = await SingUpAPI(
       $("#inputRegisterNameSignUp").val(),
       $("#inputPasswordSignUp").val(),
-      $("#inputFullNameSignUp").val()
+      $("#inputShowNameSignUp").val()
     );
 
     if (res.code !== 100) {

@@ -95,7 +95,7 @@ async function receive() {
 
   for (let i = 0; i < res_receive.data.length; i += 1) {
     if (
-      res_receive.data[i].user_id === parseInt(sessionStorage.getItem("userID"))
+      res_receive.data[i].userid === parseInt(sessionStorage.getItem("userID"))
     ) {
       showMessageRight(
         res_receive.data[i].body,
@@ -104,7 +104,7 @@ async function receive() {
       );
     } else {
       showMessageLeft(
-        res_receive.data[i].user_full_name,
+        res_receive.data[i].usershowname,
         res_receive.data[i].body,
         window.elementaryColor["Black"][700],
         window.elementaryColor["Silver"][300]
@@ -115,7 +115,7 @@ async function receive() {
   }
 
   let fromTime = new Date(
-    res_receive.data[res_receive.data.length - 1].created_at
+    res_receive.data[res_receive.data.length - 1].createdat
   ).toISOString();
   sessionStorage.setItem("fromTime", fromTime);
   scrollTop();
@@ -134,7 +134,7 @@ async function hello() {
   }
 
   sessionStorage.setItem("userID", res.data.id);
-  $(".hello span").text(res.data.full_name);
+  $(".hello span").text(res.data.showname);
 }
 
 async function helloRoom() {
@@ -206,7 +206,7 @@ $(async () => {
   let res_is_free = await ChatIsFreeAPI(sessionStorage.getItem("token"));
   if (res_is_free.code === 900) {
     // find a new room for user to join
-    let res_find = await ChatFindAPI(sessionStorage.getItem("token"), "empty");
+    let res_find = await ChatFindAPI(sessionStorage.getItem("token"), "any");
     if (res_find.code !== 400) {
       console.log(res_find);
       return;
@@ -292,9 +292,9 @@ $(async () => {
       return;
     }
 
-    $("#inputFullNameEditInfo").val(res.data.full_name);
+    $("#inputShowNameEditInfo").val(res.data.showname);
     $("#inputGenderEditInfo").val(res.data.gender);
-    $("#inputBirthYearEditInfo").val(res.data.birth_year);
+    $("#inputBirthYearEditInfo").val(res.data.birthyear);
 
     $("#modalEditInfo").modal("show");
   });
@@ -318,7 +318,7 @@ $(async () => {
 
     let res = await EditInfoAPI(
       sessionStorage.getItem("token"),
-      $("#inputFullNameEditInfo").val(),
+      $("#inputShowNameEditInfo").val(),
       $("#inputGenderEditInfo").val(),
       parseInt($("#inputBirthYearEditInfo").val())
     );

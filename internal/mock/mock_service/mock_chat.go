@@ -34,26 +34,71 @@ func (m *MockChatService) EXPECT() *MockChatServiceMockRecorder {
 	return m.recorder
 }
 
-// Find mocks base method
-func (m *MockChatService) Find(userID int, status string) (*model.Room, bool) {
+// FindAnyRoom mocks base method
+func (m *MockChatService) FindAnyRoom(userID int) (model.Room, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Find", userID, status)
-	ret0, _ := ret[0].(*model.Room)
-	ret1, _ := ret[1].(bool)
+	ret := m.ctrl.Call(m, "FindAnyRoom", userID)
+	ret0, _ := ret[0].(model.Room)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Find indicates an expected call of Find
-func (mr *MockChatServiceMockRecorder) Find(userID, status interface{}) *gomock.Call {
+// FindAnyRoom indicates an expected call of FindAnyRoom
+func (mr *MockChatServiceMockRecorder) FindAnyRoom(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Find", reflect.TypeOf((*MockChatService)(nil).Find), userID, status)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAnyRoom", reflect.TypeOf((*MockChatService)(nil).FindAnyRoom), userID)
+}
+
+// FindNextRoom mocks base method
+func (m *MockChatService) FindNextRoom(userID int) (model.Room, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindNextRoom", userID)
+	ret0, _ := ret[0].(model.Room)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindNextRoom indicates an expected call of FindNextRoom
+func (mr *MockChatServiceMockRecorder) FindNextRoom(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindNextRoom", reflect.TypeOf((*MockChatService)(nil).FindNextRoom), userID)
+}
+
+// FindSameGenderRoom mocks base method
+func (m *MockChatService) FindSameGenderRoom(userID int) (model.Room, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindSameGenderRoom", userID)
+	ret0, _ := ret[0].(model.Room)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindSameGenderRoom indicates an expected call of FindSameGenderRoom
+func (mr *MockChatServiceMockRecorder) FindSameGenderRoom(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindSameGenderRoom", reflect.TypeOf((*MockChatService)(nil).FindSameGenderRoom), userID)
+}
+
+// FindSameBirthYearRoom mocks base method
+func (m *MockChatService) FindSameBirthYearRoom(userID int) (model.Room, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindSameBirthYearRoom", userID)
+	ret0, _ := ret[0].(model.Room)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindSameBirthYearRoom indicates an expected call of FindSameBirthYearRoom
+func (mr *MockChatServiceMockRecorder) FindSameBirthYearRoom(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindSameBirthYearRoom", reflect.TypeOf((*MockChatService)(nil).FindSameBirthYearRoom), userID)
 }
 
 // Join mocks base method
-func (m *MockChatService) Join(userID, roomID int) bool {
+func (m *MockChatService) Join(userID, roomID int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Join", userID, roomID)
-	ret0, _ := ret[0].(bool)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
@@ -64,10 +109,10 @@ func (mr *MockChatServiceMockRecorder) Join(userID, roomID interface{}) *gomock.
 }
 
 // Leave mocks base method
-func (m *MockChatService) Leave(userID int) bool {
+func (m *MockChatService) Leave(userID int) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Leave", userID)
-	ret0, _ := ret[0].(bool)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
@@ -78,40 +123,41 @@ func (mr *MockChatServiceMockRecorder) Leave(userID interface{}) *gomock.Call {
 }
 
 // SendMessage mocks base method
-func (m *MockChatService) SendMessage(message *model.Message) bool {
+func (m *MockChatService) SendMessage(userID int, body string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SendMessage", message)
-	ret0, _ := ret[0].(bool)
+	ret := m.ctrl.Call(m, "SendMessage", userID, body)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SendMessage indicates an expected call of SendMessage
-func (mr *MockChatServiceMockRecorder) SendMessage(message interface{}) *gomock.Call {
+func (mr *MockChatServiceMockRecorder) SendMessage(userID, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockChatService)(nil).SendMessage), message)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessage", reflect.TypeOf((*MockChatService)(nil).SendMessage), userID, body)
 }
 
 // ReceiveMessage mocks base method
-func (m *MockChatService) ReceiveMessage(userID int, fromTime time.Time) ([]*model.Message, bool) {
+func (m *MockChatService) ReceiveMessage(userID int, from time.Time) ([]model.Message, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ReceiveMessage", userID, fromTime)
-	ret0, _ := ret[0].([]*model.Message)
-	ret1, _ := ret[1].(bool)
+	ret := m.ctrl.Call(m, "ReceiveMessage", userID, from)
+	ret0, _ := ret[0].([]model.Message)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ReceiveMessage indicates an expected call of ReceiveMessage
-func (mr *MockChatServiceMockRecorder) ReceiveMessage(userID, fromTime interface{}) *gomock.Call {
+func (mr *MockChatServiceMockRecorder) ReceiveMessage(userID, from interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveMessage", reflect.TypeOf((*MockChatService)(nil).ReceiveMessage), userID, fromTime)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReceiveMessage", reflect.TypeOf((*MockChatService)(nil).ReceiveMessage), userID, from)
 }
 
 // IsUserFree mocks base method
-func (m *MockChatService) IsUserFree(userID int) bool {
+func (m *MockChatService) IsUserFree(userID int) (bool, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "IsUserFree", userID)
 	ret0, _ := ret[0].(bool)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // IsUserFree indicates an expected call of IsUserFree
@@ -120,17 +166,17 @@ func (mr *MockChatServiceMockRecorder) IsUserFree(userID interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsUserFree", reflect.TypeOf((*MockChatService)(nil).IsUserFree), userID)
 }
 
-// CountMember mocks base method
-func (m *MockChatService) CountMember(userID int) (int, bool) {
+// CountMembersInRoomOfUser mocks base method
+func (m *MockChatService) CountMembersInRoomOfUser(userID int) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountMember", userID)
+	ret := m.ctrl.Call(m, "CountMembersInRoomOfUser", userID)
 	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(bool)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CountMember indicates an expected call of CountMember
-func (mr *MockChatServiceMockRecorder) CountMember(userID interface{}) *gomock.Call {
+// CountMembersInRoomOfUser indicates an expected call of CountMembersInRoomOfUser
+func (mr *MockChatServiceMockRecorder) CountMembersInRoomOfUser(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountMember", reflect.TypeOf((*MockChatService)(nil).CountMember), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountMembersInRoomOfUser", reflect.TypeOf((*MockChatService)(nil).CountMembersInRoomOfUser), userID)
 }

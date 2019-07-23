@@ -6,215 +6,259 @@ import (
 	"github.com/1612180/chat_stranger/internal/model"
 	"github.com/1612180/chat_stranger/internal/pkg/variable"
 	"github.com/1612180/chat_stranger/internal/repository"
-
-	"github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 )
 
 //go:generate $GOPATH/bin/mockgen -destination=../mock/mock_service/mock_chat.go -source=chat.go
 
 type ChatService interface {
-	Find(userID int, status string) (*model.Room, bool)
-	Join(userID, roomID int) bool
-	Leave(userID int) bool
-	SendMessage(message *model.Message) bool
-	ReceiveMessage(userID int, fromTime time.Time) ([]*model.Message, bool)
-	IsUserFree(userID int) bool
-	CountMember(userID int) (int, bool)
+	FindAnyRoom(userID int) (model.Room, error)
+	FindNextRoom(userID int) (model.Room, error)
+	FindSameGenderRoom(userID int) (model.Room, error)
+	FindSameBirthYearRoom(userID int) (model.Room, error)
+	Join(userID, roomID int) error
+	Leave(userID int) error
+	SendMessage(userID int, body string) error
+	ReceiveMessage(userID int, from time.Time) ([]model.Message, error)
+	IsUserFree(userID int) (bool, error)
+	CountMembersInRoomOfUser(userID int) (int, error)
 }
 
-func NewChatService(
-	userRepo repository.UserRepository,
-	roomRepo repository.RoomRepository,
-	memberRepo repository.MemberRepo,
-	messageRepo repository.MessageRepo,
-) ChatService {
-	return &chatService{userRepo: userRepo, roomRepo: roomRepo, memberRepo: memberRepo, messageRepo: messageRepo}
+func NewChatService(accountRepo repository.AccountRepo, chatRepo repository.ChatRepo) ChatService {
+	return &defautChatService{accountRepo: accountRepo, chatRepo: chatRepo}
 }
 
 // implement
 
-type chatService struct {
-	userRepo    repository.UserRepository
-	roomRepo    repository.RoomRepository
-	memberRepo  repository.MemberRepo
-	messageRepo repository.MessageRepo
+type defautChatService struct {
+	accountRepo repository.AccountRepo
+	chatRepo    repository.ChatRepo
 }
 
-func (s *chatService) Find(userID int, status string) (*model.Room, bool) {
-	if status == "empty" {
-		room, ok := s.roomRepo.FindEmpty()
-		if !ok {
-			return s.roomRepo.Create()
+func (s *defautChatService) FindAnyRoom(userID int) (model.Room, error) {
+	rooms, err := s.chatRepo.FindRooms()
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find any room userID=%d", userID)
+	}
+
+	for _, room := range rooms {
+		count, err := s.chatRepo.CountMembersInRoom(room.ID)
+		if err != nil {
+			return model.Room{}, errors.Wrapf(err, "chat service: find any room userID=%d", userID)
 		}
-		return room, true
-	} else if status == "next" {
-		// old room
-		old, ok := s.roomRepo.FindByUser(userID)
-		if !ok {
-			return nil, false
+		if count < variable.LimitRoom {
+			return room, nil
+		}
+	}
+
+	room, err := s.chatRepo.CreateRoom()
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find any room userID=%d", userID)
+	}
+	return room, nil
+}
+
+func (s *defautChatService) FindNextRoom(userID int) (model.Room, error) {
+	oldRoom, err := s.chatRepo.FindRoomOfUser(userID)
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find next room userID=%d", userID)
+	}
+
+	rooms, err := s.chatRepo.FindRooms()
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find next room userID=%d", userID)
+	}
+
+	for _, room := range rooms {
+		if room.ID == oldRoom.ID {
+			continue
 		}
 
-		// next
-		room, ok := s.roomRepo.FindNext(old.ID)
-		if !ok {
-			return s.roomRepo.Create()
+		count, err := s.chatRepo.CountMembersInRoom(room.ID)
+		if err != nil {
+			return model.Room{}, errors.Wrapf(err, "chat service: find next room userID=%d", userID)
 		}
-		return room, true
-	} else if status == "gender" {
-		// old room
-		old, ok := s.roomRepo.FindByUser(userID)
-		if !ok {
-			return nil, false
+		if count < variable.LimitRoom {
+			return room, nil
+		}
+	}
+
+	room, err := s.chatRepo.CreateRoom()
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find next room userID=%d", userID)
+	}
+	return room, nil
+}
+
+func (s *defautChatService) FindSameGenderRoom(userID int) (model.Room, error) {
+	curUser, _, err := s.accountRepo.FindUserCredential(userID)
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find same gender room userID=%d", userID)
+	}
+
+	oldRoom, err := s.chatRepo.FindRoomOfUser(userID)
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find same gender room userID=%d", userID)
+	}
+
+	rooms, err := s.chatRepo.FindRooms()
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find same gender room userID=%d", userID)
+	}
+
+	for _, room := range rooms {
+		if room.ID == oldRoom.ID {
+			continue
 		}
 
-		user, _, ok := s.userRepo.Find(userID)
-		if !ok {
-			return nil, false
+		count, err := s.chatRepo.CountMembersInRoom(room.ID)
+		if err != nil {
+			return model.Room{}, errors.Wrapf(err, "chat service: find same gender room userID=%d", userID)
+		}
+		if count >= variable.LimitRoom {
+			continue
 		}
 
-		room, ok := s.roomRepo.FindSameGender(old.ID, user.Gender)
-		if !ok {
-			room, ok := s.roomRepo.FindNext(old.ID)
-			if !ok {
-				return s.roomRepo.Create()
+		users, err := s.chatRepo.FindUsersInRoom(room.ID)
+		if err != nil {
+			return model.Room{}, errors.Wrapf(err, "chat service: find same gender room userID=%d", userID)
+		}
+		for _, user := range users {
+			if user.Gender == curUser.Gender {
+				return room, nil
 			}
-			return room, true
 		}
-		return room, true
-	} else if status == "birth" {
-		// old room
-		old, ok := s.roomRepo.FindByUser(userID)
-		if !ok {
-			return nil, false
+	}
+
+	room, err := s.chatRepo.CreateRoom()
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find same gender room userID=%d", userID)
+	}
+	return room, nil
+}
+
+func (s *defautChatService) FindSameBirthYearRoom(userID int) (model.Room, error) {
+	curUser, _, err := s.accountRepo.FindUserCredential(userID)
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find same birth year room userID=%d", userID)
+	}
+
+	oldRoom, err := s.chatRepo.FindRoomOfUser(userID)
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find same birth year room userID=%d", userID)
+	}
+
+	rooms, err := s.chatRepo.FindRooms()
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find same birth year room userID=%d", userID)
+	}
+
+	for _, room := range rooms {
+		if room.ID == oldRoom.ID {
+			continue
 		}
 
-		user, _, ok := s.userRepo.Find(userID)
-		if !ok {
-			return nil, false
+		count, err := s.chatRepo.CountMembersInRoom(room.ID)
+		if err != nil {
+			return model.Room{}, errors.Wrapf(err, "chat service: find same birth year room userID=%d", userID)
+		}
+		if count >= variable.LimitRoom {
+			continue
 		}
 
-		room, ok := s.roomRepo.FindSameBirthYear(old.ID, user.BirthYear)
-		if !ok {
-			room, ok := s.roomRepo.FindNext(old.ID)
-			if !ok {
-				return s.roomRepo.Create()
+		users, err := s.chatRepo.FindUsersInRoom(room.ID)
+		if err != nil {
+			return model.Room{}, errors.Wrapf(err, "chat service: find same birth year room userID=%d", userID)
+		}
+		for _, user := range users {
+			if user.BirthYear == curUser.BirthYear {
+				return room, nil
 			}
-			return room, true
 		}
-		return room, true
 	}
-	return nil, false
+
+	room, err := s.chatRepo.CreateRoom()
+	if err != nil {
+		return model.Room{}, errors.Wrapf(err, "chat service: find same birth year room userID=%d", userID)
+	}
+	return room, nil
 }
 
-func (s *chatService) Join(userID, roomID int) bool {
-	// check user
-	count, ok := s.memberRepo.CountByUser(userID)
-	if !ok {
-		return false
-	}
-	if count != 0 {
-		logrus.WithFields(logrus.Fields{
-			"event":  "service",
-			"target": "chat",
-			"action": "join",
-			"userID": userID,
-			"roomID": roomID,
-		}).Info("user has joined another room")
-		return false
+func (s *defautChatService) Join(userID, roomID int) error {
+	if err := s.chatRepo.DeleteMessagesOfRoom(roomID); err != nil {
+		return errors.Wrapf(err, "chat service: join userID=%d roomID=%d failed", userID, roomID)
 	}
 
-	// check room
-	if ok := s.roomRepo.Exist(roomID); !ok {
-		return false
+	_, err := s.chatRepo.CreateMember(userID, roomID)
+	if err != nil {
+		return errors.Wrapf(err, "chat service: join userID=%d roomID=%d failed", userID, roomID)
 	}
-
-	count, ok = s.memberRepo.CountByRoom(roomID)
-	if !ok {
-		return false
-	}
-	if count >= variable.LimitRoom {
-		logrus.WithFields(logrus.Fields{
-			"event":  "service",
-			"target": "chat",
-			"action": "join",
-			"userID": userID,
-			"roomID": roomID,
-		}).Info("room is full")
-		return false
-	}
-
-	// delete old messages
-	if ok := s.messageRepo.Delete(roomID); !ok {
-		return false
-	}
-	return s.memberRepo.Create(userID, roomID)
+	return nil
 }
 
-func (s *chatService) Leave(userID int) bool {
-	// find room
-	room, ok := s.roomRepo.FindByUser(userID)
-	if !ok {
-		return false
+func (s *defautChatService) Leave(userID int) error {
+	oldRoom, err := s.chatRepo.FindRoomOfUser(userID)
+	if err != nil {
+		return errors.Wrapf(err, "chat service: leave userID=%d failed", userID)
 	}
 
-	// delete old messages
-	if ok := s.messageRepo.Delete(room.ID); !ok {
-		return false
+	if err := s.chatRepo.DeleteMessagesOfRoom(oldRoom.ID); err != nil {
+		return errors.Wrapf(err, "chat service: leave userID=%d failed", userID)
 	}
-	return s.memberRepo.Delete(userID)
+
+	if err := s.chatRepo.DeleteMember(userID, oldRoom.ID); err != nil {
+		return errors.Wrapf(err, "chat service: leave userID=%d failed", userID)
+	}
+	return nil
 }
 
-func (s *chatService) SendMessage(message *model.Message) bool {
-	// find room
-	room, ok := s.roomRepo.FindByUser(message.UserID)
-	if !ok {
-		return false
+func (s *defautChatService) SendMessage(userID int, body string) error {
+	room, err := s.chatRepo.FindRoomOfUser(userID)
+	if err != nil {
+		return errors.Wrapf(err, "chat service: send message userID=%d failed", userID)
 	}
 
-	// create message
-	message.RoomID = room.ID
-	if ok := s.messageRepo.Create(message); !ok {
-		return false
+	_, err = s.chatRepo.CreateMessage(room.ID, userID, body)
+	if err != nil {
+		return errors.Wrapf(err, "chat service: send message userID=%d failed", userID)
 	}
-	return true
+	return nil
 }
 
-func (s *chatService) ReceiveMessage(userID int, fromTime time.Time) ([]*model.Message, bool) {
-	// find room
-	room, ok := s.roomRepo.FindByUser(userID)
-	if !ok {
-		return nil, false
+func (s *defautChatService) ReceiveMessage(userID int, from time.Time) ([]model.Message, error) {
+	room, err := s.chatRepo.FindRoomOfUser(userID)
+	if err != nil {
+		return nil, errors.Wrapf(err, "chat service: receive message userID=%d failed", userID)
 	}
 
-	// fetch messages
-	messages, ok := s.messageRepo.FetchByTime(room.ID, fromTime)
-	if !ok {
-		return nil, false
+	msgs, err := s.chatRepo.FindMessagesOfRoomFromTime(room.ID, from)
+	if err != nil {
+		return nil, errors.Wrapf(err, "chat service: receive message userID=%d failed", userID)
 	}
-	return messages, true
+	return msgs, nil
 }
 
-func (s *chatService) IsUserFree(userID int) bool {
-	count, ok := s.memberRepo.CountByUser(userID)
-	if !ok {
-		return false
+func (s *defautChatService) IsUserFree(userID int) (bool, error) {
+	count, err := s.chatRepo.CountMembersOfUser(userID)
+	if err != nil {
+		return false, errors.Wrap(err, "chat service: is user free failed")
 	}
-	if count != 0 {
-		logrus.WithFields(logrus.Fields{
-			"event":  "service",
-			"target": "chat",
-			"action": "is user free",
-		}).Info("user has joined another room")
-		return false
+
+	if count > 0 {
+		return false, nil
 	}
-	return true
+	return true, nil
 }
 
-func (s *chatService) CountMember(userID int) (int, bool) {
-	// find room
-	room, ok := s.roomRepo.FindByUser(userID)
-	if !ok {
-		return 0, false
+func (s *defautChatService) CountMembersInRoomOfUser(userID int) (int, error) {
+	room, err := s.chatRepo.FindRoomOfUser(userID)
+	if err != nil {
+		return 0, errors.Wrapf(err, "chat service: count members in room of user userID=%d failed", userID)
 	}
-	return s.memberRepo.CountByRoom(room.ID)
+
+	count, err := s.chatRepo.CountMembersInRoom(room.ID)
+	if err != nil {
+		return 0, errors.Wrapf(err, "chat service: count members in room of user userID=%d failed", userID)
+	}
+	return count, nil
 }
